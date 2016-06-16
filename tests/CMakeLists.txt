@@ -1,0 +1,29 @@
+INCLUDE_DIRECTORIES(BEFORE ${Boost_INCLUDE_DIR})
+
+ENABLE_TESTING()
+
+SET(Boost_USE_STATIC_LIBS ON)
+SET(BOOST_COMPONENTS unit_test_framework)
+SEARCH_FOR_BOOST()
+
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src")
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+
+ADD_DEFINITIONS(-DTESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+MACRO(ADD_SCENARIO name)
+  ADD_EXECUTABLE(${name} ${name}.cc)
+  TARGET_LINK_LIBRARIES(${name} ${Boost_LIBRARIES} cube-stacks)
+  PKG_CONFIG_USE_DEPENDENCY(${name} manifolds)
+  PKG_CONFIG_USE_DEPENDENCY(${name} roboptim-core)
+  PKG_CONFIG_USE_DEPENDENCY(${name} roboptim-core-manifold)
+  PKG_CONFIG_USE_DEPENDENCY(${name} pgSolver)
+  TARGET_LINK_LIBRARIES(${name} debug PGSolver_d optimized PGSolver)
+ENDMACRO(ADD_SCENARIO)
+
+# ADD_SCENARIO("easyProblemOnManifold")
+# ADD_SCENARIO("obsoleteInertiaId")
+# ADD_SCENARIO("obsoleteInertiaIdQuat")
+# ADD_SCENARIO("obsoleteInertiaIdR4")
+ADD_SCENARIO("test_1_cube")
+
