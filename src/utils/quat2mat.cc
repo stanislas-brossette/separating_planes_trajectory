@@ -2,8 +2,8 @@
 
 namespace cubestacks
 {
-Eigen::Matrix3d quat2mat(const double& qw, const double& qx, const double& qy,
-                         const double& qz)
+Eigen::Matrix3d quat2mat(const double& qx, const double& qy, const double& qz,
+                         const double& qw)
 {
   Eigen::Matrix3d res;
   res << 1 - 2 * qy* qy - 2 * qz* qz, 2 * qx* qy - 2 * qz* qw,

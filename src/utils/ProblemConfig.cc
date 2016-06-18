@@ -50,6 +50,11 @@ Eigen::Vector3d ProblemConfig::CustomString::asVector3d() const
   assert(v.size() == 3);
   return Eigen::Vector3d(v);
 }
+Eigen::Vector4d ProblemConfig::CustomString::asVector4d() const
+{
+  assert(v.size() == 4);
+  return Eigen::Vector4d(v);
+}
 
 ProblemConfig::CustomString::operator double() const { return asDouble(); }
 ProblemConfig::CustomString::operator int() const { return asInt(); }

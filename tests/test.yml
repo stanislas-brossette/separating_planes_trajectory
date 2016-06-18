@@ -1,25 +1,24 @@
-pgsolver:
-  VERBOSE: 0
-  VERBOSE_QP: false
-  VERBOSE_SOC: false
-  displayFilter: false
-  epsilon_D: 1e-8
-  epsilon_P: 1e-8
-  finiteDiffCheck: true
-  hessianUpdateMethod: "BFGS_SELF_SCALING"
-  hessianUpdateMethodRestoration: "BFGS_SELF_SCALING"
-  logLevel: "NO_LOG"
-  maxIter: 1000
-  numberOfFiniteDiffCheck: 5
-  regularizationValMin: 0.0
-  resetHessianAfterRestoration: false
-  resetHessianBeforeRestoration: false
-  rho0: 0.01
-  rhoMax: 1
-  rhoMin: 1e-6
-  updatePrevDiffLagWithMostRecentLambda: true
+VERBOSE: 1
+VERBOSE_QP: false
+VERBOSE_SOC: false
+displayFilter: false
+epsilon_D: 1e-2
+epsilon_P: 1e-2
+finiteDiffCheck: true
+hessianUpdateMethod: "BFGS_SELF_SCALING"
+hessianUpdateMethodRestoration: "BFGS_SELF_SCALING"
+logLevel: "NO_LOG"
+maxIter: 1000
+numberOfFiniteDiffCheck: 5
+regularizationValMin: 0.0
+resetHessianAfterRestoration: false
+resetHessianBeforeRestoration: false
+rho0: 1
+rhoMax: 10
+rhoMin: 1e-3
+updatePrevDiffLagWithMostRecentLambda: true
 
-nCubes: 1
+nCubes: 3
 lCubes: [1.3]
 
 normalZPlus: [0, 0, 1]
@@ -28,11 +27,22 @@ normalXPlus: [1, 0, 0]
 normalYMinus: [0, -1, 0]
 normalYPlus: [0, 1, 0]
 
-wallZPlus: 0
-wallXMinus: -1
-wallXPlus: 1
-wallYMinus: -1
-wallYPlus: 1
+distZPlus: 0
+distXMinus: -1
+distXPlus: -1
+distYMinus: -1
+distYPlus: -1
+
+init:
+  cube0:
+    trans: [3,2,1]
+    quat: [1,2,3,4]
+  cube1:
+    trans: [3,-2,1]
+    quat: [1,2,3,4]
+  cube2:
+    trans: [3,-2,1]
+    quat: [1,2,3,4]
 
 solverName: "pgsolver"
 #solverName: "ipopt"

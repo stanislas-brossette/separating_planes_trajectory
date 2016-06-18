@@ -43,10 +43,10 @@ class CubeAbovePlan
 //diff(cstr, tx) = nx
 //diff(cstr, ty) = ny
 //diff(cstr, tz) = nz
-//diff(cstr, qw) = nz*(2*qx*vy - 2*qy*vx) - ny*(2*qx*vz - 2*qz*vx) + nx*(2*qy*vz - 2*qz*vy)
-//diff(cstr, qx) = nz*(2*qw*vy - 4*qx*vz + 2*qz*vx) - ny*(2*qw*vz + 4*qx*vy - 2*qy*vx) + nx*(2*qy*vy + 2*qz*vz)
-//diff(cstr, qy) = nx*(2*qw*vz + 2*qx*vy - 4*qy*vx) - nz*(2*qw*vx + 4*qy*vz - 2*qz*vy) + ny*(2*qx*vx + 2*qz*vz)
-//diff(cstr, qz) = ny*(2*qw*vx + 2*qy*vz - 4*qz*vy) - nx*(2*qw*vy - 2*qx*vz + 4*qz*vx) + nz*(2*qx*vx + 2*qy*vy)
+//diff(cstr, qw) = nz*(2*qw*vy - 4*qx*vz + 2*qz*vx) - ny*(2*qw*vz + 4*qx*vy - 2*qy*vx) + nx*(2*qy*vy + 2*qz*vz)
+//diff(cstr, qx) = nx*(2*qw*vz + 2*qx*vy - 4*qy*vx) - nz*(2*qw*vx + 4*qy*vz - 2*qz*vy) + ny*(2*qx*vx + 2*qz*vz)
+//diff(cstr, qy) = ny*(2*qw*vx + 2*qy*vz - 4*qz*vy) - nx*(2*qw*vy - 2*qx*vz + 4*qz*vx) + nz*(2*qx*vx + 2*qy*vy)
+//diff(cstr, qz) = nz*(2*qx*vy - 2*qy*vx) - ny*(2*qx*vz - 2*qz*vx) + nx*(2*qy*vz - 2*qz*vy)
 //diff(cstr, nx) = tx - vx*(2*qy^2 + 2*qz^2 - 1) - vy*(2*qw*qz - 2*qx*qy) + vz*(2*qw*qy + 2*qx*qz)
 //diff(cstr, ny) = ty - vy*(2*qx^2 + 2*qz^2 - 1) + vx*(2*qw*qz + 2*qx*qy) - vz*(2*qw*qx - 2*qy*qz)
 //diff(cstr, nz) = tz - vz*(2*qx^2 + 2*qy^2 - 1) - vx*(2*qw*qy - 2*qx*qz) + vy*(2*qw*qx + 2*qy*qz)

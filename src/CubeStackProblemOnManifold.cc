@@ -8,11 +8,18 @@
 #include <cube-stacks/utils/ProblemConfig.hh>
 
 #include <pgsolver/utils/usingManifold.h>
+
+#include <manifolds/RealSpace.h>
+#include <manifolds/S2.h>
+#include <manifolds/SO3.h>
+#include <manifolds/ExpMapMatrix.h>
+#include <manifolds/ExpMapQuaternion.h>
 using mnf::RealSpace;
 using mnf::SO3;
 using mnf::S2;
 using mnf::CartesianProduct;
 using mnf::ExpMapMatrix;
+using mnf::ExpMapQuaternion;
 namespace cubestacks
 {
 CubeStackProblemOnManifold::CubeStackProblemOnManifold(
@@ -33,12 +40,31 @@ CubeStackProblemOnManifold::CubeStackProblemOnManifold(
   distYMinus_ = config_["distYMinus"];
   distYPlus_ = config_["distYPlus"];
 
-  //nCubes_ = static_cast<size_t>(M(0).tangentDim()) / 6;
   for (int i = 0; i < static_cast<int>(nCubes_); ++i)
   {
     Cube c(i, 0.5);
+    cubeAbovePlanFcts_.push_back(CubeAbovePlan(c));
     cubes_.push_back(c);
-    cubeAboveFixedPlans_.push_back(CubeAboveFixedPlan(c,normalZPlus_,distZPlus_));
+    cubeAboveFixedPlanCstrs_.push_back(
+        CubeAboveFixedPlan(c, normalZPlus_, distZPlus_));
+    cstrNames_.push_back("Cube" + std::to_string(i) + "AboveFixedPlan" +
+                         "ZPlus");
+    cubeAboveFixedPlanCstrs_.push_back(
+        CubeAboveFixedPlan(c, normalXPlus_, distXPlus_));
+    cstrNames_.push_back("Cube" + std::to_string(i) + "AboveFixedPlan" +
+                         "XPlus");
+    cubeAboveFixedPlanCstrs_.push_back(
+        CubeAboveFixedPlan(c, normalXMinus_, distXMinus_));
+    cstrNames_.push_back("Cube" + std::to_string(i) + "AboveFixedPlan" +
+                         "XMinus");
+    cubeAboveFixedPlanCstrs_.push_back(
+        CubeAboveFixedPlan(c, normalYPlus_, distYPlus_));
+    cstrNames_.push_back("Cube" + std::to_string(i) + "AboveFixedPlan" +
+                         "YPlus");
+    cubeAboveFixedPlanCstrs_.push_back(
+        CubeAboveFixedPlan(c, normalYMinus_, distYMinus_));
+    cstrNames_.push_back("Cube" + std::to_string(i) + "AboveFixedPlan" +
+                         "YMinus");
   }
 
   nPlans_ = (nCubes_ * (nCubes_ - 1)) / 2;
@@ -46,13 +72,20 @@ CubeStackProblemOnManifold::CubeStackProblemOnManifold(
   std::cout << "nCubes_ = \n" << nCubes_ << std::endl;
   std::cout << "nPlans_ = \n" << nPlans_ << std::endl;
 
-  //for (size_t i = 0; i < nCubes_; ++i)
-  //{
-    //for (size_t j = i + 1; j < nCubes_; ++j)
-    //{
-      //plans_.push_back(Plan(i, j));
-    //}
-  //}
+  for (size_t i = 0; i < nCubes_; ++i)
+  {
+    for (size_t j = i + 1; j < nCubes_; ++j)
+    {
+      plans_.push_back(Plan(i, j));
+    }
+  }
+
+  for (size_t i = 0; i < nPlans_; i++)
+  {
+    cstrNames_.push_back("Plan" + std::to_string(i) + "BetweenCube" +
+                         std::to_string(plans_[i].cubeAbove()) + "AndCube" +
+                         std::to_string(plans_[i].cubeBelow()));
+  }
 
   std::stringstream sstm;
   sstm << "Stack" << nCubes_ << "CubesS2";
@@ -60,12 +93,9 @@ CubeStackProblemOnManifold::CubeStackProblemOnManifold(
 
   outRepObjDiff_.resize(1, M.representationDim());
   outRepObjDiff_.setZero();
-  outRepLinCstrDiff_.resize(static_cast<Index>(8 * nCubes_),
-                            M.representationDim());
-  outRepLinCstrDiff_.setZero();
-  outRepNonLinCstrDiff_.resize(static_cast<Index>(16 * nPlans_),
-                               M.representationDim());
-  outRepNonLinCstrDiff_.setZero();
+  outRep_.resize(static_cast<Index>(8 * cubeAboveFixedPlanCstrs_.size() + 16*nPlans_),
+                 M.representationDim());
+  outRep_.setZero();
 }
 
 Eigen::VectorXd CubeStackProblemOnManifold::findInitPoint()
@@ -95,7 +125,7 @@ CartesianProduct* CubeStackProblemOnManifold::buildManifold(Index nCubes)
   assert(nCubes > 0 && "Number of Cubes must be positive and non null");
   RealSpace* R1_ = new RealSpace(1);
   RealSpace* R3_ = new RealSpace(3);
-  SO3<ExpMapMatrix>* SO3_ = new SO3<ExpMapMatrix>();
+  SO3<ExpMapQuaternion>* SO3_ = new SO3<ExpMapQuaternion>();
   S2* S2_ = new S2();
   CartesianProduct* MCube = new CartesianProduct(*R3_, *SO3_);
   CartesianProduct* MPlane = new CartesianProduct(*R1_, *S2_);
@@ -131,16 +161,14 @@ void CubeStackProblemOnManifold::getTangentLB(RefVec out) const
   assert(out.size() == M().tangentDim() && "wrong size");
   double infinity = std::numeric_limits<double>::infinity();
 
-  for (int i = 0; i < out.size(); i++) 
-    out(i) = -infinity;
+  for (int i = 0; i < out.size(); i++) out(i) = -infinity;
 }
 void CubeStackProblemOnManifold::getTangentUB(RefVec out) const
 {
   assert(out.size() == M().tangentDim() && "wrong size");
   double infinity = std::numeric_limits<double>::infinity();
 
-  for (int i = 0; i < out.size(); i++) 
-    out(i) = -infinity;
+  for (int i = 0; i < out.size(); i++) out(i) = infinity;
 }
 
 void CubeStackProblemOnManifold::evalObj(double& out) const
@@ -161,7 +189,7 @@ void CubeStackProblemOnManifold::evalObjDiff(RefMat out) const
   {
     Index cubeRepDim = M()(0)(static_cast<size_t>(i)).representationDim();
     outRepObjDiff_.block(0, i * cubeRepDim, 1, cubeRepDim) << 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 0;
+        0;
   }
   M().applyDiffRetractation(out, outRepObjDiff_, x().value());
 }
@@ -170,205 +198,25 @@ void CubeStackProblemOnManifold::evalLinCstr(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == linCstrDim(i) && "wrong size");
-  //if (i == 0)
-  //{
-    //// Constraint 0
-    //// All points of all the cubes above the ground
-
-    //out.setZero();
-    //// Eigen::Vector3d groundNormal(0, 0, 1);
-    //// All cubes above ground
-    //cstrAllCubeAboveFixedPlan(out, phi_x_z()(0), -wallZPlus_, groundNormal);
-  //}
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //// This constraint does not have a linear part
-  //}
-  //else if (i == 2)
-  //{
-    //// Constraint 2
-    //// Front X wall
-    //out.setZero();
-    //// Eigen::Vector3d normalXPlus(-1, 0, 0);
-    //// All cubes above a plan
-    //cstrAllCubeAboveFixedPlan(out, phi_x_z()(0), wallXPlus_, normalXPlus);
-  //}
-  //else if (i == 3)
-  //{
-    //// Constraint 2
-    //// Back X wall
-    //out.setZero();
-    //// Eigen::Vector3d normalXMinus(1, 0, 0);
-    //// All cubes above a plan
-    //cstrAllCubeAboveFixedPlan(out, phi_x_z()(0), wallXMinus_, normalXMinus);
-  //}
-  //else if (i == 4)
-  //{
-    //// Constraint 4
-    //// Front Y wall
-    //out.setZero();
-    //// Eigen::Vector3d normalYPlus(0, -1, 0);
-    //// All cubes above a plan
-    //cstrAllCubeAboveFixedPlan(out, phi_x_z()(0), wallYPlus_, normalYPlus);
-  //}
-  //else if (i == 5)
-  //{
-    //// Constraint 5
-    //// Back Y wall
-    //out.setZero();
-    //// Eigen::Vector3d normalYMinus(0, 1, 0);
-    //// All cubes above a plan
-    //cstrAllCubeAboveFixedPlan(out, phi_x_z()(0), wallYMinus_, normalYMinus);
-  //}
 }
+
 void CubeStackProblemOnManifold::evalLinCstrDiff(RefMat out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.rows() == linCstrDim(i) && "Wrong rows size");
   assert(out.cols() == M().tangentDim() && "Wrong cols size");
-
-  //if (i == 0)
-  //{
-    //// Constraint 0
-    //// All points of the cube above the ground
-    //outRepLinCstrDiff_.setZero();
-    //Eigen::Vector3d groundNormal(0, 0, 1);
-    //cstrAllCubeAboveFixedPlanDiff(outRepLinCstrDiff_, groundNormal);
-    //M().applyDiffRetractation(out, outRepLinCstrDiff_, x().value());
-  //}
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //// This constraint does not have a linear part
-  //}
-  //else if (i == 2)
-  //{
-    //// Constraint 0
-    //// All points of the cube above the ground
-    //outRepLinCstrDiff_.setZero();
-    //// Eigen::Vector3d normalXPlus(-1, 0, 0);
-    //cstrAllCubeAboveFixedPlanDiff(outRepLinCstrDiff_, normalXPlus);
-    //M().applyDiffRetractation(out, outRepLinCstrDiff_, x().value());
-  //}
-  //else if (i == 3)
-  //{
-    //// Constraint 0
-    //// All points of the cube above the ground
-    //outRepLinCstrDiff_.setZero();
-    //// Eigen::Vector3d normalXMinus(1, 0, 0);
-    //cstrAllCubeAboveFixedPlanDiff(outRepLinCstrDiff_, normalXMinus);
-    //M().applyDiffRetractation(out, outRepLinCstrDiff_, x().value());
-  //}
-  //else if (i == 4)
-  //{
-    //// Constraint 0
-    //// All points of the cube above the ground
-    //outRepLinCstrDiff_.setZero();
-    //// Eigen::Vector3d normalYPlus(0, -1, 0);
-    //cstrAllCubeAboveFixedPlanDiff(outRepLinCstrDiff_, normalYPlus);
-    //M().applyDiffRetractation(out, outRepLinCstrDiff_, x().value());
-  //}
-  //else if (i == 5)
-  //{
-    //// Constraint 0
-    //// All points of the cube above the ground
-    //outRepLinCstrDiff_.setZero();
-    //// Eigen::Vector3d normalYMinus(0, 1, 0);
-    //cstrAllCubeAboveFixedPlanDiff(outRepLinCstrDiff_, normalYMinus);
-    //M().applyDiffRetractation(out, outRepLinCstrDiff_, x().value());
-  //}
 }
+
 void CubeStackProblemOnManifold::getLinCstrLB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == linCstrDim(i) && "wrong size");
-  //if (i == 0)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << 0, 0, 0, 0, 0, 0, 0, 0;
-    //}
-  //}
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //// This constraint does not have a linear part
-  //}
-  //else if (i == 2)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << 0, 0, 0, 0, 0, 0, 0, 0;
-    //}
-  //}
-  //else if (i == 3)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << 0, 0, 0, 0, 0, 0, 0, 0;
-    //}
-  //}
-  //else if (i == 4)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << 0, 0, 0, 0, 0, 0, 0, 0;
-    //}
-  //}
-  //else if (i == 5)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << 0, 0, 0, 0, 0, 0, 0, 0;
-    //}
-  //}
 }
+
 void CubeStackProblemOnManifold::getLinCstrUB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == linCstrDim(i) && "wrong size");
-  //double inf = std::numeric_limits<double>::infinity();
-  //if (i == 0)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << inf, inf, inf, inf, inf, inf, inf, inf;
-    //}
-  //}
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //// This constraint does not have a linear part
-  //}
-  //else if (i == 2)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << inf, inf, inf, inf, inf, inf, inf, inf;
-    //}
-  //}
-  //else if (i == 3)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << inf, inf, inf, inf, inf, inf, inf, inf;
-    //}
-  //}
-  //else if (i == 4)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << inf, inf, inf, inf, inf, inf, inf, inf;
-    //}
-  //}
-  //else if (i == 5)
-  //{
-    //for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-    //{
-      //out.block(8 * i, 0, 8, 1) << inf, inf, inf, inf, inf, inf, inf, inf;
-    //}
-  //}
 }
 
 void CubeStackProblemOnManifold::evalNonLinCstr(RefVec out, size_t i) const
@@ -377,278 +225,156 @@ void CubeStackProblemOnManifold::evalNonLinCstr(RefVec out, size_t i) const
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
   out.setZero();
 
-  if(i < cubeAboveFixedPlans_.size())
+  if (i < cubeAboveFixedPlanCstrs_.size())
   {
-    unsigned long iC = static_cast<unsigned long>(cubeAboveFixedPlans_[i].cube().index());
+    unsigned long iC =
+        static_cast<unsigned long>(cubeAboveFixedPlanCstrs_[i].cube().index());
     Eigen::Vector3d trans = phi_x_z()(0)(iC)[0];
     Eigen::Vector4d quat = phi_x_z()(0)(iC)[1];
-    cubeAboveFixedPlans_[i].compute(out.block(8 * static_cast<long>(i), 0, 8, 1), trans, quat); 
+    cubeAboveFixedPlanCstrs_[i].compute(out, trans, quat);
   }
-
-  //if (i == 0)
-  //{
-    //for (size_t i = 0; i < cubes_.size(); i++) 
-    //{
-      
-    //}
-    //// Constraint 0
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //// All planes between cubes
-    //out.setZero();
-    //Eigen::Vector3d vertex;
-    //Eigen::Matrix<double, 8, 1> res;
-    //res.setZero();
-    //Eigen::Vector3d normalP, posC;
-    //for (size_t iP = 0; iP < nPlans_; ++iP)
-    //{
-      //Eigen::Map<const Eigen::Vector3d> normalP(phi_x_z()(1)(iP)[1].data());
-      //double distP = phi_x_z()(1)(iP)[0][0];
-      //// Cube Above
-      //size_t iC = plans_[iP].cubeAbove();
-      //posC = phi_x_z()(0)(iC)[0];
-      //Eigen::Map<const Eigen::Matrix3d> rotCA(phi_x_z()(0)(iC)[1].data());
-      //for (Index j = 0; j < 8; ++j)
-      //{
-        //vertex = posC + rotCA * (cubes_[iC].vertex(static_cast<size_t>(j)));
-        //res(j) = vertex.dot(normalP) - distP;
-      //}
-      //out.block(static_cast<Index>(iP * 16), 0, 8, 1) = res;
-      //res.setZero();
-      //// Cube Below
-      //iC = plans_[iP].cubeBelow();
-      //posC = phi_x_z()(0)(iC)[0];
-      //Eigen::Map<const Eigen::Matrix3d> rotCB(phi_x_z()(0)(iC)[1].data());
-      //for (Index j = 0; j < 8; ++j)
-      //{
-        //vertex = posC + rotCB * (cubes_[iC].vertex(static_cast<size_t>(j)));
-        //res(j) = -vertex.dot(normalP) + distP;
-      //}
-      //out.block(static_cast<Index>(iP * 16 + 8), 0, 8, 1) = res;
-      //res.setZero();
-    //}
-  //}
-  //else if (i == 2)
-  //{
-    //// Constraint 2
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 3)
-  //{
-    //// Constraint 3
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 4)
-  //{
-    //// Constraint 4
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 5)
-  //{
-    //// Constraint 5
-    //// This constraint does not have a nonlinear part
-  //}
+  else
+  {
+    auto iPlan = i - cubeAboveFixedPlanCstrs_.size();
+    auto iCubeAbove = plans_[iPlan].cubeAbove();
+    auto iCubeBelow = plans_[iPlan].cubeBelow();
+    Eigen::Vector3d transAbove = phi_x_z()(0)(iCubeAbove)[0];
+    Eigen::Vector4d quatAbove = phi_x_z()(0)(iCubeAbove)[1];
+    Eigen::Vector3d transBelow = phi_x_z()(0)(iCubeBelow)[0];
+    Eigen::Vector4d quatBelow = phi_x_z()(0)(iCubeBelow)[1];
+    Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
+    double d = phi_x_z()(1)(iPlan)[0](0);
+    cubeAbovePlanFcts_[iCubeAbove].compute(out.head(8), transAbove, quatAbove,
+                                           d, normal);
+    cubeAbovePlanFcts_[iCubeBelow].compute(out.tail(8), transBelow, quatBelow,
+                                           d, -normal);
+  }
 }
+
 void CubeStackProblemOnManifold::evalNonLinCstrDiff(RefMat out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.rows() == nonLinCstrDim(i) && "wrong row size");
   assert(out.cols() == M().tangentDim() && "Wrong cols size");
 
-  if(i < cubeAboveFixedPlans_.size())
+  if (i < cubeAboveFixedPlanCstrs_.size())
   {
-    int iC = cubeAboveFixedPlans_[i].cube().index();
+    int iC = cubeAboveFixedPlanCstrs_[i].cube().index();
     Eigen::Vector3d trans = phi_x_z()(0)(static_cast<size_t>(iC))[0];
     Eigen::Vector4d quat = phi_x_z()(0)(static_cast<size_t>(iC))[1];
-    cubeAboveFixedPlans_[i].diffTrans(out.block(8 * static_cast<long>(i), 7* iC, 8, 3), trans, quat); 
-    cubeAboveFixedPlans_[i].diffQuat(out.block(8 * static_cast<long>(i), 7* iC + 3, 8, 4), trans, quat); 
+    cubeAboveFixedPlanCstrs_[i].diffTrans(
+        outRep_.block(8 * static_cast<long>(i), 7 * iC, 8, 3), trans, quat);
+    cubeAboveFixedPlanCstrs_[i].diffQuat(
+        outRep_.block(8 * static_cast<long>(i), 7 * iC + 3, 8, 4), trans, quat);
+    M().applyDiffRetractation(
+        out, outRep_.middleRows(8 * static_cast<long>(i), 8), x().value());
   }
+  else
+  {
+    auto iPlan = i - cubeAboveFixedPlanCstrs_.size();
+    auto iCubeAbove = plans_[iPlan].cubeAbove();
+    auto iCubeBelow = plans_[iPlan].cubeBelow();
+    Eigen::Vector3d transAbove = phi_x_z()(0)(iCubeAbove)[0];
+    Eigen::Vector4d quatAbove = phi_x_z()(0)(iCubeAbove)[1];
+    Eigen::Vector3d transBelow = phi_x_z()(0)(iCubeBelow)[0];
+    Eigen::Vector4d quatBelow = phi_x_z()(0)(iCubeBelow)[1];
+    Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
+    double d = phi_x_z()(1)(iPlan)[0](0);
+    auto rowBegin = 8 * cubeAboveFixedPlanCstrs_.size() + 16 * iPlan;
+    auto cubeAboveBegin = 7 * iCubeAbove;
+    auto cubeBelowBegin = 7 * iCubeBelow;
+    auto planBegin = 7 * nCubes_ + 4 * iPlan;
+    long rowBeginLong = static_cast<long>(rowBegin);
+    long cubeAboveBeginLong = static_cast<long>(cubeAboveBegin);
+    long cubeBelowBeginLong = static_cast<long>(cubeBelowBegin);
+    long planBeginLong = static_cast<long>(planBegin);
 
-  //if (i == 0) {
-    //// Constraint 0
-    //// This constraint does not have a nonlinear part
-  //}
+    Eigen::Matrix<double, 8, 1> tmpWTF;
 
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //// All planes between cubes
-    //outRepNonLinCstrDiff_.setZero();
-    //Eigen::Matrix<double, 8, 12> outRepBlockCube;
-    //Eigen::Matrix<double, 8, 4> outRepBlockPlane;
-    //Eigen::Vector3d nP, v, vP, pC;  // normal of the plane, vertex of the cube
-                                    //// and vertex of the cube wrt the plane and
-                                    //// position of the cube
-    //for (size_t iP = 0; iP < nPlans_; ++iP)
-    //{
-      //Eigen::Map<const Eigen::Vector3d> nP(phi_x_z()(1)(iP)[1].data());
-      //// Cube Above
-      //size_t iC = plans_[iP].cubeAbove();
-      //pC = phi_x_z()(0)(iC)[0];
-      //Eigen::Map<const Eigen::Matrix3d> rCA(phi_x_z()(0)(iC)[1].data());
-      //for (Index j = 0; j < 8; ++j)
-      //{
-        //v = cubes_[i].vertex(static_cast<size_t>(j));
-        //outRepBlockCube.row(j) << nP(0), nP(1), nP(2), v(0) * nP(0),
-            //v(0) * nP(1), v(0) * nP(2), v(1) * nP(0), v(1) * nP(1),
-            //v(1) * nP(2), v(2) * nP(0), v(2) * nP(1), v(2) * nP(2);
-        //vP = pC + rCA * v;
-        //outRepBlockPlane.row(j) << -1, vP(0), vP(1), vP(2);
-      //}
-      //outRepNonLinCstrDiff_.block(static_cast<Index>(iP) * 16,
-                                  //static_cast<Index>(12 * iC), 8, 12) =
-          //outRepBlockCube;
-      //outRepNonLinCstrDiff_.block(static_cast<Index>(iP) * 16,
-                                  //static_cast<Index>(12 * nCubes_ + 4 * iP), 8,
-                                  //4) = outRepBlockPlane;
-      //// Cube Below
-      //iC = plans_[iP].cubeBelow();
-      //pC = phi_x_z()(0)(iC)[0];
-      //Eigen::Map<const Eigen::Matrix3d> rCB(phi_x_z()(0)(iC)[1].data());
-      //for (Index j = 0; j < 8; ++j)
-      //{
-        //v = cubes_[i].vertex(static_cast<size_t>(j));
-        //outRepBlockCube.row(j) << -nP(0), -nP(1), -nP(2), -v(0) * nP(0),
-            //-v(0) * nP(1), -v(0) * nP(2), -v(1) * nP(0), -v(1) * nP(1),
-            //-v(1) * nP(2), -v(2) * nP(0), -v(2) * nP(1), -v(2) * nP(2);
-        //vP = pC + rCB * v;
-        //outRepBlockPlane.row(j) << 1, -vP(0), -vP(1), -vP(2);
-      //}
-      //outRepNonLinCstrDiff_.block(static_cast<Index>(iP) * 16 + 8,
-                                  //static_cast<Index>(12 * iC), 8, 12) =
-          //outRepBlockCube;
-      //outRepNonLinCstrDiff_.block(static_cast<Index>(iP) * 16 + 8,
-                                  //static_cast<Index>(12 * nCubes_ + 4 * iP), 8,
-                                  //4) = outRepBlockPlane;
-    //}
-    //M().applyDiffRetractation(out, outRepNonLinCstrDiff_, x().value());
-  //}
-  //else if (i == 2)
-  //{
-    //// Constraint 2
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 3)
-  //{
-    //// Constraint 3
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 4)
-  //{
-    //// Constraint 4
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 5)
-  //{
-    //// Constraint 5
-    //// This constraint does not have a nonlinear part
-  //}
+    cubeAbovePlanFcts_[iCubeAbove].diffTrans(
+        outRep_.block(rowBeginLong, cubeAboveBeginLong, 8, 3), transAbove,
+        quatAbove, d, normal);
+    cubeAbovePlanFcts_[iCubeAbove].diffQuat(
+        outRep_.block(rowBeginLong, cubeAboveBeginLong + 3, 8, 4), transAbove,
+        quatAbove, d, normal);
+    cubeAbovePlanFcts_[iCubeAbove].diffD(tmpWTF, transAbove, quatAbove, d,
+                                         normal);
+    outRep_.block(rowBeginLong, planBeginLong, 8, 1) = tmpWTF;
+    cubeAbovePlanFcts_[iCubeAbove].diffNormal(
+        outRep_.block(rowBeginLong, planBeginLong + 1, 8, 3), transAbove,
+        quatAbove, d, normal);
+
+    cubeAbovePlanFcts_[iCubeBelow].diffTrans(
+        outRep_.block(rowBeginLong + 8, cubeBelowBeginLong, 8, 3), transBelow,
+        quatBelow, d, -normal);
+    cubeAbovePlanFcts_[iCubeBelow].diffQuat(
+        outRep_.block(rowBeginLong + 8, cubeBelowBeginLong + 3, 8, 4),
+        transBelow, quatBelow, d, -normal);
+    cubeAbovePlanFcts_[iCubeBelow].diffD(tmpWTF, transBelow, quatBelow, d,
+                                         -normal);
+    outRep_.block(rowBeginLong + 8, planBeginLong, 8, 1) = tmpWTF;
+
+    Eigen::Matrix<double, 8, 3> tmpDiffNormal;
+    cubeAbovePlanFcts_[iCubeBelow].diffNormal(
+        tmpDiffNormal, transBelow,
+        quatBelow, d, -normal);
+    outRep_.block(rowBeginLong + 8, planBeginLong + 1, 8, 3) = -tmpDiffNormal;
+
+    M().applyDiffRetractation(out, outRep_.middleRows(rowBeginLong, 16),
+                              x().value());
+  }
 }
+
 void CubeStackProblemOnManifold::getNonLinCstrLB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  if(i < cubeAboveFixedPlans_.size())
+  if (i < cubeAboveFixedPlanCstrs_.size())
   {
-    cubeAboveFixedPlans_[i].LB(out.block(8 * static_cast<long>(i), 0, 8, 1)); 
+    cubeAboveFixedPlanCstrs_[i].LB(out);
   }
-  //if (i == 0)
-  //{
-    //// Constraint 0
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 1)
-  //{
-    //// Constraint 1
-    //for (Index i = 0; i < static_cast<Index>(nPlans_); ++i)
-    //{
-      //out.block(16 * i, 0, 16, 1) << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          //0, 0;
-    //}
-  //}
-  //else if (i == 2)
-  //{
-    //// Constraint 2
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 3)
-  //{
-    //// Constraint 3
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 4)
-  //{
-    //// Constraint 4
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 5)
-  //{
-    //// Constraint 5
-    //// This constraint does not have a nonlinear part
-  //}
+  else
+  {
+    auto iPlan = i - cubeAboveFixedPlanCstrs_.size();
+    auto iCubeAbove = plans_[iPlan].cubeAbove();
+    auto iCubeBelow = plans_[iPlan].cubeBelow();
+    cubeAbovePlanFcts_[iCubeAbove].LB(out.head(8));
+    cubeAbovePlanFcts_[iCubeBelow].LB(out.tail(8));
+  }
 }
 void CubeStackProblemOnManifold::getNonLinCstrUB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  //double inf = std::numeric_limits<double>::infinity();
-  if(i < cubeAboveFixedPlans_.size())
+  if (i < cubeAboveFixedPlanCstrs_.size())
   {
-    cubeAboveFixedPlans_[i].LB(out.block(8 * static_cast<long>(i), 0, 8, 1)); 
+    cubeAboveFixedPlanCstrs_[i].UB(out);
   }
-  //else if (i == 1)
-  //{
-    //// Constraint 0
-    //for (Index i = 0; i < static_cast<Index>(nPlans_); ++i)
-    //{
-      //out.block(16 * i, 0, 16, 1) << inf, inf, inf, inf, inf, inf, inf, inf,
-          //inf, inf, inf, inf, inf, inf, inf, inf;
-    //}
-  //}
-  //else if (i == 2)
-  //{
-    //// Constraint 2
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 3)
-  //{
-    //// Constraint 3
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 4)
-  //{
-    //// Constraint 4
-    //// This constraint does not have a nonlinear part
-  //}
-  //else if (i == 5)
-  //{
-    //// Constraint 5
-    //// This constraint does not have a nonlinear part
-  //}
+  else
+  {
+    auto iPlan = i - cubeAboveFixedPlanCstrs_.size();
+    auto iCubeAbove = plans_[iPlan].cubeAbove();
+    auto iCubeBelow = plans_[iPlan].cubeBelow();
+    cubeAbovePlanFcts_[iCubeAbove].UB(out.head(8));
+    cubeAbovePlanFcts_[iCubeBelow].UB(out.tail(8));
+  }
 }
 
 size_t CubeStackProblemOnManifold::numberOfCstr() const
 {
-  size_t nb = nCubes_;
+  size_t nb = cubeAboveFixedPlanCstrs_.size();
+  nb += nPlans_;
   return nb;
 }
 
-Index CubeStackProblemOnManifold::linCstrDim(size_t i) const
-{
-  //Index nCubesI = static_cast<Index>(nCubes_);
-  Index linDim[] = {0};
-  return linDim[static_cast<size_t>(i)];
-}
+Index CubeStackProblemOnManifold::linCstrDim(size_t) const { return 0; }
 
 Index CubeStackProblemOnManifold::nonLinCstrDim(size_t i) const
 {
-  //Index nPlanesI = static_cast<Index>(nPlans_);
-  //Index nCubesI = static_cast<Index>(nCubes_);
-  Index nonLinDim[] = {8};
-  return nonLinDim[static_cast<size_t>(i)];
+  if (i < cubeAboveFixedPlanCstrs_.size())
+    return 8;
+  else
+    return 16;
 }
 
 void CubeStackProblemOnManifold::printState() const
@@ -667,51 +393,9 @@ void CubeStackProblemOnManifold::printState() const
   //}
 }
 
-void CubeStackProblemOnManifold::cstrAllCubeAboveFixedPlan(
-    RefMat out, const ConstSubPoint& pointAllCubes, const double& distPlan,
-    const Eigen::Vector3d& normal) const
+std::string CubeStackProblemOnManifold::getCstrName(const size_t i) const
 {
-  for (size_t i = 0; i < nCubes_; ++i)
-  {
-    cstrCubeAboveFixedPlan(out.block<8, 1>(static_cast<Index>(i) * 8, 0),
-                           pointAllCubes(i), cubes_[i], distPlan, normal);
-  }
-}
-
-void CubeStackProblemOnManifold::cstrCubeAboveFixedPlan(
-    RefMat out, const ConstSubPoint& pointCube, const Cube& cube,
-    const double& distPlan, const Eigen::Vector3d& normal) const
-{
-  Eigen::Vector3d vertex;
-  Eigen::Vector3d posC = pointCube[0];
-  Eigen::Map<const Eigen::Matrix3d> rotC(pointCube[1].data());
-  for (Index j = 0; j < 8; ++j)
-  {
-    vertex = posC + rotC * (cube.vertex(static_cast<size_t>(j)));
-    out(j, 0) = distPlan + vertex.dot(normal);
-  }
-}
-
-void CubeStackProblemOnManifold::cstrAllCubeAboveFixedPlanDiff(
-    RefMat out, const Eigen::Vector3d& normal) const
-{
-  for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
-  {
-    cstrCubeAboveFixedPlanDiff(out.block(8 * i, 12 * i, 8, 12),
-                               cubes_[static_cast<size_t>(i)], normal);
-  }
-}
-
-void CubeStackProblemOnManifold::cstrCubeAboveFixedPlanDiff(
-    RefMat out, const Cube& cube, const Eigen::Vector3d& normal) const
-{
-  for (Index j = 0; j < 8; ++j)
-  {
-    Eigen::Vector3d v = cube.vertex(static_cast<size_t>(j));
-    out.row(j) << normal(0), normal(1), normal(2), v(0) * normal(0),
-        v(0) * normal(1), v(0) * normal(2), v(1) * normal(0), v(1) * normal(1),
-        v(1) * normal(2), v(2) * normal(0), v(2) * normal(1), v(2) * normal(2);
-  }
+  return cstrNames_[i];
 }
 
 //void CubeStackProblemOnManifold::fileForMatlab(std::string fileName,
