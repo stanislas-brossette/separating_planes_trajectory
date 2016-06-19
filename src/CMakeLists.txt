@@ -1,24 +1,18 @@
 INCLUDE_DIRECTORIES(BEFORE ${Boost_INCLUDE_DIR})
 
 SET(SOURCES
-  #CubeStackProblem.cc
-  #CubeStackProblem1Cube.cc
   CubeStackProblemOnManifold.cc
   functions/Cost.cc
   functions/CubeAboveFixedPlan.cc
   functions/CubeAbovePlan.cc
-  #functions/PlanBetweenCubes.cc
   utils/ProblemConfig.cc
   utils/quat2mat.cc
   )
 SET(HEADERS
-  #../include/cube-stacks/CubeStackProblem.hh
-  #../include/cube-stacks/CubeStackProblem1Cube.hh
   ../include/cube-stacks/CubeStackProblemOnManifold.hh
   ../include/cube-stacks/functions/Cost.hh
   ../include/cube-stacks/functions/CubeAboveFixedPlan.hh
   ../include/cube-stacks/functions/CubeAbovePlan.hh
-  #../include/cube-stacks/functions/PlanBetweenCubes.hh
   ../include/cube-stacks/utils/Cube.hh
   ../include/cube-stacks/utils/Plan.hh
   ../include/cube-stacks/utils/ProblemConfig.hh

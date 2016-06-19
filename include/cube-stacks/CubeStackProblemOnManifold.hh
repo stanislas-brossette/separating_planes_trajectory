@@ -50,7 +50,6 @@ class CubeStackProblemOnManifold : public pgs::Problem
   size_t numberOfCstr() const;
   Index linCstrDim(size_t i) const;
   Index nonLinCstrDim(size_t i) const;
-  void printState() const;
 
   void cstrCubeAboveFixedPlan(RefMat out, const mnf::ConstSubPoint& pointCube,
                               const Cube& cube, const double& distPlan,
@@ -65,7 +64,7 @@ class CubeStackProblemOnManifold : public pgs::Problem
   void cstrAllCubeAboveFixedPlanDiff(RefMat out,
                                      const Eigen::Vector3d& normal) const;
 
-  //void fileForMatlab(std::string fileName, const mnf::Point& x) const;
+  void fileForMatlab(std::string fileName, const mnf::Point& x) const;
 
   std::string getCstrName(const size_t i) const;
 

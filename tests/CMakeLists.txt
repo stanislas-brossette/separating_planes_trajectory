@@ -21,9 +21,5 @@ MACRO(ADD_SCENARIO name)
   TARGET_LINK_LIBRARIES(${name} debug PGSolver_d optimized PGSolver)
 ENDMACRO(ADD_SCENARIO)
 
-# ADD_SCENARIO("easyProblemOnManifold")
-# ADD_SCENARIO("obsoleteInertiaId")
-# ADD_SCENARIO("obsoleteInertiaIdQuat")
-# ADD_SCENARIO("obsoleteInertiaIdR4")
-ADD_SCENARIO("test_1_cube")
+ADD_SCENARIO("stackCubes")
 

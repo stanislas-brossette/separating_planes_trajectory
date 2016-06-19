@@ -6,6 +6,7 @@
 
 #include <cube-stacks/CubeStackProblemOnManifold.hh>
 #include <cube-stacks/utils/ProblemConfig.hh>
+#include <cube-stacks/utils/quat2mat.hh>
 
 #include <pgsolver/utils/usingManifold.h>
 
@@ -40,9 +41,11 @@ CubeStackProblemOnManifold::CubeStackProblemOnManifold(
   distYMinus_ = config_["distYMinus"];
   distYPlus_ = config_["distYPlus"];
 
+  Eigen::VectorXd lCubes = config_["lCubes"].asVectorXd();
+
   for (int i = 0; i < static_cast<int>(nCubes_); ++i)
   {
-    Cube c(i, 0.5);
+    Cube c(i, lCubes(i));
     cubeAbovePlanFcts_.push_back(CubeAbovePlan(c));
     cubes_.push_back(c);
     cubeAboveFixedPlanCstrs_.push_back(
@@ -247,7 +250,7 @@ void CubeStackProblemOnManifold::evalNonLinCstr(RefVec out, size_t i) const
     cubeAbovePlanFcts_[iCubeAbove].compute(out.head(8), transAbove, quatAbove,
                                            d, normal);
     cubeAbovePlanFcts_[iCubeBelow].compute(out.tail(8), transBelow, quatBelow,
-                                           d, -normal);
+                                           -d, -normal);
   }
 }
 
@@ -306,18 +309,18 @@ void CubeStackProblemOnManifold::evalNonLinCstrDiff(RefMat out, size_t i) const
 
     cubeAbovePlanFcts_[iCubeBelow].diffTrans(
         outRep_.block(rowBeginLong + 8, cubeBelowBeginLong, 8, 3), transBelow,
-        quatBelow, d, -normal);
+        quatBelow, -d, -normal);
     cubeAbovePlanFcts_[iCubeBelow].diffQuat(
         outRep_.block(rowBeginLong + 8, cubeBelowBeginLong + 3, 8, 4),
-        transBelow, quatBelow, d, -normal);
-    cubeAbovePlanFcts_[iCubeBelow].diffD(tmpWTF, transBelow, quatBelow, d,
+        transBelow, quatBelow, -d, -normal);
+    cubeAbovePlanFcts_[iCubeBelow].diffD(tmpWTF, transBelow, quatBelow, -d,
                                          -normal);
-    outRep_.block(rowBeginLong + 8, planBeginLong, 8, 1) = tmpWTF;
+    outRep_.block(rowBeginLong + 8, planBeginLong, 8, 1) = -tmpWTF;
 
     Eigen::Matrix<double, 8, 3> tmpDiffNormal;
     cubeAbovePlanFcts_[iCubeBelow].diffNormal(
         tmpDiffNormal, transBelow,
-        quatBelow, d, -normal);
+        quatBelow, -d, -normal);
     outRep_.block(rowBeginLong + 8, planBeginLong + 1, 8, 3) = -tmpDiffNormal;
 
     M().applyDiffRetractation(out, outRep_.middleRows(rowBeginLong, 16),
@@ -377,180 +380,168 @@ Index CubeStackProblemOnManifold::nonLinCstrDim(size_t i) const
     return 16;
 }
 
-void CubeStackProblemOnManifold::printState() const
-{
-  // Eigen::Vector3d pos = x()[0];
-  // Eigen::Map<const Eigen::Matrix3d> rot(x()[1].data());
-  // Eigen::Vector3d vertex;
-  // Eigen::Vector3d groundNormal(0, 0, 1);
-  // Eigen::VectorXd res(8);
-  // std::cout << "Cube:" << std::endl;
-  // std::cout << "Center: " << pos.transpose() << std::endl;
-  // for(Index i = 0; i < 8; ++i)
-  //{
-  //  vertex = pos+rot*cubes_[0].vertex()[(size_t)i];
-  //  std::cout << "vertex " << i << ": " << vertex.transpose() << std::endl;
-  //}
-}
-
 std::string CubeStackProblemOnManifold::getCstrName(const size_t i) const
 {
   return cstrNames_[i];
 }
 
-//void CubeStackProblemOnManifold::fileForMatlab(std::string fileName,
-                                       //const Point& x) const
-//{
-  //std::ofstream myFile;
-  //myFile.open(fileName);
+void CubeStackProblemOnManifold::fileForMatlab(std::string fileName,
+                                       const Point& x) const
+{
+  std::cout << "Filing for Matlab" << std::endl;
+  std::cout << "x: " << x << std::endl;
+  std::ofstream myFile;
+  myFile.open(fileName);
 
-  //myFile << "clear all;" << std::endl;
-  //myFile << "material shiny;" << std::endl;
-  //myFile << "alpha(\'color\');" << std::endl;
-  //myFile << "alphamap(\'rampdown\');" << std::endl;
-  //myFile << "xlabel(\'x\');" << std::endl;
-  //myFile << "ylabel(\'y\');" << std::endl;
-  //myFile << "zlabel(\'z\');" << std::endl;
-  //myFile << "grid \'on\';" << std::endl;
-  //myFile << "view(30,30);" << std::endl;
-  //myFile << "axis(\'equal\');   " << std::endl;
+  myFile << "clear all;" << std::endl;
+  myFile << "clf;" << std::endl;
+  myFile << "material shiny;" << std::endl;
+  myFile << "alpha(\'color\');" << std::endl;
+  myFile << "alphamap(\'rampdown\');" << std::endl;
+  myFile << "xlabel(\'x\');" << std::endl;
+  myFile << "ylabel(\'y\');" << std::endl;
+  myFile << "zlabel(\'z\');" << std::endl;
+  myFile << "grid \'on\';" << std::endl;
+  myFile << "view(30,30);" << std::endl;
+  myFile << "axis(\'equal\');   " << std::endl;
 
-  //double minX(-2.0);
-  //double maxX(2.0);
-  //double minY(-2.0);
-  //double maxY(2.0);
-  //double minZ(-2.0);
-  //double maxZ(2.0);
-  //for (size_t i = 0; i < nCubes_; ++i)
-  //{
-    //Eigen::Vector3d pC = x(0)(i)[0];
-    //minX = fmin(minX, pC(0) - cubes_[i].l());
-    //maxX = fmax(maxX, pC(0) + cubes_[i].l());
-    //minY = fmin(minY, pC(1) - cubes_[i].l());
-    //maxY = fmax(maxY, pC(1) + cubes_[i].l());
-    //minZ = fmin(minZ, pC(2) - cubes_[i].l());
-    //maxZ = fmax(maxZ, pC(2) + cubes_[i].l());
-    //Eigen::Map<const Eigen::Matrix3d> rotC(x(0)(i)[1].data());
-    //myFile << "vert" << i << " = [ ";
-    //for (Index j = 0; j < 8; ++j)
-    //{
-      //Eigen::Vector3d v =
-          //pC + rotC * (cubes_[i].vertex(static_cast<size_t>(j)));
-      //myFile << v.transpose();
+  double minX(-2.0);
+  double maxX(2.0);
+  double minY(-2.0);
+  double maxY(2.0);
+  double minZ(-2.0);
+  double maxZ(2.0);
+  for (size_t i = 0; i < nCubes_; ++i)
+  {
+    std::cout << "Cube " << i << std::endl;
+    Eigen::Vector3d pC = x(0)(i)[0];
+    minX = fmin(minX, pC(0) - cubes_[i].l());
+    maxX = fmax(maxX, pC(0) + cubes_[i].l());
+    minY = fmin(minY, pC(1) - cubes_[i].l());
+    maxY = fmax(maxY, pC(1) + cubes_[i].l());
+    minZ = fmin(minZ, pC(2) - cubes_[i].l());
+    maxZ = fmax(maxZ, pC(2) + cubes_[i].l());
+    Eigen::Matrix3d rotC = quat2mat(x(0)(i)[1]);
+    myFile << "vert" << i << " = [ ";
+    for (Index j = 0; j < 8; ++j)
+    {
+      Eigen::Vector3d v =
+          pC + rotC * (cubes_[i].vertex(static_cast<size_t>(j)));
+      myFile << v.transpose();
 
-      //if (j < 7)
-      //{
-        //myFile << "; ..." << std::endl;
-      //}
-      //else
-      //{
-        //myFile << "];" << std::endl;
-      //}
-    //}
-    //myFile << "fac" << i
-           //<< " = [1 2 4 3; 2 6 8 4; 4 3 7 8; 1 5 7 3; 1 2 6 5; 5 6 8 7];"
-           //<< std::endl;
-    //myFile << "patch( \'Faces\', fac" << i << ", \'Vertices\', vert" << i
-           //<< ", \'FaceColor\', \'r\');" << std::endl;
-  //}
-  //for (size_t i = 0; i < nPlans_; ++i)
-  //{
-    //double r = x(1)(i)[0][0];
-    //Eigen::Vector3d n = x(1)(i)[1];
-    //size_t cubeBelow = plans_[i].cubeBelow();
-    //size_t cubeAbove = plans_[i].cubeAbove();
-    //Eigen::Vector3d Cb = x(0)(cubeBelow)[0];
-    //Eigen::Vector3d Cu = x(0)(cubeAbove)[0];
+      if (j < 7)
+      {
+        myFile << "; ..." << std::endl;
+      }
+      else
+      {
+        myFile << "];" << std::endl;
+      }
+    }
+    myFile << "fac" << i
+           << " = [1 2 4 3; 2 6 8 4; 4 3 7 8; 1 5 7 3; 1 2 6 5; 5 6 8 7];"
+           << std::endl;
+    myFile << "patch( \'Faces\', fac" << i << ", \'Vertices\', vert" << i
+           << ", \'FaceColor\', \'r\');" << std::endl;
+  }
+  for (size_t i = 0; i < nPlans_; ++i)
+  {
+    double r = x(1)(i)[0][0];
+    Eigen::Vector3d n = x(1)(i)[1];
+    size_t cubeBelow = plans_[i].cubeBelow();
+    size_t cubeAbove = plans_[i].cubeAbove();
+    Eigen::Vector3d Cb = x(0)(cubeBelow)[0];
+    Eigen::Vector3d Cu = x(0)(cubeAbove)[0];
 
-    //double lambda = (r - n.dot(Cb)) / n.dot(Cu - Cb);
-    //Eigen::Vector3d zeroPlane = Cb + lambda * (Cu - Cb);
+    double lambda = (r - n.dot(Cb)) / n.dot(Cu - Cb);
+    Eigen::Vector3d zeroPlane = Cb + lambda * (Cu - Cb);
 
-    //Eigen::Vector3d t(n(1), -n(0), 0);
-    //t = t / t.norm();
+    Eigen::Vector3d t(n(1), -n(0), 0);
+    t = t / t.norm();
 
-    //Eigen::Vector3d b = n.cross(t);
-    //b = b / b.norm();
+    Eigen::Vector3d b = n.cross(t);
+    b = b / b.norm();
 
-    //myFile << "vert" << i << " = [ ";
+    myFile << "vert" << i << " = [ ";
 
-    //Eigen::Vector3d vertex;
-    //vertex = zeroPlane + t + b;
-    //myFile << vertex.transpose() << "; ..." << std::endl;
-    //vertex = zeroPlane + t - b;
-    //myFile << vertex.transpose() << "; ..." << std::endl;
-    //vertex = zeroPlane - t - b;
-    //myFile << vertex.transpose() << "; ..." << std::endl;
-    //vertex = zeroPlane - t + b;
-    //myFile << vertex.transpose() << "; ..." << std::endl;
-    //myFile << "];" << std::endl;
-    //myFile << "fac" << i << " = [1 2 3 4];" << std::endl;
-    //myFile << "patch( \'Faces\', fac" << i << ", \'Vertices\', vert" << i
-           //<< ", \'FaceColor\', \'y\', 'FaceAlpha', 0.5);" << std::endl;
-  //}
-  //myFile << "xlim([" << minX << " " << maxX << "]);" << std::endl;
-  //myFile << "ylim([" << minY << " " << maxY << "]);" << std::endl;
-  //myFile << "zlim([" << minZ << " " << maxZ << "]);" << std::endl;
+    Eigen::Vector3d vertex;
+    vertex = zeroPlane + t + b;
+    myFile << vertex.transpose() << "; ..." << std::endl;
+    vertex = zeroPlane + t - b;
+    myFile << vertex.transpose() << "; ..." << std::endl;
+    vertex = zeroPlane - t - b;
+    myFile << vertex.transpose() << "; ..." << std::endl;
+    vertex = zeroPlane - t + b;
+    myFile << vertex.transpose() << "; ..." << std::endl;
+    myFile << "];" << std::endl;
+    myFile << "fac" << i << " = [1 2 3 4];" << std::endl;
+    myFile << "patch( \'Faces\', fac" << i << ", \'Vertices\', vert" << i
+           << ", \'FaceColor\', \'y\', 'FaceAlpha', 0.5);" << std::endl;
+  }
+  myFile << "xlim([" << minX << " " << maxX << "]);" << std::endl;
+  myFile << "ylim([" << minY << " " << maxY << "]);" << std::endl;
+  myFile << "zlim([" << minZ << " " << maxZ << "]);" << std::endl;
 
-  //myFile << "vertPlanZPlus = [ ";
-  //myFile << -wallXMinus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << -wallXMinus_ << ", " << wallYPlus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << wallYPlus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ << "];"
-         //<< std::endl;
-  //myFile << "facZPlus = [1 2 3 4];" << std::endl;
-  //myFile << "patch( \'Faces\', facZPlus, \'Vertices\', vertPlanZPlus, "
-            //"\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
-  //myFile << "vertPlanXPlus = [ ";
-  //myFile << wallXPlus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << wallYPlus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << wallYPlus_ << ", " << wallZPlus_ + 3 << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ + 3 << "];"
-         //<< std::endl;
-  //myFile << "facXPlus = [1 2 3 4];" << std::endl;
-  //myFile << "patch( \'Faces\', facXPlus, \'Vertices\', vertPlanXPlus, "
-            //"\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
-  //myFile << "vertPlanXMinus = [ ";
-  //myFile << -wallXMinus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << -wallXMinus_ << ", " << wallYPlus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << -wallXMinus_ << ", " << wallYPlus_ << ", " << wallZPlus_ + 3
-         //<< ";..." << std::endl;
-  //myFile << -wallXMinus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ + 3
-         //<< "];" << std::endl;
-  //myFile << "facXMinus = [1 2 3 4];" << std::endl;
-  //myFile << "patch( \'Faces\', facXMinus, \'Vertices\', vertPlanXMinus, "
-            //"\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
-  //myFile << "vertPlanYPlus = [ ";
-  //myFile << -wallXMinus_ << ", " << wallYPlus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << wallYPlus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << wallYPlus_ << ", " << wallZPlus_ + 3 << ";..."
-         //<< std::endl;
-  //myFile << -wallXMinus_ << ", " << wallYPlus_ << ", " << wallZPlus_ + 3 << "];"
-         //<< std::endl;
-  //myFile << "facYPlus = [1 2 3 4];" << std::endl;
-  //myFile << "patch( \'Faces\', facYPlus, \'Vertices\', vertPlanYPlus, "
-            //"\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
-  //myFile << "vertPlanYMinus = [ ";
-  //myFile << -wallXMinus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ << ";..."
-         //<< std::endl;
-  //myFile << wallXPlus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ + 3
-         //<< ";..." << std::endl;
-  //myFile << -wallXMinus_ << ", " << -wallYMinus_ << ", " << wallZPlus_ + 3
-         //<< "];" << std::endl;
-  //myFile << "facYMinus = [1 2 3 4];" << std::endl;
-  //myFile << "patch( \'Faces\', facYMinus, \'Vertices\', vertPlanYMinus, "
-            //"\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
-  //myFile.close();
-//}
+  myFile << "vertPlanZPlus = [ ";
+  myFile << -distXMinus_ << ", " << -distYMinus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << -distXMinus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distZPlus_ << "];"
+         << std::endl;
+  myFile << "facZPlus = [1 2 3 4];" << std::endl;
+  myFile << "patch( \'Faces\', facZPlus, \'Vertices\', vertPlanZPlus, "
+            "\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
+  myFile << "vertPlanXPlus = [ ";
+  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distYPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << distYPlus_ << ", " << distZPlus_ + 3 << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distZPlus_ + 3 << "];"
+         << std::endl;
+  myFile << "facXPlus = [1 2 3 4];" << std::endl;
+  myFile << "patch( \'Faces\', facXPlus, \'Vertices\', vertPlanXPlus, "
+            "\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
+  myFile << "vertPlanXMinus = [ ";
+  myFile << -distXMinus_ << ", " << -distYMinus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << -distXMinus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << -distXMinus_ << ", " << distYPlus_ << ", " << distZPlus_ + 3
+         << ";..." << std::endl;
+  myFile << -distXMinus_ << ", " << -distYMinus_ << ", " << distZPlus_ + 3
+         << "];" << std::endl;
+  myFile << "facXMinus = [1 2 3 4];" << std::endl;
+  myFile << "patch( \'Faces\', facXMinus, \'Vertices\', vertPlanXMinus, "
+            "\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
+  myFile << "vertPlanYPlus = [ ";
+  myFile << -distXMinus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << distYPlus_ << ", " << distZPlus_ + 3 << ";..."
+         << std::endl;
+  myFile << -distXMinus_ << ", " << distYPlus_ << ", " << distZPlus_ + 3 << "];"
+         << std::endl;
+  myFile << "facYPlus = [1 2 3 4];" << std::endl;
+  myFile << "patch( \'Faces\', facYPlus, \'Vertices\', vertPlanYPlus, "
+            "\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
+  myFile << "vertPlanYMinus = [ ";
+  myFile << -distXMinus_ << ", " << -distYMinus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distZPlus_ << ";..."
+         << std::endl;
+  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distZPlus_ + 3
+         << ";..." << std::endl;
+  myFile << -distXMinus_ << ", " << -distYMinus_ << ", " << distZPlus_ + 3
+         << "];" << std::endl;
+  myFile << "facYMinus = [1 2 3 4];" << std::endl;
+  myFile << "patch( \'Faces\', facYMinus, \'Vertices\', vertPlanYMinus, "
+            "\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
+  myFile.close();
+}
 }
