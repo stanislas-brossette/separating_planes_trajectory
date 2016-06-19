@@ -17,8 +17,8 @@ rhoMax: 10
 rhoMin: 1e-3
 updatePrevDiffLagWithMostRecentLambda: true
 
-nCubes: 3
-lCubes: [0.75, 0.2, 0.4]
+nCubes: 6
+lCubes: [0.6, 0.5, 0.4, 0.5, 0.3, 0.4, 0.2]
 
 normalZPlus: [0, 0, 1]
 normalXMinus: [-1, 0, 0]

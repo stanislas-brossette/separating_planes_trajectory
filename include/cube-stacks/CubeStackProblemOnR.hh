@@ -6,10 +6,6 @@
 #include <manifolds/defs.h>
 #include <pgsolver/solver/Problem.h>
 #include <manifolds/RealSpace.h>
-#include <manifolds/S2.h>
-#include <manifolds/SO3.h>
-#include <manifolds/ExpMapMatrix.h>
-#include <manifolds/ExpMapQuaternion.h>
 #include <manifolds/CartesianProduct.h>
 
 #include <pgsolver/utils/defs.h>
@@ -23,10 +19,10 @@
 namespace cubestacks
 {
 
-class CubeStackProblemOnManifold : public pgs::Problem
+class CubeStackProblemOnR : public pgs::Problem
 {
  public:
-  CubeStackProblemOnManifold(const mnf::Manifold& M, const std::string& configPath);
+  CubeStackProblemOnR(const mnf::Manifold& M, const std::string& configPath);
 
   static mnf::CartesianProduct* buildManifold(Index nCubes);
   Eigen::VectorXd findInitPoint();
@@ -58,6 +54,10 @@ class CubeStackProblemOnManifold : public pgs::Problem
  public:
   size_t nCubes_;
   size_t nPlans_;
+  size_t iMaxCstrFixPlan_;
+  size_t iMaxCstrS2Plan_;
+  size_t iMaxCstrQuatNorm1_;
+  size_t iMaxCstrVecNorm1_;
 
  private:
   std::vector<Cube> cubes_;
@@ -71,8 +71,8 @@ class CubeStackProblemOnManifold : public pgs::Problem
   ProblemConfig config_;
 
   // buffers
-  mutable Eigen::MatrixXd outRepObjDiff_;
+  //mutable Eigen::MatrixXd outRepObjDiff_;
   //mutable Eigen::MatrixXd outRepLinCstrDiff_;
-  mutable Eigen::MatrixXd outRep_;
+  //mutable Eigen::MatrixXd outRep_;
 };
 }

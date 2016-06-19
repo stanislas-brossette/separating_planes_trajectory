@@ -10,7 +10,7 @@
 #include <manifolds/CartesianProduct.h>
 #include <manifolds/Point.h>
 
-#include <cube-stacks/CubeStackProblemOnManifold.hh>
+#include <cube-stacks/CubeStackProblemOnR.hh>
 #include <cube-stacks/utils/ProblemConfig.hh>
 
 using namespace cubestacks;
@@ -23,11 +23,11 @@ int main(void)
   ProblemConfig config(ymlPath);
   int nCubes = config["nCubes"];
 
-  mnf::CartesianProduct* M = CubeStackProblemOnManifold::buildManifold(nCubes);
+  mnf::CartesianProduct* M = CubeStackProblemOnR::buildManifold(nCubes);
 
   M->display();
 
-  CubeStackProblemOnManifold myProb(*M, ymlPath);
+  CubeStackProblemOnR myProb(*M, ymlPath);
   Eigen::VectorXd v0(M->representationDim());
   v0 = myProb.findInitPoint();
   M->createRandomPoint(v0);

@@ -22,4 +22,5 @@ MACRO(ADD_SCENARIO name)
 ENDMACRO(ADD_SCENARIO)
 
 ADD_SCENARIO("stackCubes")
+ADD_SCENARIO("stackCubesNoManifold")
 
