@@ -27,7 +27,7 @@ CubeStackProblemOnR::CubeStackProblemOnR(
     const Manifold& M, const std::string& configPath)
     : Problem(M), config_(configPath)
 {
-  nCubes_ = static_cast<size_t>(config_["nCubes"].asInt());
+  nCubes_ = static_cast<size_t>(M(0).dim()) / 7;
 
   normalZPlus_ = config_["normalZPlus"];
   normalXMinus_ = config_["normalXMinus"];
@@ -71,9 +71,6 @@ CubeStackProblemOnR::CubeStackProblemOnR(
   }
 
   nPlans_ = (nCubes_ * (nCubes_ - 1)) / 2;
-
-  std::cout << "nCubes_ = \n" << nCubes_ << std::endl;
-  std::cout << "nPlans_ = \n" << nPlans_ << std::endl;
 
   for (size_t i = 0; i < nCubes_; ++i)
   {
@@ -457,8 +454,6 @@ std::string CubeStackProblemOnR::getCstrName(const size_t i) const
 void CubeStackProblemOnR::fileForMatlab(std::string fileName,
                                        const Point& x) const
 {
-  std::cout << "Filing for Matlab" << std::endl;
-  std::cout << "x: " << x << std::endl;
   std::ofstream myFile;
   myFile.open(fileName);
 
@@ -482,7 +477,6 @@ void CubeStackProblemOnR::fileForMatlab(std::string fileName,
   double maxZ(2.0);
   for (size_t i = 0; i < nCubes_; ++i)
   {
-    std::cout << "Cube " << i << std::endl;
     Eigen::Vector3d pC = x(0)(i)[0];
     minX = fmin(minX, pC(0) - cubes_[i].l());
     maxX = fmax(maxX, pC(0) + cubes_[i].l());

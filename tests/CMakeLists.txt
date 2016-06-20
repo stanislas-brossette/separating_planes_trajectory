@@ -23,4 +23,5 @@ ENDMACRO(ADD_SCENARIO)
 
 ADD_SCENARIO("stackCubes")
 ADD_SCENARIO("stackCubesNoManifold")
+ADD_SCENARIO("compareMethods")
 
