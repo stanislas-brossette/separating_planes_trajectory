@@ -194,29 +194,29 @@ void CubeStackProblemOnManifold::evalObjDiff(RefMat out) const
   M().applyDiffRetractation(out, outRepObjDiff_, x().value());
 }
 
-void CubeStackProblemOnManifold::evalLinCstr(RefVec out, size_t i) const
+void CubeStackProblemOnManifold::evalLinCstr(RefVec /*out*/, size_t /*i*/) const
 {
-  assert(i < numberOfCstr() && "This constraint index is out of bounds");
-  assert(out.size() == linCstrDim(i) && "wrong size");
+  //assert(i < numberOfCstr() && "This constraint index is out of bounds");
+  //assert(out.size() == linCstrDim(i) && "wrong size");
 }
 
-void CubeStackProblemOnManifold::evalLinCstrDiff(RefMat out, size_t i) const
+void CubeStackProblemOnManifold::evalLinCstrDiff(RefMat /*out*/, size_t /*i*/) const
 {
-  assert(i < numberOfCstr() && "This constraint index is out of bounds");
-  assert(out.rows() == linCstrDim(i) && "Wrong rows size");
-  assert(out.cols() == M().tangentDim() && "Wrong cols size");
+  //assert(i < numberOfCstr() && "This constraint index is out of bounds");
+  //assert(out.rows() == linCstrDim(i) && "Wrong rows size");
+  //assert(out.cols() == M().tangentDim() && "Wrong cols size");
 }
 
-void CubeStackProblemOnManifold::getLinCstrLB(RefVec out, size_t i) const
+void CubeStackProblemOnManifold::getLinCstrLB(RefVec /*out*/, size_t /*i*/) const
 {
-  assert(i < numberOfCstr() && "This constraint index is out of bounds");
-  assert(out.size() == linCstrDim(i) && "wrong size");
+  //assert(i < numberOfCstr() && "This constraint index is out of bounds");
+  //assert(out.size() == linCstrDim(i) && "wrong size");
 }
 
-void CubeStackProblemOnManifold::getLinCstrUB(RefVec out, size_t i) const
+void CubeStackProblemOnManifold::getLinCstrUB(RefVec /*out*/, size_t /*i*/) const
 {
-  assert(i < numberOfCstr() && "This constraint index is out of bounds");
-  assert(out.size() == linCstrDim(i) && "wrong size");
+  //assert(i < numberOfCstr() && "This constraint index is out of bounds");
+  //assert(out.size() == linCstrDim(i) && "wrong size");
 }
 
 void CubeStackProblemOnManifold::evalNonLinCstr(RefVec out, size_t i) const
@@ -489,7 +489,7 @@ void CubeStackProblemOnManifold::fileForMatlab(std::string fileName,
   myFile << "patch( \'Faces\', facZPlus, \'Vertices\', vertPlanZPlus, "
             "\'FaceColor\', \'b\', 'FaceAlpha', 0.5);" << std::endl;
   myFile << "vertPlanXPlus = [ ";
-  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distYPlus_ << ";..."
+  myFile << distXPlus_ << ", " << -distYMinus_ << ", " << distZPlus_ << ";..."
          << std::endl;
   myFile << distXPlus_ << ", " << distYPlus_ << ", " << distZPlus_ << ";..."
          << std::endl;

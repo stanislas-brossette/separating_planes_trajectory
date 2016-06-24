@@ -2,6 +2,7 @@ INCLUDE_DIRECTORIES(BEFORE ${Boost_INCLUDE_DIR})
 
 SET(SOURCES
   CubeStackProblemOnManifold.cc
+  CubeStackProblemOnSO3noS2.cc
   CubeStackProblemOnR.cc
   functions/Cost.cc
   functions/CubeAboveFixedPlan.cc
@@ -11,6 +12,7 @@ SET(SOURCES
   )
 SET(HEADERS
   ../include/cube-stacks/CubeStackProblemOnManifold.hh
+  ../include/cube-stacks/CubeStackProblemOnSO3noS2.hh
   ../include/cube-stacks/CubeStackProblemOnR.hh
   ../include/cube-stacks/functions/Cost.hh
   ../include/cube-stacks/functions/CubeAboveFixedPlan.hh

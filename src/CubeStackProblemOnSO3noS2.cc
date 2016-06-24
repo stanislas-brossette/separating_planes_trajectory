@@ -4,30 +4,28 @@
 
 #include <Eigen/Geometry>
 
-#include <cube-stacks/CubeStackProblemOnR.hh>
+#include <cube-stacks/CubeStackProblemOnSO3noS2.hh>
 #include <cube-stacks/utils/ProblemConfig.hh>
 #include <cube-stacks/utils/quat2mat.hh>
 
 #include <pgsolver/utils/usingManifold.h>
 
 #include <manifolds/RealSpace.h>
-#include <manifolds/S2.h>
 #include <manifolds/SO3.h>
 #include <manifolds/ExpMapMatrix.h>
 #include <manifolds/ExpMapQuaternion.h>
 using mnf::RealSpace;
 using mnf::SO3;
-using mnf::S2;
 using mnf::CartesianProduct;
 using mnf::ExpMapMatrix;
 using mnf::ExpMapQuaternion;
 namespace cubestacks
 {
-CubeStackProblemOnR::CubeStackProblemOnR(
+CubeStackProblemOnSO3noS2::CubeStackProblemOnSO3noS2(
     const Manifold& M, const std::string& configPath)
     : Problem(M), config_(configPath)
 {
-  nCubes_ = static_cast<size_t>(M(0).dim()) / 7;
+  nCubes_ = static_cast<size_t>(M(0).dim()) / 6;
 
   normalZPlus_ = config_["normalZPlus"];
   normalXMinus_ = config_["normalXMinus"];
@@ -86,10 +84,6 @@ CubeStackProblemOnR::CubeStackProblemOnR(
                          std::to_string(plans_[i].cubeAbove()) + "AndCube" +
                          std::to_string(plans_[i].cubeBelow()));
   }
-  for (size_t i = 0; i < nCubes_; i++) 
-  {
-    cstrNames_.push_back("Norm1QuatCube" + std::to_string(i));
-  }
   for (size_t i = 0; i < nPlans_; i++) 
   {
     cstrNames_.push_back("Norm1S2Plan" + std::to_string(i));
@@ -101,11 +95,16 @@ CubeStackProblemOnR::CubeStackProblemOnR(
   
   iMaxCstrFixPlan_ = cubeAboveFixedPlanCstrs_.size();
   iMaxCstrS2Plan_ = iMaxCstrFixPlan_ + nPlans_;
-  iMaxCstrQuatNorm1_ = iMaxCstrS2Plan_ + nCubes_;
-  iMaxCstrVecNorm1_ = iMaxCstrQuatNorm1_ + nPlans_;
+  iMaxCstrVecNorm1_ = iMaxCstrS2Plan_ + nPlans_;
+
+  outRepObjDiff_.resize(1, M.representationDim());
+  outRepObjDiff_.setZero();
+  outRep_.resize(static_cast<Index>(8 * cubeAboveFixedPlanCstrs_.size() + 16*nPlans_),
+                 M.representationDim());
+  outRep_.setZero();
 }
 
-Eigen::VectorXd CubeStackProblemOnR::findInitPoint()
+Eigen::VectorXd CubeStackProblemOnSO3noS2::findInitPoint()
 {
   Point xRand = M().createRandomPoint();
   Eigen::Vector3d interCubes;
@@ -127,12 +126,12 @@ Eigen::VectorXd CubeStackProblemOnR::findInitPoint()
   return xRand.value();
 }
 
-CartesianProduct* CubeStackProblemOnR::buildManifold(Index nCubes)
+CartesianProduct* CubeStackProblemOnSO3noS2::buildManifold(Index nCubes)
 {
   assert(nCubes > 0 && "Number of Cubes must be positive and non null");
   RealSpace* R1_ = new RealSpace(1);
   RealSpace* R3_ = new RealSpace(3);
-  RealSpace* SO3_ = new RealSpace(4);
+  SO3<ExpMapQuaternion>* SO3_ = new SO3<ExpMapQuaternion>();
   RealSpace* S2_ = new RealSpace(3);
   CartesianProduct* MCube = new CartesianProduct(*R3_, *SO3_);
   CartesianProduct* MPlane = new CartesianProduct(*R1_, *S2_);
@@ -163,14 +162,14 @@ CartesianProduct* CubeStackProblemOnR::buildManifold(Index nCubes)
   return MCubesAndPlanes;
 }
 
-void CubeStackProblemOnR::getTangentLB(RefVec out) const
+void CubeStackProblemOnSO3noS2::getTangentLB(RefVec out) const
 {
   assert(out.size() == M().tangentDim() && "wrong size");
   double infinity = std::numeric_limits<double>::infinity();
 
   for (int i = 0; i < out.size(); i++) out(i) = -infinity;
 }
-void CubeStackProblemOnR::getTangentUB(RefVec out) const
+void CubeStackProblemOnSO3noS2::getTangentUB(RefVec out) const
 {
   assert(out.size() == M().tangentDim() && "wrong size");
   double infinity = std::numeric_limits<double>::infinity();
@@ -178,7 +177,7 @@ void CubeStackProblemOnR::getTangentUB(RefVec out) const
   for (int i = 0; i < out.size(); i++) out(i) = infinity;
 }
 
-void CubeStackProblemOnR::evalObj(double& out) const
+void CubeStackProblemOnSO3noS2::evalObj(double& out) const
 {
   out = 0;
   for (size_t i = 0; i < nCubes_; ++i)
@@ -187,44 +186,45 @@ void CubeStackProblemOnR::evalObj(double& out) const
     out += pos[2];
   }
 }
-void CubeStackProblemOnR::evalObjDiff(RefMat out) const
+void CubeStackProblemOnSO3noS2::evalObjDiff(RefMat out) const
 {
   assert(out.rows() == 1 && "wrong rows size");
   assert(out.cols() == M().tangentDim() && "wrong cols size");
   for (Index i = 0; i < static_cast<Index>(nCubes_); ++i)
   {
     Index cubeRepDim = M()(0)(static_cast<size_t>(i)).representationDim();
-    out.block(0, i * cubeRepDim, 1, cubeRepDim) << 0, 0, 1, 0, 0, 0,
+    outRepObjDiff_.block(0, i * cubeRepDim, 1, cubeRepDim) << 0, 0, 1, 0, 0, 0,
         0;
   }
+  M().applyDiffRetractation(out, outRepObjDiff_, x().value());
 }
 
-void CubeStackProblemOnR::evalLinCstr(RefVec /*out*/, size_t /*i*/) const
+void CubeStackProblemOnSO3noS2::evalLinCstr(RefVec /*out*/, size_t /*i*/) const
 {
   //assert(i < numberOfCstr() && "This constraint index is out of bounds");
   //assert(out.size() == linCstrDim(i) && "wrong size");
 }
 
-void CubeStackProblemOnR::evalLinCstrDiff(RefMat /*out*/, size_t /*i*/) const
+void CubeStackProblemOnSO3noS2::evalLinCstrDiff(RefMat /*out*/, size_t /*i*/) const
 {
   //assert(i < numberOfCstr() && "This constraint index is out of bounds");
   //assert(out.rows() == linCstrDim(i) && "Wrong rows size");
   //assert(out.cols() == M().tangentDim() && "Wrong cols size");
 }
 
-void CubeStackProblemOnR::getLinCstrLB(RefVec /*out*/, size_t /*i*/) const
+void CubeStackProblemOnSO3noS2::getLinCstrLB(RefVec /*out*/, size_t /*i*/) const
 {
   //assert(i < numberOfCstr() && "This constraint index is out of bounds");
   //assert(out.size() == linCstrDim(i) && "wrong size");
 }
 
-void CubeStackProblemOnR::getLinCstrUB(RefVec /*out*/, size_t /*i*/) const
+void CubeStackProblemOnSO3noS2::getLinCstrUB(RefVec /*out*/, size_t /*i*/) const
 {
   //assert(i < numberOfCstr() && "This constraint index is out of bounds");
   //assert(out.size() == linCstrDim(i) && "wrong size");
 }
 
-void CubeStackProblemOnR::evalNonLinCstr(RefVec out, size_t i) const
+void CubeStackProblemOnSO3noS2::evalNonLinCstr(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
@@ -254,15 +254,9 @@ void CubeStackProblemOnR::evalNonLinCstr(RefVec out, size_t i) const
     cubeAbovePlanFcts_[iCubeBelow].compute(out.tail(8), transBelow, quatBelow,
                                            -d, -normal);
   }
-  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrQuatNorm1_)
+  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrVecNorm1_)
   {
-    auto iCube = i - iMaxCstrS2Plan_;
-    Eigen::Vector4d quat = phi_x_z()(0)(iCube)[1];
-    out(0) = quat.squaredNorm();
-  }
-  else if(iMaxCstrQuatNorm1_ <= i && i < iMaxCstrVecNorm1_)
-  {
-    auto iPlan = i - iMaxCstrQuatNorm1_;
+    auto iPlan = i - iMaxCstrS2Plan_;
     Eigen::Vector3d vec = phi_x_z()(1)(iPlan)[1];
     out(0) = vec.squaredNorm();
   }
@@ -272,7 +266,7 @@ void CubeStackProblemOnR::evalNonLinCstr(RefVec out, size_t i) const
   }
 }
 
-void CubeStackProblemOnR::evalNonLinCstrDiff(RefMat out, size_t i) const
+void CubeStackProblemOnSO3noS2::evalNonLinCstrDiff(RefMat out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.rows() == nonLinCstrDim(i) && "wrong row size");
@@ -284,9 +278,11 @@ void CubeStackProblemOnR::evalNonLinCstrDiff(RefMat out, size_t i) const
     Eigen::Vector3d trans = phi_x_z()(0)(static_cast<size_t>(iC))[0];
     Eigen::Vector4d quat = phi_x_z()(0)(static_cast<size_t>(iC))[1];
     cubeAboveFixedPlanCstrs_[i].diffTrans(
-        out.block(0, 7 * iC, 8, 3), trans, quat);
+        outRep_.block(8 * static_cast<long>(i), 7 * iC, 8, 3), trans, quat);
     cubeAboveFixedPlanCstrs_[i].diffQuat(
-        out.block(0, 7 * iC + 3, 8, 4), trans, quat);
+        outRep_.block(8 * static_cast<long>(i), 7 * iC + 3, 8, 4), trans, quat);
+    M().applyDiffRetractation(
+        out, outRep_.middleRows(8 * static_cast<long>(i), 8), x().value());
   }
   else if(iMaxCstrFixPlan_ <= i && i < iMaxCstrS2Plan_)
   {
@@ -299,7 +295,7 @@ void CubeStackProblemOnR::evalNonLinCstrDiff(RefMat out, size_t i) const
     Eigen::Vector4d quatBelow = phi_x_z()(0)(iCubeBelow)[1];
     Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
     double d = phi_x_z()(1)(iPlan)[0](0);
-    auto rowBegin = 0; //8 * cubeAboveFixedPlanCstrs_.size() + 16 * iPlan;
+    auto rowBegin = 8 * cubeAboveFixedPlanCstrs_.size() + 16 * iPlan;
     auto cubeAboveBegin = 7 * iCubeAbove;
     auto cubeBelowBegin = 7 * iCubeBelow;
     auto planBegin = 7 * nCubes_ + 4 * iPlan;
@@ -311,47 +307,45 @@ void CubeStackProblemOnR::evalNonLinCstrDiff(RefMat out, size_t i) const
     Eigen::Matrix<double, 8, 1> tmpWTF;
 
     cubeAbovePlanFcts_[iCubeAbove].diffTrans(
-        out.block(rowBeginLong, cubeAboveBeginLong, 8, 3), transAbove,
+        outRep_.block(rowBeginLong, cubeAboveBeginLong, 8, 3), transAbove,
         quatAbove, d, normal);
     cubeAbovePlanFcts_[iCubeAbove].diffQuat(
-        out.block(rowBeginLong, cubeAboveBeginLong + 3, 8, 4), transAbove,
+        outRep_.block(rowBeginLong, cubeAboveBeginLong + 3, 8, 4), transAbove,
         quatAbove, d, normal);
     cubeAbovePlanFcts_[iCubeAbove].diffD(tmpWTF, transAbove, quatAbove, d,
                                          normal);
-    out.block(rowBeginLong, planBeginLong, 8, 1) = tmpWTF;
+    outRep_.block(rowBeginLong, planBeginLong, 8, 1) = tmpWTF;
     cubeAbovePlanFcts_[iCubeAbove].diffNormal(
-        out.block(rowBeginLong, planBeginLong + 1, 8, 3), transAbove,
+        outRep_.block(rowBeginLong, planBeginLong + 1, 8, 3), transAbove,
         quatAbove, d, normal);
 
     cubeAbovePlanFcts_[iCubeBelow].diffTrans(
-        out.block(rowBeginLong + 8, cubeBelowBeginLong, 8, 3), transBelow,
+        outRep_.block(rowBeginLong + 8, cubeBelowBeginLong, 8, 3), transBelow,
         quatBelow, -d, -normal);
     cubeAbovePlanFcts_[iCubeBelow].diffQuat(
-        out.block(rowBeginLong + 8, cubeBelowBeginLong + 3, 8, 4),
+        outRep_.block(rowBeginLong + 8, cubeBelowBeginLong + 3, 8, 4),
         transBelow, quatBelow, -d, -normal);
     cubeAbovePlanFcts_[iCubeBelow].diffD(tmpWTF, transBelow, quatBelow, -d,
                                          -normal);
-    out.block(rowBeginLong + 8, planBeginLong, 8, 1) = -tmpWTF;
+    outRep_.block(rowBeginLong + 8, planBeginLong, 8, 1) = -tmpWTF;
 
     Eigen::Matrix<double, 8, 3> tmpDiffNormal;
     cubeAbovePlanFcts_[iCubeBelow].diffNormal(
         tmpDiffNormal, transBelow,
         quatBelow, -d, -normal);
-    out.block(rowBeginLong + 8, planBeginLong + 1, 8, 3) = -tmpDiffNormal;
+    outRep_.block(rowBeginLong + 8, planBeginLong + 1, 8, 3) = -tmpDiffNormal;
+
+    M().applyDiffRetractation(out, outRep_.middleRows(rowBeginLong, 16),
+                              x().value());
   }
-  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrQuatNorm1_)
+  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrVecNorm1_)
   {
-    auto iCube = i - iMaxCstrS2Plan_;
-    auto quatBegin = 7 * iCube + 3;
-    Eigen::Vector4d q = phi_x_z()(0)(iCube)[1];
-    out.middleCols(static_cast<long>(quatBegin), 4) << 2*q(0), 2*q(1), 2*q(2), 2*q(3);
-  }
-  else if(iMaxCstrQuatNorm1_ <= i && i < iMaxCstrVecNorm1_)
-  {
-    auto iPlan = i - iMaxCstrQuatNorm1_;
+    outRep_.row(0).setZero();
+    auto iPlan = i - iMaxCstrS2Plan_;
     auto vecBegin = 7 * nCubes_ + 4 * iPlan + 1;
     Eigen::Vector3d v = phi_x_z()(1)(iPlan)[1];
-    out.middleCols(static_cast<long>(vecBegin), 3) << 2*v(0), 2*v(1), 2*v(2);
+    outRep_.block(0,static_cast<long>(vecBegin),1, 3) << 2*v(0), 2*v(1), 2*v(2);
+    M().applyDiffRetractation(out, outRep_.row(0), x().value());
   }
   else
   {
@@ -359,7 +353,7 @@ void CubeStackProblemOnR::evalNonLinCstrDiff(RefMat out, size_t i) const
   }
 }
 
-void CubeStackProblemOnR::getNonLinCstrLB(RefVec out, size_t i) const
+void CubeStackProblemOnSO3noS2::getNonLinCstrLB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
@@ -375,11 +369,7 @@ void CubeStackProblemOnR::getNonLinCstrLB(RefVec out, size_t i) const
     cubeAbovePlanFcts_[iCubeAbove].LB(out.head(8));
     cubeAbovePlanFcts_[iCubeBelow].LB(out.tail(8));
   }
-  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrQuatNorm1_)
-  {
-    out(0) = 1;
-  }
-  else if(iMaxCstrQuatNorm1_ <= i && i < iMaxCstrVecNorm1_)
+  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrVecNorm1_)
   {
     out(0) = 1;
   }
@@ -388,7 +378,7 @@ void CubeStackProblemOnR::getNonLinCstrLB(RefVec out, size_t i) const
     std::cerr << "WOOOPS! Wrong csrt index " << i << std::endl;
   }
 }
-void CubeStackProblemOnR::getNonLinCstrUB(RefVec out, size_t i) const
+void CubeStackProblemOnSO3noS2::getNonLinCstrUB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
@@ -404,11 +394,7 @@ void CubeStackProblemOnR::getNonLinCstrUB(RefVec out, size_t i) const
     cubeAbovePlanFcts_[iCubeAbove].UB(out.head(8));
     cubeAbovePlanFcts_[iCubeBelow].UB(out.tail(8));
   }
-  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrQuatNorm1_)
-  {
-    out(0) = 1;
-  }
-  else if(iMaxCstrQuatNorm1_ <= i && i < iMaxCstrVecNorm1_)
+  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrVecNorm1_)
   {
     out(0) = 1;
   }
@@ -418,26 +404,23 @@ void CubeStackProblemOnR::getNonLinCstrUB(RefVec out, size_t i) const
   }
 }
 
-size_t CubeStackProblemOnR::numberOfCstr() const
+size_t CubeStackProblemOnSO3noS2::numberOfCstr() const
 {
   size_t nb = cubeAboveFixedPlanCstrs_.size();
   nb += nPlans_;
-  nb += nCubes_;
   nb += nPlans_;
   return nb;
 }
 
-Index CubeStackProblemOnR::linCstrDim(size_t) const { return 0; }
+Index CubeStackProblemOnSO3noS2::linCstrDim(size_t) const { return 0; }
 
-Index CubeStackProblemOnR::nonLinCstrDim(size_t i) const
+Index CubeStackProblemOnSO3noS2::nonLinCstrDim(size_t i) const
 {
   if (i < iMaxCstrFixPlan_)
     return 8;
   else if(iMaxCstrFixPlan_ <= i && i < iMaxCstrS2Plan_)
     return 16;
-  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrQuatNorm1_)
-    return 1;
-  else if(iMaxCstrQuatNorm1_ <= i && i < iMaxCstrVecNorm1_)
+  else if(iMaxCstrS2Plan_ <= i && i < iMaxCstrVecNorm1_)
     return 1;
   else
   {
@@ -446,12 +429,12 @@ Index CubeStackProblemOnR::nonLinCstrDim(size_t i) const
   }
 }
 
-std::string CubeStackProblemOnR::getCstrName(const size_t i) const
+std::string CubeStackProblemOnSO3noS2::getCstrName(const size_t i) const
 {
   return cstrNames_[i];
 }
 
-void CubeStackProblemOnR::fileForMatlab(std::string fileName,
+void CubeStackProblemOnSO3noS2::fileForMatlab(std::string fileName,
                                        const Point& x) const
 {
   std::ofstream myFile;

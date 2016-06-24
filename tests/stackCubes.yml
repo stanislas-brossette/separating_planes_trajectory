@@ -5,10 +5,11 @@ displayFilter: false
 epsilon_D: 1e-4
 epsilon_P: 1e-4
 finiteDiffCheck: false
-hessianUpdateMethod: "BFGS_SELF_SCALING"
-hessianUpdateMethodRestoration: "BFGS_SELF_SCALING"
-logLevel: "NO_LOG"
-maxIter: 1000
+hessianUpdateMethod: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+hessianUpdateMethodRestoration: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+logLevel: "ALL"
+logDirectory: "log/test/"
+maxIter: 200
 regularizationValMin: 0.0
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
@@ -25,9 +26,15 @@ QP:
 FP:
   feasTol: 1e-6
 
-minCubes: 1
-maxCubes: 3
-numberOfTests: 10
+#log: false
+timeLog: false
+logName: "BFGS"
+
+nCubes: 3
+
+minCubes: 2
+maxCubes: 7
+numberOfTests: 5
 
 #nCubes: 2
 lCubes: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
@@ -39,10 +46,10 @@ normalYMinus: [0, -1, 0]
 normalYPlus: [0, 1, 0]
 
 distZPlus: 0
-distXMinus: -1
-distXPlus: -1
-distYMinus: -1
-distYPlus: -1
+distXMinus: -1.1
+distXPlus: -1.1
+distYMinus: -1.1
+distYPlus: -1.1
 
 init:
   cube0:
@@ -58,10 +65,4 @@ init:
     d: 0.0
     normal: [1,0,0]
 
-
-solverName: "pgsolver"
-#solverName: "ipopt"
-#SO3representation: "matrix"
-SO3representation: "quaternion"
-#SO3representation: "R4"
 

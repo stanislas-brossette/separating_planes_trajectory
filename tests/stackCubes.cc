@@ -6,6 +6,7 @@
 #include <pgsolver/solver/Problem.h>
 #include <pgsolver/solver/Results.h>
 #include <pgsolver/solver/SolverTrustRegionFilter.h>
+#include <pgsolver/utils/TimeLogger.h>
 
 #include <manifolds/CartesianProduct.h>
 #include <manifolds/Point.h>
@@ -19,7 +20,7 @@ int main(void)
 {
   std::srand(static_cast<uint>(std::time(0)));
   std::string testDir = TESTS_DATA_DIR;
-  std::string ymlPath = testDir + "/stackCubes.yml";
+  std::string ymlPath = testDir + "/stackCubesTmp.yml";
   ProblemConfig config(ymlPath);
   int nCubes = config["nCubes"];
 
@@ -30,7 +31,7 @@ int main(void)
   CubeStackProblemOnManifold myProb(*M, ymlPath);
   Eigen::VectorXd v0(M->representationDim());
   v0 = myProb.findInitPoint();
-  M->createRandomPoint(v0);
+  //M->createRandomPoint(v0);
 
   //for (size_t i = 0; i < myProb.nCubes_; i++)
   //{
@@ -64,7 +65,14 @@ int main(void)
   pgs::utils::loadOptionsFromYaml(mySolver.opt_, ymlPath);
 
   mySolver.init(myProb, x0);
+  myProb.fileForMatlab(
+      "/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+      "stackCubesInit.m",
+      x0);
   pgs::Results res = mySolver.solve();
+  auto timeLog = mySolver.getTimeLogger();
+  std::cout << *timeLog << std::endl;
+
   std::cout << "xSol = \n" << res.x_star << std::endl;
   myProb.fileForMatlab(
       "/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
