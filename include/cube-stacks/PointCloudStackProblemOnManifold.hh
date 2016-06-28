@@ -14,11 +14,11 @@
 
 #include <pgsolver/utils/defs.h>
 
-#include <cube-stacks/utils/Cube.hh>
+#include <cube-stacks/utils/PointCloud.hh>
 #include <cube-stacks/utils/Plan.hh>
 #include <cube-stacks/utils/ProblemConfig.hh>
-#include <cube-stacks/functions/CubeAbovePlan.hh>
-#include <cube-stacks/functions/CubeAboveFixedPlan.hh>
+#include <cube-stacks/functions/PointCloudAbovePlan.hh>
+#include <cube-stacks/functions/PointCloudAboveFixedPlan.hh>
 
 namespace cubestacks
 {
@@ -56,14 +56,14 @@ class CubeStackProblemOnManifold : public pgs::Problem
   std::string getCstrName(const size_t i) const;
 
  public:
-  size_t nCubes_;
+  size_t nPointClouds_;
   size_t nPlans_;
 
  private:
-  std::vector<Cube> cubes_;
+  std::vector<PointCloud> PointClouds_;
   std::vector<Plan> plans_;
-  std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
-  std::vector<CubeAbovePlan> cubeAbovePlanFcts_;
+  std::vector<PointCloudAboveFixedPlan> pointCloudPlanCstrs_;
+  std::vector<PointCloudAbovePlan> pointCloudAbovePlanFcts_;
   std::vector<std::string> cstrNames_;
   double distZPlus_, distXPlus_, distXMinus_, distYPlus_, distYMinus_;
   Eigen::Vector3d normalZPlus_, normalXPlus_, normalXMinus_, normalYPlus_,

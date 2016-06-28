@@ -5,15 +5,13 @@ displayFilter: false
 epsilon_D: 1e-4
 epsilon_P: 1e-4
 finiteDiffCheck: false
-hessianUpdateMethod: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
-hessianUpdateMethodRestoration: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+hessianUpdateMethod: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU 
+hessianUpdateMethodRestoration: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU 
 logLevel: "NO_LOG"
-logDirectory: "log/no_warmstart/"
-maxIter: 200
-regularizationValMin: 0 #1e-6
+maxIter: 300
+regularizationValMin: 0.0
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
-warmStart: true
 rho0: 1
 rhoMax: 10
 rhoMin: 1e-3
@@ -27,7 +25,7 @@ QP:
 FP:
   feasTol: 1e-6
 
-#log: false
+log: true
 timeLog: true
 logName: "BFGS"
 
@@ -47,10 +45,10 @@ normalYMinus: [0, -1, 0]
 normalYPlus: [0, 1, 0]
 
 distZPlus: 0
-distXMinus: -1.1
-distXPlus: -1.1
-distYMinus: -1.1
-distYPlus: -1.1
+distXMinus: -0.8
+distXPlus: -0.8
+distYMinus: -0.8
+distYPlus: -0.8
 
 init:
   cube0:

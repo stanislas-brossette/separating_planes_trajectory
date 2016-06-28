@@ -8,12 +8,11 @@ finiteDiffCheck: false
 hessianUpdateMethod: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 hessianUpdateMethodRestoration: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 logLevel: "NO_LOG"
-logDirectory: "log/no_warmstart/"
+logDirectory: "log/regularizationStudy/"
 maxIter: 200
-regularizationValMin: 0 #1e-6
+regularizationValMin: 0.0
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
-warmStart: true
 rho0: 1
 rhoMax: 10
 rhoMin: 1e-3
@@ -31,11 +30,11 @@ FP:
 timeLog: true
 logName: "BFGS"
 
-nCubes: 3
+nCubes: 5
 
-minCubes: 2
-maxCubes: 7
-numberOfTests: 300
+minRegPower: -8
+maxRegPower: -1
+numberOfTests: 100
 
 #nCubes: 2
 lCubes: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]

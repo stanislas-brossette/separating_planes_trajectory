@@ -16,11 +16,12 @@ using namespace cubestacks;
 
 struct logResult
 {
-  logResult(const size_t& nCubes, const size_t& nPlans, const long& dim,
+  logResult(const size_t& nCubes, const double& regMinVal, const size_t& nPlans, const long& dim,
             const long& repDim, const std::string& manifold, const long& nCstr,
             const int& status, const int& iteration, const double& time,
             const double& obj_star, const Eigen::VectorXd& v0, std::shared_ptr<pgs::TimeLogger> tLog)
       : nCubes_(nCubes),
+        regMinVal_(regMinVal),
         nPlans_(nPlans),
         dim_(dim),
         repDim_(repDim),
@@ -36,6 +37,7 @@ struct logResult
   };
 
   size_t nCubes_;
+  double regMinVal_;
   size_t nPlans_;
   long dim_;
   long repDim_;
@@ -52,6 +54,7 @@ struct logResult
   std::ostream& print(std::ostream& o) const
   {
     o << nCubes_ << ", ";
+    o << regMinVal_ << ", ";
     o << nPlans_ << ", ";
     o << dim_ << ", ";
     o << repDim_ << ", ";
@@ -74,7 +77,7 @@ inline std::ostream& operator<<(std::ostream& os, const logResult& m)
 std::string printSummary(const std::vector<logResult> res)
 {
   std::stringstream ss;
-  ss << "nCubes, nPlans, dim, repDim, nCstr, status, iteration, time, obj_star, v0" << std::endl;
+  ss << "nCubes, regMinVal, nPlans, dim, repDim, nCstr, status, iteration, time, obj_star, v0" << std::endl;
   double averageIter = 0;
   double timePerIter;
   double averageTimePerIter = 0;
@@ -102,7 +105,7 @@ std::string printSummary(const std::vector<logResult> res)
 std::string printRes(const std::vector<logResult>& res)
 {
   std::stringstream ss;
-  ss << "nCubes, nPlans, dim, repDim, nCstr, status, iteration, time, obj_star, v0" << std::endl;
+  ss << "nCubes, regMinVal, nPlans, dim, repDim, nCstr, status, iteration, time, obj_star, v0" << std::endl;
   double averageIter = 0;
   double timePerIter;
   double averageTimePerIter = 0;
@@ -233,7 +236,7 @@ std::string printTimes(const std::vector<logResult> res, const std::string& pref
 }
 
 
-logResult solveOnManifold(const mnf::CartesianProduct& M, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName)
+logResult solveOnManifold(const mnf::CartesianProduct& M, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName, const double& regMinVal)
 {
   CubeStackProblemOnManifold myProb(M, ymlPath);
   myProb.name(pbName);
@@ -242,6 +245,8 @@ logResult solveOnManifold(const mnf::CartesianProduct& M, const Eigen::VectorXd&
   pgs::SolverTrustRegionFilter mySolver;
 
   pgs::utils::loadOptionsFromYaml(mySolver.opt_, ymlPath);
+
+  mySolver.opt_.regularizationValMin = regMinVal;
 
   mySolver.init(myProb, x0);
 
@@ -254,11 +259,11 @@ logResult solveOnManifold(const mnf::CartesianProduct& M, const Eigen::VectorXd&
       //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
       //"stackCubesR.m",
       //res.x_star);
-  logResult out(myProb.nCubes_, myProb.nPlans_, M.dim(), M.representationDim(), M.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  logResult out(myProb.nCubes_, mySolver.opt_.regularizationValMin, myProb.nPlans_, M.dim(), M.representationDim(), M.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
   return out;
 }
 
-logResult solveOnSO3noS2(const mnf::CartesianProduct& M, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName)
+logResult solveOnSO3noS2(const mnf::CartesianProduct& M, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName, const double& regMinVal)
 {
   CubeStackProblemOnSO3noS2 myProb(M, ymlPath);
   myProb.name(pbName);
@@ -268,8 +273,9 @@ logResult solveOnSO3noS2(const mnf::CartesianProduct& M, const Eigen::VectorXd& 
 
   pgs::utils::loadOptionsFromYaml(mySolver.opt_, ymlPath);
 
+  mySolver.opt_.regularizationValMin = regMinVal;
   mySolver.init(myProb, x0);
-  
+
   auto t0 = std::clock();
   pgs::Results res = mySolver.solve();
   auto tf = std::clock();
@@ -279,11 +285,11 @@ logResult solveOnSO3noS2(const mnf::CartesianProduct& M, const Eigen::VectorXd& 
       //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
       //"stackCubesSO3noS2.m",
       //res.x_star);
-  logResult out(myProb.nCubes_, myProb.nPlans_, M.dim(), M.representationDim(), M.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  logResult out(myProb.nCubes_, mySolver.opt_.regularizationValMin, myProb.nPlans_, M.dim(), M.representationDim(), M.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
   return out;
 }
 
-logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName)
+logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName, const double& regMinVal)
 {
   CubeStackProblemOnR myProb(R, ymlPath);
   myProb.name(pbName);
@@ -292,6 +298,8 @@ logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0, co
   pgs::SolverTrustRegionFilter mySolver;
 
   pgs::utils::loadOptionsFromYaml(mySolver.opt_, ymlPath);
+
+  mySolver.opt_.regularizationValMin = regMinVal;
 
   mySolver.init(myProb, x0);
   auto t0 = std::clock();
@@ -302,7 +310,7 @@ logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0, co
       //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
       //"stackCubesM.m",
       //res.x_star);
-  logResult out(myProb.nCubes_, myProb.nPlans_, R.dim(), R.representationDim(), R.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  logResult out(myProb.nCubes_, mySolver.opt_.regularizationValMin, myProb.nPlans_, R.dim(), R.representationDim(), R.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
   return out;
 }
 
@@ -315,23 +323,22 @@ std::string currentTime()
   time (&rawtime);
   timeinfo = localtime(&rawtime);
 
-  strftime(buffer,80,"%Y-%m-%d.%H:%M:%S",timeinfo);
+  strftime(buffer,80,"%Y_%m_%d.%H:%M:%S",timeinfo);
   std::string str(buffer);
   return str;
 }
 
 int main(void)
 {
-
   std::cout << "CLOCKS_PER_SEC: " << (double) CLOCKS_PER_SEC << std::endl;
   std::ofstream myFile, mySumFile, myTimeFile, myTimePerIterFile;
   std::string testDir = TESTS_DATA_DIR;
-  std::string ymlPath = testDir + "/stackCubes.yml";
+  std::string ymlPath = testDir + "/compareRegularisationVal.yml";
   ProblemConfig config(ymlPath);
 
   if(config["timeLog"])
   {
-    std::string baseName("log/" + config["logName"] /* + "_" + currentTime()*/);
+    std::string baseName("log/" + config["logName"] + "_regMinValStudy" /* + "_" + currentTime()*/);
     std::string fileName(baseName + ".m");
     std::string summaryFileName(baseName + "_summary.m");
     std::string timeFileName(baseName + "_time.m");
@@ -342,9 +349,27 @@ int main(void)
     myTimePerIterFile.open(timePerIterFileName);
   }
 
-  for (int nCubes = config["minCubes"].asInt(); nCubes <= config["maxCubes"].asInt(); nCubes++)
+  int nCubes = config["nCubes"];
+
+  std::vector<double> regMinVals;
+  std::vector<std::string> regMinPowerStrings;
+
+  regMinVals.push_back(0);
+  regMinPowerStrings.push_back("_RegMinVal_0");
+  for (int regPower = config["minRegPower"].asInt(); regPower <= config["maxRegPower"].asInt(); regPower++)
+  {
+    regMinVals.push_back(std::pow(10,regPower));
+    if(regPower<0)
+      regMinPowerStrings.push_back("_RegMinVal_1Eminus" + std::to_string(-regPower));
+    else
+      regMinPowerStrings.push_back("_RegMinVal_1E" + std::to_string(regPower));
+  }
+
+  for (size_t regIndex = 0; regIndex < regMinVals.size(); regIndex++) 
   {
     std::cerr << "\n\n\n((((------ "<< nCubes << " cubes ------))))" << std::endl;
+    std::cerr << "\n\n\n((((------ RegMinVal: "<< regMinVals[regIndex] << " ------))))" << std::endl;
+    std::cerr << "\n\n\n((((------ " << regMinPowerStrings[regIndex] << " ------))))" << std::endl;
 
     mnf::CartesianProduct* Mptr = CubeStackProblemOnManifold::buildManifold(nCubes);
     mnf::CartesianProduct* MSO3noS2ptr = CubeStackProblemOnSO3noS2::buildManifold(nCubes);
@@ -357,23 +382,24 @@ int main(void)
     CubeStackProblemOnManifold tmpProb(*Mptr, ymlPath);
 
     std::vector<logResult> resManifold, resSO3noS2, resRealSpace;
-    for (int i = 0; i < config["numberOfTests"].asInt(); i++) 
+    for (int i = 0; i < config["numberOfTests"].asInt(); i++)
     {
       std::cerr << "i: " << i << std::endl;
       Eigen::VectorXd v0(Mptr->representationDim());
       v0 = tmpProb.findInitPoint();
 
-      std::string manifoldPbName("BFGS_manifoldPb" + std::to_string(nCubes) + "Cubes" + std::to_string(i));
-      std::string SO3noS2PbName("BFGS_SO3noS2Pb" + std::to_string(nCubes) + "Cubes" + std::to_string(i));
-      std::string RealSpacePbName("BFGS_RealSpacePb" + std::to_string(nCubes) + "Cubes" + std::to_string(i));
-      resManifold.push_back(solveOnManifold(*Mptr, v0, ymlPath, manifoldPbName));
-      resSO3noS2.push_back(solveOnSO3noS2(*MSO3noS2ptr, v0, ymlPath, SO3noS2PbName));
-      resRealSpace.push_back(solveOnR(*Rptr, v0, ymlPath, RealSpacePbName));
+      std::string manifoldPbName("BFGS_manifoldPb" + std::to_string(nCubes) + "Cubes" + std::to_string(i) + regMinPowerStrings[regIndex]);
+      std::string SO3noS2PbName("BFGS_SO3noS2Pb" + std::to_string(nCubes) + "Cubes" + std::to_string(i) + regMinPowerStrings[regIndex]);
+      std::string RealSpacePbName("BFGS_RealSpacePb" + std::to_string(nCubes) + "Cubes" + std::to_string(i) + regMinPowerStrings[regIndex]);
+      resManifold.push_back(solveOnManifold(*Mptr, v0, ymlPath, manifoldPbName, regMinVals[regIndex]));
+      resSO3noS2.push_back(solveOnSO3noS2(*MSO3noS2ptr, v0, ymlPath, SO3noS2PbName, regMinVals[regIndex]));
+      resRealSpace.push_back(solveOnR(*Rptr, v0, ymlPath, RealSpacePbName, regMinVals[regIndex]));
     }
-    
+
     if(config["timeLog"])
     {
       myFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
+      myFile << "%=============== " << regMinPowerStrings[regIndex] << " ==============" << std::endl;
       myFile << "%" << Mptr->name() << std::endl;
       myFile << "%" << MSO3noS2ptr->name() << std::endl;
       myFile << "%" << Rptr->name() << std::endl;
@@ -382,26 +408,30 @@ int main(void)
       myFile << "%resRealSpace:\n" << printRes(resRealSpace) << std::endl;
 
       mySumFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
+      mySumFile << "%=============== " << regMinPowerStrings[regIndex] << " ==============" << std::endl;
       mySumFile << "%resManifold:\n" << printSummary(resManifold) << std::endl;
       mySumFile << "%resSO3noS2:\n" << printSummary(resSO3noS2) << std::endl;
       mySumFile << "%resRealSpace:\n" << printSummary(resRealSpace) << std::endl;
 
       myTimeFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
+      myTimeFile << "%=============== " << regMinPowerStrings[regIndex] << " ==============" << std::endl;
       myTimeFile << "%" << Mptr->name() << std::endl;
       myTimeFile << "%" << MSO3noS2ptr->name() << std::endl;
       myTimeFile << "%" << Rptr->name() << std::endl;
-      myTimeFile << "%resManifold:\n" << printTimes(resManifold, "manifold_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimeFile << "%resSO3noS2:\n" << printTimes(resSO3noS2, "SO3noS2_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimeFile << "%resRealSpace:\n" << printTimes(resRealSpace, "RealSpace_" + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimeFile << "%resManifold:\n" << printTimes(resManifold, "manifold_" + regMinPowerStrings[regIndex] + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimeFile << "%resSO3noS2:\n" << printTimes(resSO3noS2, "SO3noS2_" + regMinPowerStrings[regIndex] + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimeFile << "%resRealSpace:\n" << printTimes(resRealSpace, "RealSpace_" + regMinPowerStrings[regIndex] + std::to_string(nCubes) + "cubes.") << std::endl;
 
       myTimePerIterFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
-      myTimePerIterFile << "%resManifold:\n" << printAverageTimesPerIter(resManifold, "manifold_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimePerIterFile << "%resSO3noS2:\n" << printAverageTimesPerIter(resSO3noS2, "SO3noS2_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimePerIterFile << "%resRealSpace:\n" << printAverageTimesPerIter(resRealSpace, "RealSpace_" + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimePerIterFile << "%=============== " << regMinPowerStrings[regIndex] << " ==============" << std::endl;
+      myTimePerIterFile << "%resManifold:\n" << printAverageTimesPerIter(resManifold, "manifold_" + regMinPowerStrings[regIndex] + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimePerIterFile << "%resSO3noS2:\n" << printAverageTimesPerIter(resSO3noS2, "SO3noS2_" + regMinPowerStrings[regIndex] + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimePerIterFile << "%resRealSpace:\n" << printAverageTimesPerIter(resRealSpace, "RealSpace_" + regMinPowerStrings[regIndex] + std::to_string(nCubes) + "cubes.") << std::endl;
     }
     else
     {
       std::cout << "=============== " << nCubes << " cubes ==============" << std::endl;
+      std::cout << "=============== " << regMinPowerStrings[regIndex] << " ==============" << std::endl;
       std::cout << Mptr->name() << std::endl;
       std::cout << MSO3noS2ptr->name() << std::endl;
       std::cout << Rptr->name() << std::endl;
