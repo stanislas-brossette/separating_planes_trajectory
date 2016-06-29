@@ -67,16 +67,16 @@ int main(void)
   mySolver.init(myProb, x0);
   myProb.fileForMatlab(
       "/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
-      "stackCubesInit.m",
+      "stack" + std::to_string(nCubes) + "CubesInit.m",
       x0);
   pgs::Results res = mySolver.solve();
-  auto timeLog = mySolver.getTimeLogger();
-  std::cout << *timeLog << std::endl;
+  //auto timeLog = mySolver.getTimeLogger();
+  //std::cout << *timeLog << std::endl;
 
   std::cout << "xSol = \n" << res.x_star << std::endl;
   myProb.fileForMatlab(
       "/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
-      "stackCubes.m",
+      "stack" + std::to_string(nCubes) + "Cubes.m",
       res.x_star);
   return 0;
 }

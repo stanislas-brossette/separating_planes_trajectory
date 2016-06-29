@@ -28,7 +28,10 @@ PointCloudStackProblemOnManifold::PointCloudStackProblemOnManifold(
     : Problem(M), config_(configPath)
 {
   nPointClouds_ = config_["nPointClouds"];
-  nCubes_ = static_cast<size_t>(M(0).dim()) / 6;
+  for (int i = 0; i < nPointClouds_; i++)
+  {
+
+  }
 
   normalZPlus_ = config_["normalZPlus"];
   normalXMinus_ = config_["normalXMinus"];

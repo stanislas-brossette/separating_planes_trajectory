@@ -10,7 +10,7 @@ hessianUpdateMethodRestoration: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER
 logLevel: "NO_LOG"
 logDirectory: "log/no_warmstart/"
 maxIter: 200
-regularizationValMin: 1e-10
+regularizationValMin: 0 #1e-6
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
 warmStart: true
@@ -27,15 +27,17 @@ QP:
 FP:
   feasTol: 1e-6
 
+allRegVal: [0, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1, 100]
+
 #log: false
 timeLog: true
-logName: "RegVal1Eminus10BFGS"
+logName: "BFGS"
 
 nCubes: 4
 
 minCubes: 2
-maxCubes: 7
-numberOfTests: 300
+maxCubes: 4
+numberOfTests: 3
 
 #nCubes: 2
 lCubes: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]

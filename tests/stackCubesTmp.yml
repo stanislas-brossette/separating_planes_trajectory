@@ -9,7 +9,7 @@ hessianUpdateMethod: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 hessianUpdateMethodRestoration: "BFGS" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU 
 logLevel: "NO_LOG"
 maxIter: 300
-regularizationValMin: 0.0
+regularizationValMin: 1e-6
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
 rho0: 1
@@ -25,8 +25,8 @@ QP:
 FP:
   feasTol: 1e-6
 
-log: true
-timeLog: true
+log: false
+timeLog: false
 logName: "BFGS"
 
 nCubes: 3
@@ -45,10 +45,10 @@ normalYMinus: [0, -1, 0]
 normalYPlus: [0, 1, 0]
 
 distZPlus: 0
-distXMinus: -0.8
-distXPlus: -0.8
-distYMinus: -0.8
-distYPlus: -0.8
+distXMinus: -0.9
+distXPlus: -0.9
+distYMinus: -0.9
+distYPlus: -0.9
 
 init:
   cube0:
