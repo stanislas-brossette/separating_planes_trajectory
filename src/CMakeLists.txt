@@ -4,20 +4,34 @@ SET(SOURCES
   CubeStackProblemOnManifold.cc
   CubeStackProblemOnSO3noS2.cc
   CubeStackProblemOnR.cc
+  RoboptimCubeStackProblem.cc
   functions/Cost.cc
+  functions/TotalCost.cc
   functions/CubeAboveFixedPlan.cc
+  functions/CubeAboveFixedPlanRoboptim.cc
+  functions/Norm1Quaternion.cc
+  functions/Norm1Vector.cc
   functions/CubeAbovePlan.cc
+  functions/CubeAbovePlanRoboptim.cc
   utils/ProblemConfig.cc
+  utils/IndexManager.cc
   utils/quat2mat.cc
   )
 SET(HEADERS
   ../include/cube-stacks/CubeStackProblemOnManifold.hh
   ../include/cube-stacks/CubeStackProblemOnSO3noS2.hh
   ../include/cube-stacks/CubeStackProblemOnR.hh
+  ../include/cube-stacks/RoboptimCubeStackProblem.hh
   ../include/cube-stacks/functions/Cost.hh
+  ../include/cube-stacks/functions/TotalCost.hh
   ../include/cube-stacks/functions/CubeAboveFixedPlan.hh
+  ../include/cube-stacks/functions/CubeAboveFixedPlanRoboptim.hh
+  ../include/cube-stacks/functions/Norm1Quaternion.hh
+  ../include/cube-stacks/functions/Norm1Vector.hh
   ../include/cube-stacks/functions/CubeAbovePlan.hh
+  ../include/cube-stacks/functions/CubeAbovePlanRoboptim.hh
   ../include/cube-stacks/utils/Cube.hh
+  ../include/cube-stacks/utils/IndexManager.hh
   ../include/cube-stacks/utils/Plan.hh
   ../include/cube-stacks/utils/ProblemConfig.hh
   ../include/cube-stacks/utils/quat2mat.hh

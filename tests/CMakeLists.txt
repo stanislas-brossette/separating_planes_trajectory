@@ -26,4 +26,5 @@ ADD_SCENARIO("stackCubesNoManifold")
 ADD_SCENARIO("compareMethods")
 ADD_SCENARIO("compareRegularisationVal")
 ADD_SCENARIO("compareMethodsMultiple")
+ADD_SCENARIO("stackCubesRoboptim")
 

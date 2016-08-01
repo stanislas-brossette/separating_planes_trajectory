@@ -51,6 +51,19 @@ class CubeStackProblemOnR : public pgs::Problem
 
   std::string getCstrName(const size_t i) const;
 
+  std::vector<CubeAboveFixedPlan>& cubeAboveFixedPlanCstrs()
+  {
+    return cubeAboveFixedPlanCstrs_;
+  }
+  std::vector<CubeAbovePlan>& cubeAbovePlanCstrs()
+  {
+    return cubeAbovePlanFcts_;
+  }
+
+  const std::vector<Cube>& cubes() const {return cubes_;}
+
+  const std::vector<Plan>& plans() const {return plans_;}
+
  public:
   size_t nCubes_;
   size_t nPlans_;
