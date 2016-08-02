@@ -38,4 +38,21 @@ void CubeAboveFixedPlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
   CubeAbovePlan::diffQuat(res, trans, quat, d_, normal_);
 }
 
+void CubeAboveFixedPlan::diffTrans(
+    Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+    const Eigen::Ref<const Eigen::Vector3d> trans,
+    const Eigen::Ref<const Eigen::Vector4d> quat,
+    const long& index) const
+{
+  CubeAbovePlan::diffTrans(res, trans, quat, d_, normal_, index);
+}
+
+void CubeAboveFixedPlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
+                                  const Eigen::Ref<const Eigen::Vector3d> trans,
+                                  const Eigen::Ref<const Eigen::Vector4d> quat,
+                                  const long& index) const
+{
+  CubeAbovePlan::diffQuat(res, trans, quat, d_, normal_, index);
+}
+
 } /* cubestacks */

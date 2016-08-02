@@ -10,10 +10,10 @@ SET(PROJECT_DESCRIPTION "Compare resolution of cube stack problems with differen
 SET(PROJECT_URL "git@gite.lirmm.fr:brossette/cube-stacks.git")
 SET(PROJECT_DEBUG_POSTFIX "_d")
 
+SET(CXX_DISABLE_WERROR 1)
 SETUP_PROJECT()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++0x -pedantic")
-
 #########################
 # External dependencies
 SEARCH_FOR_EIGEN()

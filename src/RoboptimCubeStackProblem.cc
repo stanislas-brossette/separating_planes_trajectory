@@ -12,6 +12,7 @@
 #include <cube-stacks/RoboptimCubeStackProblem.hh>
 #include <cube-stacks/CubeStackProblemOnR.hh>
 #include <cube-stacks/utils/ProblemConfig.hh>
+#include <cube-stacks/utils/IndexManager.hh>
 #include <cube-stacks/functions/TotalCost.hh>
 #include <cube-stacks/functions/CubeAboveFixedPlanRoboptim.hh>
 #include <cube-stacks/functions/CubeAbovePlanRoboptim.hh>
@@ -20,58 +21,58 @@
 
 namespace cubestacks
 {
-
-typedef roboptim::EigenMatrixDense T;
-typedef roboptim::GenericFunction<T> Function_t;
-typedef roboptim::GenericLinearFunction<T> LinearFunction_t;
-typedef roboptim::Solver<T> solver_t;
-typedef roboptim::OptimizationLogger<solver_t> logger_t;
-
-class solutionVisitor : public boost::static_visitor<Eigen::VectorXd>
+class solutionVisitor
+    : public boost::static_visitor<resultRoboptimCubeStackProblem>
 {
  public:
-  Eigen::VectorXd operator()(roboptim::Result res) const
+  resultRoboptimCubeStackProblem operator()(roboptim::Result res) const
   {
     std::cout << "Success" << std::endl;
-    return res.x;
+    resultRoboptimCubeStackProblem rws;
+    rws.status = 1;
+    rws.xSol = res.x;
+    rws.obj_star = res.value[0];
+    return rws;
   }
-  //Eigen::VectorXd operator()(roboptim::ResultWithWarnings res) const
+  // Eigen::VectorXd operator()(roboptim::ResultWithWarnings res) const
   //{
-    //std::cout << "Warning" << std::endl;
-    //return res.x;
+  // std::cout << "Warning" << std::endl;
+  // return res.x;
   //}
-  Eigen::VectorXd operator()(roboptim::NoSolution) const
+  resultRoboptimCubeStackProblem operator()(roboptim::NoSolution) const
   {
     std::cout << "NoSolution" << std::endl;
-    Eigen::VectorXd res;
-    return res;
+    resultRoboptimCubeStackProblem rws;
+    rws.status = 0;
+    return rws;
   }
-  Eigen::VectorXd operator()(roboptim::SolverError) const
+  resultRoboptimCubeStackProblem operator()(roboptim::SolverError) const
   {
     std::cout << "SolverError" << std::endl;
-    Eigen::VectorXd res;
-    return res;
+    resultRoboptimCubeStackProblem rws;
+    rws.status = 0;
+    return rws;
   }
 };
 
 RoboptimCubeStackProblem::RoboptimCubeStackProblem(
     const mnf::Manifold& M, const std::string& configPath)
-    : config_(configPath), myProb_(M, configPath)
+    : nCubes_(static_cast<size_t>(M(0).dim()) / 7),
+      nPlans_(nCubes_ * (nCubes_ - 1) / 2),
+      config_(configPath),
+      pgsProb_(M, configPath),
+      indexManager_(static_cast<int>(nCubes_))
 {
   Eigen::VectorXd v0(M.representationDim());
-  v0 = myProb_.findInitPoint();
-  M.createRandomPoint(v0);
 
-  int nCubes = config_["nCubes"];
-  IndexManager indexManager(nCubes);
-  f_ = boost::make_shared<TotalCost>(indexManager);
-  solver_t::problem_t problem(f_);
+  f_ = boost::make_shared<TotalCost>(indexManager_);
+  problem_ = std::make_shared<solver_t::problem_t>(f_);
 
-  for (size_t i = 0; i < myProb_.cubeAboveFixedPlanCstrs().size(); i++)
+  for (size_t i = 0; i < pgsProb_.cubeAboveFixedPlanCstrs().size(); i++)
   {
     boost::shared_ptr<CubeAboveFixedPlanRoboptim> g =
         boost::make_shared<CubeAboveFixedPlanRoboptim>(
-            indexManager, myProb_.cubeAboveFixedPlanCstrs()[i]);
+            indexManager_, pgsProb_.cubeAboveFixedPlanCstrs()[i]);
     cubeAboveFixedPlanCstrs_.push_back(g);
     std::vector<double> scalings;
     typename CubeAboveFixedPlanRoboptim::intervals_t bounds;
@@ -80,17 +81,19 @@ RoboptimCubeStackProblem::RoboptimCubeStackProblem(
       bounds.push_back(roboptim::Function::makeLowerInterval(0));
       scalings.push_back(1.0);
     }
-    problem.addConstraint(g, bounds, scalings);
+    problem_->addConstraint(g, bounds, scalings);
   }
 
-  for (int iPlan = 0; iPlan < static_cast<int>(myProb_.plans().size()); iPlan++)
+  for (int iPlan = 0; iPlan < static_cast<int>(pgsProb_.plans().size());
+       iPlan++)
   {
-    auto iCubeAbove = myProb_.plans()[static_cast<size_t>(iPlan)].cubeAbove();
-    auto iCubeBelow = myProb_.plans()[static_cast<size_t>(iPlan)].cubeBelow();
+    auto iCubeAbove = pgsProb_.plans()[static_cast<size_t>(iPlan)].cubeAbove();
+    auto iCubeBelow = pgsProb_.plans()[static_cast<size_t>(iPlan)].cubeBelow();
 
     boost::shared_ptr<CubeAbovePlanRoboptim> gAbove =
         boost::make_shared<CubeAbovePlanRoboptim>(
-            indexManager, myProb_.cubeAbovePlanCstrs()[iCubeAbove], iPlan, true);
+            indexManager_, pgsProb_.cubeAbovePlanCstrs()[iCubeAbove], iPlan,
+            true);
     cubeAbovePlanCstrs_.push_back(gAbove);
     std::vector<double> scalings;
     typename CubeAboveFixedPlanRoboptim::intervals_t bounds;
@@ -99,11 +102,11 @@ RoboptimCubeStackProblem::RoboptimCubeStackProblem(
       bounds.push_back(roboptim::Function::makeLowerInterval(0));
       scalings.push_back(1.0);
     }
-    problem.addConstraint(gAbove, bounds, scalings);
+    problem_->addConstraint(gAbove, bounds, scalings);
 
     boost::shared_ptr<CubeAbovePlanRoboptim> gBelow =
         boost::make_shared<CubeAbovePlanRoboptim>(
-            indexManager, myProb_.cubeAbovePlanCstrs()[iCubeBelow], iPlan,
+            indexManager_, pgsProb_.cubeAbovePlanCstrs()[iCubeBelow], iPlan,
             false);
     cubeAbovePlanCstrs_.push_back(gBelow);
     scalings.clear();
@@ -113,59 +116,121 @@ RoboptimCubeStackProblem::RoboptimCubeStackProblem(
       bounds.push_back(roboptim::Function::makeLowerInterval(0));
       scalings.push_back(1.0);
     }
-    problem.addConstraint(gBelow, bounds, scalings);
+    problem_->addConstraint(gBelow, bounds, scalings);
   }
 
-  for (int i = 0; i < nCubes; i++)
+  for (int i = 0; i < static_cast<int>(nCubes_); i++)
   {
     boost::shared_ptr<Norm1Quaternion> g =
-        boost::make_shared<Norm1Quaternion>(indexManager, i);
+        boost::make_shared<Norm1Quaternion>(indexManager_, i);
     Norm1Quaternions_.push_back(g);
-    problem.addConstraint(g, roboptim::Function::makeInterval(0, 0), 1.0);
+    problem_->addConstraint(g, roboptim::Function::makeInterval(0, 0), 1.0);
   }
 
-  for (int i = 0; i < indexManager.nPlanes(); i++)
+  for (int i = 0; i < indexManager_.nPlanes(); i++)
   {
     boost::shared_ptr<Norm1Vector> g =
-        boost::make_shared<Norm1Vector>(indexManager, i);
+        boost::make_shared<Norm1Vector>(indexManager_, i);
     Norm1Vectors_.push_back(g);
-    problem.addConstraint(g, roboptim::Function::makeInterval(0, 0), 1.0);
+    problem_->addConstraint(g, roboptim::Function::makeInterval(0, 0), 1.0);
   }
+}
 
-  std::cout << problem << std::endl;
+void RoboptimCubeStackProblem::init(const Eigen::VectorXd& x0)
+{
+  TotalCost::argument_t x(indexManager_.totalDim());
+  x << x0;
+  problem_->startingPoint() = x;
+}
 
-  /**********
-   *  Init  *
-   **********/
-  TotalCost::argument_t x (indexManager.totalDim());
-  x << v0;
-  std::cout << "x: " << x << std::endl;
-  problem.startingPoint () = x;
-  std::cout << "problem.startingPoint(): " << problem.startingPoint() << std::endl;
-  std::string solverName(config_["solverName"]);
-  std::cout << "solverName: " << solverName << std::endl;
-  roboptim::SolverFactory<solver_t> solverFactory(solverName,
-                                                  problem);
+void RoboptimCubeStackProblem::setCFSQPparameterInt(solver_t& solver,
+                                                    const std::string& s)
+{
+  if (config_.has(s))
+  {
+    roboptim::Parameter param;
+    param.value = config_[s].asInt();
+    solver.parameters()[s] = param;
+  }
+}
+
+void RoboptimCubeStackProblem::setCFSQPparameterDouble(solver_t& solver,
+                                                       const std::string& s)
+{
+  if (config_.has(s))
+  {
+    roboptim::Parameter param;
+    param.value = config_[s].asDouble();
+    solver.parameters()[s] = param;
+  }
+}
+
+void RoboptimCubeStackProblem::setCFSQPparameters(solver_t& solver)
+{
+  setCFSQPparameterInt(solver, "max-iterations");
+  setCFSQPparameterInt(solver, "cfsqp.mode");
+  setCFSQPparameterInt(solver, "cfsqp.iprint");
+  setCFSQPparameterDouble(solver, "cfsqp.bigbnd");
+  setCFSQPparameterDouble(solver, "cfsqp.eps");
+  setCFSQPparameterDouble(solver, "cfsqp.epseqn");
+  setCFSQPparameterDouble(solver, "cfsqp.udelta");
+  setCFSQPparameterDouble(solver, "cfsqp.objeps");
+  setCFSQPparameterDouble(solver, "cfsqp.objrep");
+  setCFSQPparameterDouble(solver, "cfsqp.gLgeps");
+  setCFSQPparameterInt(solver, "cfsqp.nstop");
+}
+
+resultRoboptimCubeStackProblem RoboptimCubeStackProblem::solve(
+    const std::string& solverName)
+{
+  roboptim::SolverFactory<solver_t> solverFactory(solverName, *problem_);
   solver_t& solver = solverFactory();
 
+  nIterations_ = 0;
+  solver.setIterationCallback(
+      [this](const solver_t::problem_t&, solver_t::solverState_t&)
+      {
+        nIterations_++;
+      });
+
+  if (solverName.compare("cfsqp") == 0)
+  {
+    setCFSQPparameters(solver);
+  }
+
+  //std::cout << "solver: " << solver << std::endl;
   /************
    *  Result  *
    ************/
   solver_t::result_t res(solver.minimum());
-  std::cout << "res: " << res << std::endl;
-  Eigen::VectorXd xSol = boost::apply_visitor(solutionVisitor(), res);
+  auto result = boost::apply_visitor(solutionVisitor(), res);
+  if (result.status)
+  {
+    std::cout << "============= " << solverName << " Solution after " << nIterations_
+              << " iterations ================" << std::endl;
+    std::cerr << "============= " << solverName << " Solution after " << nIterations_
+              << " iterations ================" << std::endl;
+  }
+  else
+  {
+    std::cout << "============= " << solverName << "  Failed  after " << nIterations_
+              << " iterations ================" << std::endl;
+    std::cerr << "============= " << solverName << "  Failed  after " << nIterations_
+              << " iterations ================" << std::endl;
+  }
 
-  std::cout << "xSol = \n" << xSol << std::endl;
-  mnf::Point pSol = M.createPoint(xSol);
-  std::cout << "pSol: " << pSol << std::endl;
-  myProb_.fileForMatlab(
-      "/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
-      "stackCubesCFSQP.m",
-      pSol);
+  return result;
+
+  // std::cout << "xSol = \n" << rws.xSol << std::endl;
+  // mnf::Point pSol = pgsProb_.M().createPoint(rws.xSol);
+  // std::cout << "pSol: " << pSol << std::endl;
+  // pgsProb_.fileForMatlab(
+  //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+  //"stackCubesCFSQP.m",
+  // pSol);
 }
 
 RoboptimCubeStackProblem::~RoboptimCubeStackProblem() {}
 
-
-
+void RoboptimCubeStackProblem::name(const std::string& n) { name_ = n; }
 }

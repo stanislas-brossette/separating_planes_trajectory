@@ -164,6 +164,14 @@ ProblemConfig ProblemConfig::operator()(std::string section)
   return std::move(subSection(section));
 }
 
+bool ProblemConfig::has(std::string key)
+{
+  if (prop.find(globalCategory + key) == prop.end())
+    return false;
+  else
+    return true;
+}
+
 ProblemConfig ProblemConfig::loadUserConfig(std::string envVar)
 {
   ProblemConfig config;

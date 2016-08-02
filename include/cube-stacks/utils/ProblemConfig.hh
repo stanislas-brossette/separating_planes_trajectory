@@ -52,6 +52,7 @@ struct ProblemConfig
   const CustomString operator[](std::string key);
   ProblemConfig subSection(std::string section);
   ProblemConfig operator()(std::string section);
+  bool has(std::string key);
   static ProblemConfig loadUserConfig(
       std::string envVar = "PROBLEM_GENERATOR_USER_CONFIG");
 

@@ -10,6 +10,7 @@
 #include <cube-stacks/CubeStackProblemOnManifold.hh>
 #include <cube-stacks/CubeStackProblemOnSO3noS2.hh>
 #include <cube-stacks/CubeStackProblemOnR.hh>
+#include <cube-stacks/RoboptimCubeStackProblem.hh>
 #include <cube-stacks/utils/ProblemConfig.hh>
 
 using namespace cubestacks;
@@ -19,7 +20,8 @@ struct logResult
   logResult(const size_t& nCubes, const size_t& nPlans, const long& dim,
             const long& repDim, const std::string& manifold, const long& nCstr,
             const int& status, const int& iteration, const double& time,
-            const double& obj_star, const Eigen::VectorXd& v0, std::shared_ptr<pgs::TimeLogger> tLog)
+            const double& obj_star, const Eigen::VectorXd& v0,
+            std::shared_ptr<pgs::TimeLogger> tLog)
       : nCubes_(nCubes),
         nPlans_(nPlans),
         dim_(dim),
@@ -31,9 +33,7 @@ struct logResult
         time_(time),
         obj_star_(obj_star),
         v0_(v0),
-        tLog_(tLog)
-  {
-  };
+        tLog_(tLog){};
 
   size_t nCubes_;
   size_t nPlans_;
@@ -60,10 +60,9 @@ struct logResult
     o << iteration_ << ", ";
     o << time_ << ", ";
     o << obj_star_ << "\n";
-    o << v0_.transpose().format(fmt::matlabVector);
+    //o << v0_.transpose().format(fmt::matlabVector);
     return o;
   }
-
 };
 
 inline std::ostream& operator<<(std::ostream& os, const logResult& m)
@@ -74,26 +73,27 @@ inline std::ostream& operator<<(std::ostream& os, const logResult& m)
 std::string printSummary(const std::vector<logResult> res)
 {
   std::stringstream ss;
-  ss << "nCubes, nPlans, dim, repDim, nCstr, status, iteration, time, obj_star, v0" << std::endl;
+  ss << "nCubes, nPlans, dim, repDim, nCstr, status, iteration, time, "
+        "obj_star, v0" << std::endl;
   double averageIter = 0;
   double timePerIter;
   double averageTimePerIter = 0;
   double successRate = 0;
   for (auto s : res)
   {
-    if(s.status_==1)
+    if (s.status_ == 1)
     {
-      successRate ++;
+      successRate++;
       averageIter += s.iteration_;
-      timePerIter = s.time_/s.iteration_;
+      timePerIter = s.time_ / s.iteration_;
       averageTimePerIter += timePerIter;
     }
   }
   successRate = successRate / res.size();
-  averageIter = averageIter/res.size();
-  averageTimePerIter = averageTimePerIter/res.size();
-  averageTimePerIter = averageTimePerIter/CLOCKS_PER_SEC;
-  ss << "successRate: " << 100*successRate << "%" << std::endl;
+  averageIter = averageIter / res.size();
+  averageTimePerIter = averageTimePerIter / res.size();
+  averageTimePerIter = averageTimePerIter / CLOCKS_PER_SEC;
+  ss << "successRate: " << 100 * successRate << "%" << std::endl;
   ss << "averageIter: " << averageIter << std::endl;
   ss << "averageTimePerIter: " << averageTimePerIter << std::endl;
   return ss.str();
@@ -102,7 +102,8 @@ std::string printSummary(const std::vector<logResult> res)
 std::string printRes(const std::vector<logResult>& res)
 {
   std::stringstream ss;
-  ss << "nCubes, nPlans, dim, repDim, nCstr, status, iteration, time, obj_star, v0" << std::endl;
+  ss << "nCubes, nPlans, dim, repDim, nCstr, status, iteration, time, "
+        "obj_star, v0" << std::endl;
   double averageIter = 0;
   double timePerIter;
   double averageTimePerIter = 0;
@@ -110,19 +111,19 @@ std::string printRes(const std::vector<logResult>& res)
   for (size_t i = 0; i < res.size(); i++)
   {
     ss << res[i] << "\n";
-    if(res[i].status_==1)
+    if (res[i].status_ == 1)
     {
-      successRate ++;
+      successRate++;
       averageIter += res[i].iteration_;
-      timePerIter = res[i].time_/res[i].iteration_;
+      timePerIter = res[i].time_ / res[i].iteration_;
       averageTimePerIter += timePerIter;
     }
   }
   successRate = successRate / res.size();
-  averageIter = averageIter/res.size();
-  averageTimePerIter = averageTimePerIter/res.size();
-  averageTimePerIter = averageTimePerIter/CLOCKS_PER_SEC;
-  ss << "successRate: " << 100*successRate << "%" << std::endl;
+  averageIter = averageIter / res.size();
+  averageTimePerIter = averageTimePerIter / res.size();
+  averageTimePerIter = averageTimePerIter / CLOCKS_PER_SEC;
+  ss << "successRate: " << 100 * successRate << "%" << std::endl;
   ss << "averageIter: " << averageIter << std::endl;
   ss << "averageTimePerIter: " << averageTimePerIter << std::endl;
   return ss.str();
@@ -140,22 +141,23 @@ std::string avTimePerIter(const std::vector<pgs::VecTimer>& timer)
   {
     for (auto s : timer)
     {
-      if(s.vec()(i) != 0)
+      if (s.vec()(i) != 0)
       {
         perIter(i) += s.vec()(i);
-        count(i) ++;
+        count(i)++;
       }
     }
   }
   for (long i = 0; i < maxIter; i++)
   {
-    perIter(i) = perIter(i)/count(i);
+    perIter(i) = perIter(i) / count(i);
   }
   ss << perIter.transpose().format(fmt::matlabVector);
   return ss.str();
 }
 
-std::string printAverageTimesPerIter(const std::vector<logResult>& res, const std::string& prefix)
+std::string printAverageTimesPerIter(const std::vector<logResult>& res,
+                                     const std::string& prefix)
 {
   std::vector<pgs::VecTimer> iter, hessian, qp, fp, regularisation,
       regularisationRestoration, problemUpdate;
@@ -175,69 +177,64 @@ std::string printAverageTimesPerIter(const std::vector<logResult>& res, const st
   ss << prefix << "hessianTimePerIter = " << avTimePerIter(hessian) << "\n";
   ss << prefix << "qpTimePerIter = " << avTimePerIter(qp) << "\n";
   ss << prefix << "fpTimePerIter = " << avTimePerIter(fp) << "\n";
-  ss << prefix << "regularisationTimePerIter = " << avTimePerIter(regularisation) << "\n";
-  ss << prefix << "regularisationRestorationTimePerIter = " << avTimePerIter(regularisationRestoration) << "\n";
-  ss << prefix << "problemUpdateTimePerIter = " << avTimePerIter(problemUpdate) << "\n";
+  ss << prefix
+     << "regularisationTimePerIter = " << avTimePerIter(regularisation) << "\n";
+  ss << prefix << "regularisationRestorationTimePerIter = "
+     << avTimePerIter(regularisationRestoration) << "\n";
+  ss << prefix << "problemUpdateTimePerIter = " << avTimePerIter(problemUpdate)
+     << "\n";
   return ss.str();
 }
 
-std::string printTimes(const std::vector<logResult> res, const std::string& prefix)
+std::string printTimes(const std::vector<logResult> res,
+                       const std::string& prefix)
 {
   std::stringstream ss;
   ss << prefix << "initTime = [";
-  for (auto s : res)
-    ss << s.tLog_->initializationTime() << ",";
+  for (auto s : res) ss << s.tLog_->initializationTime() << ",";
   ss << "];\n";
 
   ss << prefix << "totalTime = [";
-  for (auto s : res)
-    ss << s.tLog_->totalTime() << ",";
+  for (auto s : res) ss << s.tLog_->totalTime() << ",";
   ss << "];\n";
 
   ss << prefix << "iter = [";
-  for (auto s : res)
-    ss << s.tLog_->iter << "\n";
+  for (auto s : res) ss << s.tLog_->iter << "\n";
   ss << "];\n";
 
   ss << prefix << "hessian = [";
-  for (auto s : res)
-    ss << s.tLog_->hessian << "\n";
+  for (auto s : res) ss << s.tLog_->hessian << "\n";
   ss << "];\n";
 
   ss << prefix << "qp = [";
-  for (auto s : res)
-    ss << s.tLog_->qp << "\n";
+  for (auto s : res) ss << s.tLog_->qp << "\n";
   ss << "];\n";
 
   ss << prefix << "fp = [";
-  for (auto s : res)
-    ss << s.tLog_->fp << "\n";
+  for (auto s : res) ss << s.tLog_->fp << "\n";
   ss << "];\n";
 
   ss << prefix << "regularisation = [";
-  for (auto s : res)
-    ss << s.tLog_->regularisation << "\n";
+  for (auto s : res) ss << s.tLog_->regularisation << "\n";
   ss << "];\n";
 
   ss << prefix << "regularisationRestoration = [";
-  for (auto s : res)
-    ss << s.tLog_->regularisationRestoration
-       << "\n";
+  for (auto s : res) ss << s.tLog_->regularisationRestoration << "\n";
   ss << "];\n";
 
   ss << prefix << "problemUpdate = [";
-  for (auto s : res)
-    ss << s.tLog_->problemUpdate << "\n";
+  for (auto s : res) ss << s.tLog_->problemUpdate << "\n";
   ss << "];\n";
   return ss.str();
 }
 
-
-logResult solveOnManifold(const mnf::CartesianProduct& M, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName)
+logResult solveOnManifold(const mnf::CartesianProduct& M,
+                          const Eigen::VectorXd& v0, const std::string& ymlPath,
+                          const std::string& pbName)
 {
   CubeStackProblemOnManifold myProb(M, ymlPath);
   myProb.name(pbName);
-  //pgs::utils::finiteDiffCheck(myProb);
+  // pgs::utils::finiteDiffCheck(myProb);
   mnf::Point x0 = myProb.M().createPoint(v0);
   pgs::SolverTrustRegionFilter mySolver;
 
@@ -250,44 +247,51 @@ logResult solveOnManifold(const mnf::CartesianProduct& M, const Eigen::VectorXd&
   auto tf = std::clock();
   auto solveTime = tf - t0;
 
-  //myProb.fileForMatlab(
-      //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
-      //"stackCubesR.m",
-      //res.x_star);
-  logResult out(myProb.nCubes_, myProb.nPlans_, M.dim(), M.representationDim(), M.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  // myProb.fileForMatlab(
+  //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+  //"stackCubesR.m",
+  // res.x_star);
+  logResult out(myProb.nCubes_, myProb.nPlans_, M.dim(), M.representationDim(),
+                M.name(), myProb.totalCstrDim(), res.status, res.iterations,
+                solveTime, res.obj_star, v0, mySolver.getTimeLogger());
   return out;
 }
 
-logResult solveOnSO3noS2(const mnf::CartesianProduct& M, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName)
+logResult solveOnSO3noS2(const mnf::CartesianProduct& M,
+                         const Eigen::VectorXd& v0, const std::string& ymlPath,
+                         const std::string& pbName)
 {
   CubeStackProblemOnSO3noS2 myProb(M, ymlPath);
   myProb.name(pbName);
-  //pgs::utils::finiteDiffCheck(myProb);
+  // pgs::utils::finiteDiffCheck(myProb);
   mnf::Point x0 = myProb.M().createPoint(v0);
   pgs::SolverTrustRegionFilter mySolver;
 
   pgs::utils::loadOptionsFromYaml(mySolver.opt_, ymlPath);
 
   mySolver.init(myProb, x0);
-  
+
   auto t0 = std::clock();
   pgs::Results res = mySolver.solve();
   auto tf = std::clock();
   auto solveTime = tf - t0;
 
-  //myProb.fileForMatlab(
-      //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
-      //"stackCubesSO3noS2.m",
-      //res.x_star);
-  logResult out(myProb.nCubes_, myProb.nPlans_, M.dim(), M.representationDim(), M.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  // myProb.fileForMatlab(
+  //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+  //"stackCubesSO3noS2.m",
+  // res.x_star);
+  logResult out(myProb.nCubes_, myProb.nPlans_, M.dim(), M.representationDim(),
+                M.name(), myProb.totalCstrDim(), res.status, res.iterations,
+                solveTime, res.obj_star, v0, mySolver.getTimeLogger());
   return out;
 }
 
-logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0, const std::string& ymlPath, const std::string& pbName)
+logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0,
+                   const std::string& ymlPath, const std::string& pbName)
 {
   CubeStackProblemOnR myProb(R, ymlPath);
   myProb.name(pbName);
-  //pgs::utils::finiteDiffCheck(myProb);
+  // pgs::utils::finiteDiffCheck(myProb);
   mnf::Point x0 = myProb.M().createPoint(v0);
   pgs::SolverTrustRegionFilter mySolver;
 
@@ -298,38 +302,87 @@ logResult solveOnR(const mnf::CartesianProduct& R, const Eigen::VectorXd& v0, co
   pgs::Results res = mySolver.solve();
   auto tf = std::clock();
   auto solveTime = tf - t0;
-  //myProb.fileForMatlab(
-      //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
-      //"stackCubesM.m",
-      //res.x_star);
-  logResult out(myProb.nCubes_, myProb.nPlans_, R.dim(), R.representationDim(), R.name(), myProb.totalCstrDim(), res.status, res.iterations, solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  // myProb.fileForMatlab(
+  //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+  //"stackCubesM.m",
+  // res.x_star);
+  logResult out(myProb.nCubes_, myProb.nPlans_, R.dim(), R.representationDim(),
+                R.name(), myProb.totalCstrDim(), res.status, res.iterations,
+                solveTime, res.obj_star, v0, mySolver.getTimeLogger());
+  return out;
+}
+
+logResult solveWithCFSQP(const mnf::CartesianProduct& R,
+                         const Eigen::VectorXd& v0, const std::string& ymlPath,
+                         const std::string& pbName)
+{
+  RoboptimCubeStackProblem myProb(R, ymlPath);
+  myProb.name(pbName);
+  // pgs::utils::finiteDiffCheck(myProb);
+  myProb.init(v0);
+  auto t0 = std::clock();
+  auto res = myProb.solve("cfsqp");
+  auto tf = std::clock();
+  auto solveTime = tf - t0;
+  // myProb.fileForMatlab(
+  //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+  //"stackCubesM.m",
+  // res.x_star);
+  std::shared_ptr<pgs::TimeLogger> emptyPtr;
+  logResult out(myProb.pgsProb().nCubes_, myProb.pgsProb().nPlans_, R.dim(),
+                R.representationDim(), R.name(),
+                myProb.pgsProb().totalCstrDim(), res.status,
+                myProb.nIterations_, solveTime, res.obj_star, v0, emptyPtr);
+  return out;
+}
+
+logResult solveWithIPOPT(const mnf::CartesianProduct& R,
+                         const Eigen::VectorXd& v0, const std::string& ymlPath,
+                         const std::string& pbName)
+{
+  RoboptimCubeStackProblem myProb(R, ymlPath);
+  myProb.name(pbName);
+  // pgs::utils::finiteDiffCheck(myProb);
+  myProb.init(v0);
+  auto t0 = std::clock();
+  auto res = myProb.solve("ipopt");
+  auto tf = std::clock();
+  auto solveTime = tf - t0;
+  // myProb.fileForMatlab(
+  //"/media/stanislas/Data/virtual_box/shared_data_windows_7/Matlab/tmp/"
+  //"stackCubesM.m",
+  // res.x_star);
+  std::shared_ptr<pgs::TimeLogger> emptyPtr;
+  logResult out(myProb.pgsProb().nCubes_, myProb.pgsProb().nPlans_, R.dim(),
+                R.representationDim(), R.name(),
+                myProb.pgsProb().totalCstrDim(), res.status,
+                myProb.nIterations_, solveTime, res.obj_star, v0, emptyPtr);
   return out;
 }
 
 std::string currentTime()
 {
   time_t rawtime;
-  struct tm * timeinfo;
+  struct tm* timeinfo;
   char buffer[80];
 
-  time (&rawtime);
+  time(&rawtime);
   timeinfo = localtime(&rawtime);
 
-  strftime(buffer,80,"%Y-%m-%d.%H:%M:%S",timeinfo);
+  strftime(buffer, 80, "%Y-%m-%d.%H:%M:%S", timeinfo);
   std::string str(buffer);
   return str;
 }
 
 int main(void)
 {
-
-  std::cout << "CLOCKS_PER_SEC: " << (double) CLOCKS_PER_SEC << std::endl;
+  std::cout << "CLOCKS_PER_SEC: " << (double)CLOCKS_PER_SEC << std::endl;
   std::ofstream myFile, mySumFile, myTimeFile, myTimePerIterFile;
   std::string testDir = TESTS_DATA_DIR;
   std::string ymlPath = testDir + "/stackCubes.yml";
   ProblemConfig config(ymlPath);
 
-  if(config["timeLog"])
+  if (config["timeLog"])
   {
     std::string baseName("log/" + config["logName"] /* + "_" + currentTime()*/);
     std::string fileName(baseName + ".m");
@@ -341,13 +394,24 @@ int main(void)
     myTimeFile.open(timeFileName);
     myTimePerIterFile.open(timePerIterFileName);
   }
-
-  for (int nCubes = config["minCubes"].asInt(); nCubes <= config["maxCubes"].asInt(); nCubes++)
+  else if (config["logOnlySummary"])
   {
-    std::cerr << "\n\n\n((((------ "<< nCubes << " cubes ------))))" << std::endl;
+    std::string baseName("log/" + config["logName"] /* + "_" + currentTime()*/);
+    std::string summaryFileName(baseName + "_summary.m");
+    mySumFile.open(summaryFileName);
+  }
 
-    mnf::CartesianProduct* Mptr = CubeStackProblemOnManifold::buildManifold(nCubes);
-    mnf::CartesianProduct* MSO3noS2ptr = CubeStackProblemOnSO3noS2::buildManifold(nCubes);
+
+  for (int nCubes = config["minCubes"].asInt();
+       nCubes <= config["maxCubes"].asInt(); nCubes++)
+  {
+    std::cerr << "\n\n\n((((------ " << nCubes << " cubes ------))))"
+              << std::endl;
+
+    mnf::CartesianProduct* Mptr =
+        CubeStackProblemOnManifold::buildManifold(nCubes);
+    mnf::CartesianProduct* MSO3noS2ptr =
+        CubeStackProblemOnSO3noS2::buildManifold(nCubes);
     mnf::CartesianProduct* Rptr = CubeStackProblemOnR::buildManifold(nCubes);
 
     Mptr->display();
@@ -356,24 +420,37 @@ int main(void)
 
     CubeStackProblemOnManifold tmpProb(*Mptr, ymlPath);
 
-    std::vector<logResult> resManifold, resSO3noS2, resRealSpace;
-    for (int i = 0; i < config["numberOfTests"].asInt(); i++) 
+    std::vector<logResult> resManifold, resSO3noS2, resRealSpace, resCFSQP, resIPOPT;
+    for (int i = 0; i < config["numberOfTests"].asInt(); i++)
     {
       std::cerr << "i: " << i << std::endl;
       Eigen::VectorXd v0(Mptr->representationDim());
       v0 = tmpProb.findInitPoint();
+      std::cout << "v0: " << v0.transpose() << std::endl;
 
-      std::string manifoldPbName("BFGS_manifoldPb" + std::to_string(nCubes) + "Cubes" + std::to_string(i));
-      std::string SO3noS2PbName("BFGS_SO3noS2Pb" + std::to_string(nCubes) + "Cubes" + std::to_string(i));
-      std::string RealSpacePbName("BFGS_RealSpacePb" + std::to_string(nCubes) + "Cubes" + std::to_string(i));
-      resManifold.push_back(solveOnManifold(*Mptr, v0, ymlPath, manifoldPbName));
-      resSO3noS2.push_back(solveOnSO3noS2(*MSO3noS2ptr, v0, ymlPath, SO3noS2PbName));
+      std::string manifoldPbName("BFGS_manifoldPb" + std::to_string(nCubes) +
+                                 "Cubes" + std::to_string(i));
+      std::string SO3noS2PbName("BFGS_SO3noS2Pb" + std::to_string(nCubes) +
+                                "Cubes" + std::to_string(i));
+      std::string RealSpacePbName("BFGS_RealSpacePb" + std::to_string(nCubes) +
+                                  "Cubes" + std::to_string(i));
+      std::string CFSQPPbName("CFSQP_RealSpacePb" + std::to_string(nCubes) +
+                              "Cubes" + std::to_string(i));
+      std::string IPOPTPbName("IPOPT_RealSpacePb" + std::to_string(nCubes) +
+                              "Cubes" + std::to_string(i));
+      resManifold.push_back(
+          solveOnManifold(*Mptr, v0, ymlPath, manifoldPbName));
+      resSO3noS2.push_back(
+          solveOnSO3noS2(*MSO3noS2ptr, v0, ymlPath, SO3noS2PbName));
       resRealSpace.push_back(solveOnR(*Rptr, v0, ymlPath, RealSpacePbName));
+      resCFSQP.push_back(solveWithCFSQP(*Rptr, v0, ymlPath, CFSQPPbName));
+      //resIPOPT.push_back(solveWithIPOPT(*Rptr, v0, ymlPath, IPOPTPbName));
     }
-    
-    if(config["timeLog"])
+
+    if (config["timeLog"])
     {
-      myFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
+      myFile << "%=============== " << nCubes
+             << " cubes ==============" << std::endl;
       myFile << "%" << Mptr->name() << std::endl;
       myFile << "%" << MSO3noS2ptr->name() << std::endl;
       myFile << "%" << Rptr->name() << std::endl;
@@ -381,33 +458,70 @@ int main(void)
       myFile << "%resSO3noS2:\n" << printRes(resSO3noS2) << std::endl;
       myFile << "%resRealSpace:\n" << printRes(resRealSpace) << std::endl;
 
-      mySumFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
+      mySumFile << "%=============== " << nCubes
+                << " cubes ==============" << std::endl;
       mySumFile << "%resManifold:\n" << printSummary(resManifold) << std::endl;
       mySumFile << "%resSO3noS2:\n" << printSummary(resSO3noS2) << std::endl;
-      mySumFile << "%resRealSpace:\n" << printSummary(resRealSpace) << std::endl;
+      mySumFile << "%resRealSpace:\n" << printSummary(resRealSpace)
+                << std::endl;
 
-      myTimeFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
+      myTimeFile << "%=============== " << nCubes
+                 << " cubes ==============" << std::endl;
       myTimeFile << "%" << Mptr->name() << std::endl;
       myTimeFile << "%" << MSO3noS2ptr->name() << std::endl;
       myTimeFile << "%" << Rptr->name() << std::endl;
-      myTimeFile << "%resManifold:\n" << printTimes(resManifold, "manifold_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimeFile << "%resSO3noS2:\n" << printTimes(resSO3noS2, "SO3noS2_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimeFile << "%resRealSpace:\n" << printTimes(resRealSpace, "RealSpace_" + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimeFile << "%resManifold:\n"
+                 << printTimes(resManifold,
+                               "manifold_" + std::to_string(nCubes) + "cubes.")
+                 << std::endl;
+      myTimeFile << "%resSO3noS2:\n"
+                 << printTimes(resSO3noS2, "SO3noS2_" + std::to_string(nCubes) +
+                                               "cubes.") << std::endl;
+      myTimeFile << "%resRealSpace:\n"
+                 << printTimes(resRealSpace,
+                               "RealSpace_" + std::to_string(nCubes) + "cubes.")
+                 << std::endl;
 
-      myTimePerIterFile << "%=============== " << nCubes << " cubes ==============" << std::endl;
-      myTimePerIterFile << "%resManifold:\n" << printAverageTimesPerIter(resManifold, "manifold_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimePerIterFile << "%resSO3noS2:\n" << printAverageTimesPerIter(resSO3noS2, "SO3noS2_" + std::to_string(nCubes) + "cubes.") << std::endl;
-      myTimePerIterFile << "%resRealSpace:\n" << printAverageTimesPerIter(resRealSpace, "RealSpace_" + std::to_string(nCubes) + "cubes.") << std::endl;
+      myTimePerIterFile << "%=============== " << nCubes
+                        << " cubes ==============" << std::endl;
+      myTimePerIterFile << "%resManifold:\n"
+                        << printAverageTimesPerIter(
+                               resManifold,
+                               "manifold_" + std::to_string(nCubes) + "cubes.")
+                        << std::endl;
+      myTimePerIterFile << "%resSO3noS2:\n"
+                        << printAverageTimesPerIter(
+                               resSO3noS2, "SO3noS2_" + std::to_string(nCubes) +
+                                               "cubes.") << std::endl;
+      myTimePerIterFile << "%resRealSpace:\n"
+                        << printAverageTimesPerIter(
+                               resRealSpace,
+                               "RealSpace_" + std::to_string(nCubes) + "cubes.")
+                        << std::endl;
+    }
+    else if (config["logOnlySummary"])
+    {
+      mySumFile << "%=============== " << nCubes
+                << " cubes ==============" << std::endl;
+      mySumFile << "%resManifold:\n" << printSummary(resManifold) << std::endl;
+      mySumFile << "%resSO3noS2:\n" << printSummary(resSO3noS2) << std::endl;
+      mySumFile << "%resRealSpace:\n" << printSummary(resRealSpace)
+                << std::endl;
+      mySumFile << "%resCFSQP:\n" << printSummary(resCFSQP) << std::endl;
+      //mySumFile << "%resIPOPT:\n" << printSummary(resIPOPT) << std::endl;
     }
     else
     {
-      std::cout << "=============== " << nCubes << " cubes ==============" << std::endl;
+      std::cout << "=============== " << nCubes
+                << " cubes ==============" << std::endl;
       std::cout << Mptr->name() << std::endl;
       std::cout << MSO3noS2ptr->name() << std::endl;
       std::cout << Rptr->name() << std::endl;
       std::cout << "resManifold:\n" << printRes(resManifold) << std::endl;
       std::cout << "resSO3noS2:\n" << printRes(resSO3noS2) << std::endl;
       std::cout << "resRealSpace:\n" << printRes(resRealSpace) << std::endl;
+      std::cout << "resCFSQP:\n" << printRes(resCFSQP) << std::endl;
+      //std::cout << "resIPOPT:\n" << printRes(resIPOPT) << std::endl;
     }
   }
 

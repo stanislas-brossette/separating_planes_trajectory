@@ -30,6 +30,27 @@ class CubeAbovePlan
                   const Eigen::Ref<const Eigen::Vector3d> trans,
                   const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
                   const Eigen::Ref<const Eigen::Vector3d> normal) const;
+
+  void diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+                 const Eigen::Ref<const Eigen::Vector3d> trans,
+                 const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+                 const Eigen::Ref<const Eigen::Vector3d> normal,
+                 const long& index) const;
+  void diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
+                const Eigen::Ref<const Eigen::Vector3d> trans,
+                const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+                const Eigen::Ref<const Eigen::Vector3d> normal,
+                const long& index) const;
+  void diffD(Eigen::Ref<Eigen::Matrix<double, 1, 1>> res,
+             const Eigen::Ref<const Eigen::Vector3d> trans,
+             const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+             const Eigen::Ref<const Eigen::Vector3d> normal,
+             const long& index) const;
+  void diffNormal(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+                  const Eigen::Ref<const Eigen::Vector3d> trans,
+                  const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+                  const Eigen::Ref<const Eigen::Vector3d> normal,
+                  const long& index) const;
   void LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   void UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   const Cube& cube() const{return cube_;};

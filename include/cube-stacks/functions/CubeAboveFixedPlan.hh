@@ -25,6 +25,15 @@ class CubeAboveFixedPlan : public CubeAbovePlan
                 const Eigen::Ref<const Eigen::Vector3d> trans,
                 const Eigen::Ref<const Eigen::Vector4d> quat) const;
 
+  void diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+                 const Eigen::Ref<const Eigen::Vector3d> trans,
+                 const Eigen::Ref<const Eigen::Vector4d> quat,
+                 const long& index) const;
+  void diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
+                const Eigen::Ref<const Eigen::Vector3d> trans,
+                const Eigen::Ref<const Eigen::Vector4d> quat,
+                const long& index) const;
+
  private:
   Eigen::Vector3d normal_;
   double d_;

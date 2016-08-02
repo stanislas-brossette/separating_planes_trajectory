@@ -101,6 +101,7 @@ CubeStackProblemOnManifold::CubeStackProblemOnManifold(
 Eigen::VectorXd CubeStackProblemOnManifold::findInitPoint()
 {
   Point xRand = M().createRandomPoint();
+  std::cout << "xRand: " << xRand << std::endl;
   Eigen::Vector3d interCubes;
   for (size_t i = 0; i < nCubes_; ++i)
   {
@@ -117,6 +118,7 @@ Eigen::VectorXd CubeStackProblemOnManifold::findInitPoint()
     xRand(1)(i)[1] = interCubes;
     xRand(1)(i)[0][0] = interCubes.dot((cubeAbovePos + cubeBelowPos) / 2);
   }
+  std::cout << "xRand.value().transpose(): " << xRand.value().transpose() << std::endl;
   return xRand.value();
 }
 
