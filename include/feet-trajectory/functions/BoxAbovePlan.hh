@@ -1,15 +1,16 @@
 #pragma once
 #include <iostream>
 #include <Eigen/Core>
-#include <cube-stacks/utils/Cube.hh>
+#include <feet-trajectory/utils/Box.hh>
 
-namespace cubestacks
+
+namespace feettrajectory
 {
-class PointCloudAbovePlan
+class BoxAbovePlan
 {
  public:
-  PointCloudAbovePlan(const Cube& c);
-  virtual ~PointCloudAbovePlan();
+  BoxAbovePlan(const Box& c);
+  virtual ~BoxAbovePlan();
   void compute(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
                const Eigen::Ref<const Eigen::Vector3d> trans,
                const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
@@ -30,14 +31,34 @@ class PointCloudAbovePlan
                   const Eigen::Ref<const Eigen::Vector3d> trans,
                   const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
                   const Eigen::Ref<const Eigen::Vector3d> normal) const;
+
+  void diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+                 const Eigen::Ref<const Eigen::Vector3d> trans,
+                 const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+                 const Eigen::Ref<const Eigen::Vector3d> normal,
+                 const long& index) const;
+  void diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
+                const Eigen::Ref<const Eigen::Vector3d> trans,
+                const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+                const Eigen::Ref<const Eigen::Vector3d> normal,
+                const long& index) const;
+  void diffD(Eigen::Ref<Eigen::Matrix<double, 1, 1>> res,
+             const Eigen::Ref<const Eigen::Vector3d> trans,
+             const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+             const Eigen::Ref<const Eigen::Vector3d> normal,
+             const long& index) const;
+  void diffNormal(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+                  const Eigen::Ref<const Eigen::Vector3d> trans,
+                  const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
+                  const Eigen::Ref<const Eigen::Vector3d> normal,
+                  const long& index) const;
   void LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   void UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
-  const Cube& cube() const{return cube_;};
+  const Box& box() const{return box_;};
 
  private:
-  Cube cube_;
+  Box box_;
 };
-} /* cubestacks */
 
 //cstr = nx*(tx - vx*(2*qy^2 + 2*qz^2 - 1) - vy*(2*qw*qz - 2*qx*qy) + vz*(2*qw*qy + 2*qx*qz)) - d + ny*(ty - vy*(2*qx^2 + 2*qz^2 - 1) + vx*(2*qw*qz + 2*qx*qy) - vz*(2*qw*qx - 2*qy*qz)) + nz*(tz - vz*(2*qx^2 + 2*qy^2 - 1) - vx*(2*qw*qy - 2*qx*qz) + vy*(2*qw*qx + 2*qy*qz))
 //diff(cstr, tx) = nx
@@ -51,3 +72,5 @@ class PointCloudAbovePlan
 //diff(cstr, ny) = ty - vy*(2*qx^2 + 2*qz^2 - 1) + vx*(2*qw*qz + 2*qx*qy) - vz*(2*qw*qx - 2*qy*qz)
 //diff(cstr, nz) = tz - vz*(2*qx^2 + 2*qy^2 - 1) - vx*(2*qw*qy - 2*qx*qz) + vy*(2*qw*qx + 2*qy*qz)
 //diff(cstr, d)  = -1
+  
+} /* feettrajectory */ 

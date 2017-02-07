@@ -4,27 +4,31 @@
 #include <Eigen/Core>
 
 #include <manifolds/defs.h>
-#include <pgsolver/solver/Problem.h>
 #include <manifolds/RealSpace.h>
+#include <manifolds/S2.h>
+#include <manifolds/SO3.h>
+#include <manifolds/ExpMapMatrix.h>
+#include <manifolds/ExpMapQuaternion.h>
 #include <manifolds/CartesianProduct.h>
 
+#include <pgsolver/solver/Problem.h>
 #include <pgsolver/utils/defs.h>
 
-#include <cube-stacks/utils/Cube.hh>
-#include <cube-stacks/utils/Plan.hh>
-#include <cube-stacks/utils/ProblemConfig.hh>
-#include <cube-stacks/functions/CubeAbovePlan.hh>
-#include <cube-stacks/functions/CubeAboveFixedPlan.hh>
+#include <feet-trajectory/utils/Box.hh>
+#include <feet-trajectory/utils/Plan.hh>
+#include <feet-trajectory/utils/ProblemConfig.hh>
+#include <feet-trajectory/functions/BoxAbovePlan.hh>
 
-namespace cubestacks
+namespace feettrajectory
 {
-
-class CubeStackProblemOnSO3noS2: public pgs::Problem
+class BoxTrajProblemOnManifold : public pgs::Problem
 {
  public:
-  CubeStackProblemOnSO3noS2(const mnf::Manifold& M, const std::string& configPath);
+  BoxTrajProblemOnManifold(const mnf::Manifold& M, const std::string& configPath);
+  virtual ~BoxTrajProblemOnManifold();
 
-  static mnf::CartesianProduct* buildManifold(Index nCubes);
+  static mnf::CartesianProduct* buildManifold(const Index& nBoxes,
+                                              const Index& nObstacles);
   Eigen::VectorXd findInitPoint();
 
   void getTangentLB(RefVec out) const;
@@ -47,31 +51,32 @@ class CubeStackProblemOnSO3noS2: public pgs::Problem
   Index linCstrDim(size_t i) const;
   Index nonLinCstrDim(size_t i) const;
 
-  void fileForMatlab(std::string fileName, const mnf::Point& x) const;
+  //void fileForMatlab(std::string fileName, const mnf::Point& x) const;
 
   std::string getCstrName(const size_t i) const;
 
  public:
-  size_t nCubes_;
+  size_t nBoxes_;
   size_t nPlans_;
-  size_t iMaxCstrFixPlan_;
-  size_t iMaxCstrS2Plan_;
-  size_t iMaxCstrVecNorm1_;
+  size_t nObstacles_;
 
  private:
-  std::vector<Cube> cubes_;
+  std::vector<Box> boxes_;
+  std::vector<Box> obstacles_;
   std::vector<Plan> plans_;
-  std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
-  std::vector<CubeAbovePlan> cubeAbovePlanFcts_;
+  //std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
+  std::vector<BoxAbovePlan> boxAbovePlanFcts_;
+  std::vector<BoxAbovePlan> obstacleAbovePlanFcts_;
   std::vector<std::string> cstrNames_;
-  double distZPlus_, distXPlus_, distXMinus_, distYPlus_, distYMinus_;
-  Eigen::Vector3d normalZPlus_, normalXPlus_, normalXMinus_, normalYPlus_,
-      normalYMinus_;
   ProblemConfig config_;
+  
+  Eigen::Vector3d initPos_;
+  Eigen::Vector3d finalPos_;
 
   // buffers
   mutable Eigen::MatrixXd outRepObjDiff_;
   //mutable Eigen::MatrixXd outRepLinCstrDiff_;
   mutable Eigen::MatrixXd outRep_;
 };
-}
+  
+} /* feettrajectory */ 

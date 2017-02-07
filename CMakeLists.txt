@@ -5,9 +5,9 @@ INCLUDE(cmake/boost.cmake)
 INCLUDE(cmake/cpack.cmake)
 INCLUDE(cmake/eigen.cmake)
 
-SET(PROJECT_NAME cube-stacks)
-SET(PROJECT_DESCRIPTION "Compare resolution of cube stack problems with different optimization approaches")
-SET(PROJECT_URL "git@gite.lirmm.fr:brossette/cube-stacks.git")
+SET(PROJECT_NAME feet-trajectory)
+SET(PROJECT_DESCRIPTION "Computes feet trajectory")
+SET(PROJECT_URL "git@gite.lirmm.fr:brossette/feet-stacks.git")
 SET(PROJECT_DEBUG_POSTFIX "_d")
 
 SET(CXX_DISABLE_WERROR 1)
@@ -35,7 +35,7 @@ ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
 
 # Add dependency towards the library in the pkg-config file.
-PKG_CONFIG_APPEND_LIBS(cube-stacks)
+PKG_CONFIG_APPEND_LIBS(feet-trajectory)
 
 SETUP_PROJECT_FINALIZE()
 #SETUP_PROJECT_CPACK()

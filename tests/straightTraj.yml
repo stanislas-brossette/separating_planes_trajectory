@@ -28,50 +28,35 @@ FP:
   feasTol: 1e-6
 
 max-iterations: 1000
-cfsqp:
-  mode: 100
-  iprint: 0
-  eps: 1e-6
-  epseqn: 1e-6
 
-#log: false
+#cfsqp
+cfsqp:
+  mode: 110
+  iprint: 1
+  eps: 1e-4
+  epseqn: 1e-4
+
+#logs
+log: false
 timeLog: false
 logOnlySummary: true
-logName: "RegVal1Eminus8BFGS"
+logName: "straightTraj"
 
-nCubes: 4
+#Boxes
+nBoxes: 3
+BoxSize: [0.2, 0.1, 0.05]
 
-minCubes: 2
-maxCubes: 2
-numberOfTests: 10
+#Obstacles
+nObstacles: 1
+ObstacleSizes: [0.2, 0.2, 1.0]
+ObstaclePositions: [0.5, 0.5, 0.5]
 
-#nCubes: 2
-lCubes: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-
+#ground
 normalZPlus: [0, 0, 1]
-normalXMinus: [-1, 0, 0]
-normalXPlus: [1, 0, 0]
-normalYMinus: [0, -1, 0]
-normalYPlus: [0, 1, 0]
-
 distZPlus: 0
-distXMinus: -1.1
-distXPlus: -1.1
-distYMinus: -1.1
-distYPlus: -1.1
 
-init:
-  cube0:
-    trans: [1.1,0,0.5]
-    quat: [0,0,0,1]
-  cube1:
-    trans: [-1.1,0,0.5]
-    quat: [0,0,0,1]
-  cube2:
-    trans: [3,-2,1]
-    quat: [1,2,3,4]
-  plan0:
-    d: 0.0
-    normal: [1,0,0]
+#initial and final positions
+initPos: [0, 0, 0]
+finalPos: [1, 1, 1]
 
 

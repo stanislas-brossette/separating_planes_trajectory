@@ -11,7 +11,7 @@
 
 #include <Eigen/Core>
 
-namespace cubestacks
+namespace feettrajectory
 {
 struct ProblemConfig
 {
@@ -60,4 +60,4 @@ struct ProblemConfig
   std::string globalCategory;
 };
 
-}  // end of namespace cubestacks
+}  // end of namespace feettrajectory

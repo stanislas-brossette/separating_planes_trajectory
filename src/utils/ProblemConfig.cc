@@ -1,6 +1,6 @@
-#include <cube-stacks/utils/ProblemConfig.hh>
+#include <feet-trajectory/utils/ProblemConfig.hh>
 
-namespace cubestacks
+namespace feettrajectory
 {
 ProblemConfig::CustomString::CustomString() {}
 ProblemConfig::CustomString::CustomString(const CustomString& cS)

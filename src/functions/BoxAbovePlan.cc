@@ -1,23 +1,23 @@
-#include <cube-stacks/functions/CubeAbovePlan.hh>
-#include <cube-stacks/utils/quat2mat.hh>
+#include <feet-trajectory/functions/BoxAbovePlan.hh>
+#include <feet-trajectory/utils/quat2mat.hh>
 
-namespace cubestacks
+namespace feettrajectory
 {
-CubeAbovePlan::CubeAbovePlan(const Cube& c) : cube_(c) {}
+BoxAbovePlan::BoxAbovePlan(const Box& c) : box_(c) {}
 
-CubeAbovePlan::~CubeAbovePlan() {}
+BoxAbovePlan::~BoxAbovePlan() {}
 
-void CubeAbovePlan::compute(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
+void BoxAbovePlan::compute(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
                             const Eigen::Ref<const Eigen::Vector3d> t,
                             const Eigen::Ref<const Eigen::Vector4d> q,
                             const double& d,
                             const Eigen::Ref<const Eigen::Vector3d> n) const
 {
   for (size_t i = 0; i < 8; i++)
-    res[static_cast<long>(i)] = (t + quat2mat(q) * cube_.vertex(i)).dot(n) - d;
+    res[static_cast<long>(i)] = (t + quat2mat(q) * box_.vertex(i)).dot(n) - d;
 }
 
-void CubeAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
+void BoxAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
                               const Eigen::Ref<const Eigen::Vector3d>,
                               const Eigen::Ref<const Eigen::Vector4d>,
                               const double&,
@@ -30,7 +30,7 @@ void CubeAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
     res(i, 2) = n.z();
   }
 }
-void CubeAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+void BoxAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
                               const Eigen::Ref<const Eigen::Vector3d>,
                               const Eigen::Ref<const Eigen::Vector4d>,
                               const double&,
@@ -42,7 +42,7 @@ void CubeAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
   res(0, 2) = n.z();
 }
 
-void CubeAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
+void BoxAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
                              const Eigen::Ref<const Eigen::Vector3d>,
                              const Eigen::Ref<const Eigen::Vector4d> q,
                              const double&,
@@ -50,7 +50,7 @@ void CubeAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
 {
   for (long i = 0; i < 8; i++)
   {
-    Eigen::Vector3d v = cube_.vertex(i);
+    Eigen::Vector3d v = box_.vertex(i);
     res(i, 0) =
         n.z() * (2 * q.w() * v.y() - 4 * q.x() * v.z() + 2 * q.z() * v.x()) -
         n.y() * (2 * q.w() * v.z() + 4 * q.x() * v.y() - 2 * q.y() * v.x()) +
@@ -68,14 +68,14 @@ void CubeAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
                 n.x() * (2 * q.y() * v.z() - 2 * q.z() * v.y());
   }
 }
-void CubeAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
+void BoxAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
                              const Eigen::Ref<const Eigen::Vector3d>,
                              const Eigen::Ref<const Eigen::Vector4d> q,
                              const double&,
                              const Eigen::Ref<const Eigen::Vector3d> n,
                              const long& i) const
 {
-  Eigen::Vector3d v = cube_.vertex(i);
+  Eigen::Vector3d v = box_.vertex(i);
   res(0, 0) =
       n.z() * (2 * q.w() * v.y() - 4 * q.x() * v.z() + 2 * q.z() * v.x()) -
       n.y() * (2 * q.w() * v.z() + 4 * q.x() * v.y() - 2 * q.y() * v.x()) +
@@ -93,7 +93,7 @@ void CubeAbovePlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
               n.x() * (2 * q.y() * v.z() - 2 * q.z() * v.y());
 }
 
-void CubeAbovePlan::diffD(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
+void BoxAbovePlan::diffD(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
                           const Eigen::Ref<const Eigen::Vector3d>,
                           const Eigen::Ref<const Eigen::Vector4d>,
                           const double&,
@@ -104,7 +104,7 @@ void CubeAbovePlan::diffD(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
     res(i, 0) = -1;
   }
 }
-void CubeAbovePlan::diffD(Eigen::Ref<Eigen::Matrix<double, 1, 1>> res,
+void BoxAbovePlan::diffD(Eigen::Ref<Eigen::Matrix<double, 1, 1>> res,
                           const Eigen::Ref<const Eigen::Vector3d>,
                           const Eigen::Ref<const Eigen::Vector4d>,
                           const double&,
@@ -114,7 +114,7 @@ void CubeAbovePlan::diffD(Eigen::Ref<Eigen::Matrix<double, 1, 1>> res,
   res(0, 0) = -1;
 }
 
-void CubeAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
+void BoxAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
                                const Eigen::Ref<const Eigen::Vector3d> t,
                                const Eigen::Ref<const Eigen::Vector4d> q,
                                const double&,
@@ -122,7 +122,7 @@ void CubeAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
 {
   for (long i = 0; i < 8; i++)
   {
-    Eigen::Vector3d v = cube_.vertex(i);
+    Eigen::Vector3d v = box_.vertex(i);
     res(i, 0) = t.x() - v.x() * (2 * q.y() * q.y() + 2 * q.z() * q.z() - 1) -
                 v.y() * (2 * q.w() * q.z() - 2 * q.x() * q.y()) +
                 v.z() * (2 * q.w() * q.y() + 2 * q.x() * q.z());
@@ -135,34 +135,35 @@ void CubeAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
   }
 }
 
-void CubeAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+void BoxAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
                                const Eigen::Ref<const Eigen::Vector3d> t,
                                const Eigen::Ref<const Eigen::Vector4d> q,
                                const double&,
                                const Eigen::Ref<const Eigen::Vector3d>,
                                const long& i) const
 {
-    Eigen::Vector3d v = cube_.vertex(i);
-    res(0, 0) = t.x() - v.x() * (2 * q.y() * q.y() + 2 * q.z() * q.z() - 1) -
-                v.y() * (2 * q.w() * q.z() - 2 * q.x() * q.y()) +
-                v.z() * (2 * q.w() * q.y() + 2 * q.x() * q.z());
-    res(0, 1) = t.y() - v.y() * (2 * q.x() * q.x() + 2 * q.z() * q.z() - 1) +
-                v.x() * (2 * q.w() * q.z() + 2 * q.x() * q.y()) -
-                v.z() * (2 * q.w() * q.x() - 2 * q.y() * q.z());
-    res(0, 2) = t.z() - v.z() * (2 * q.x() * q.x() + 2 * q.y() * q.y() - 1) -
-                v.x() * (2 * q.w() * q.y() - 2 * q.x() * q.z()) +
-                v.y() * (2 * q.w() * q.x() + 2 * q.y() * q.z());
+  Eigen::Vector3d v = box_.vertex(i);
+  res(0, 0) = t.x() - v.x() * (2 * q.y() * q.y() + 2 * q.z() * q.z() - 1) -
+              v.y() * (2 * q.w() * q.z() - 2 * q.x() * q.y()) +
+              v.z() * (2 * q.w() * q.y() + 2 * q.x() * q.z());
+  res(0, 1) = t.y() - v.y() * (2 * q.x() * q.x() + 2 * q.z() * q.z() - 1) +
+              v.x() * (2 * q.w() * q.z() + 2 * q.x() * q.y()) -
+              v.z() * (2 * q.w() * q.x() - 2 * q.y() * q.z());
+  res(0, 2) = t.z() - v.z() * (2 * q.x() * q.x() + 2 * q.y() * q.y() - 1) -
+              v.x() * (2 * q.w() * q.y() - 2 * q.x() * q.z()) +
+              v.y() * (2 * q.w() * q.x() + 2 * q.y() * q.z());
 }
 
-void CubeAbovePlan::LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const
+void BoxAbovePlan::LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const
 {
+  for (long i = 0; i < 8; i++)
   res << 0, 0, 0, 0, 0, 0, 0, 0;
 }
 
-void CubeAbovePlan::UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const
+void BoxAbovePlan::UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const
 {
   double inf = std::numeric_limits<double>::infinity();
   res << inf, inf, inf, inf, inf, inf, inf, inf;
 }
 
-} /* cubestacks */
+} /* feettrajectory */

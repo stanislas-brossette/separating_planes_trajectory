@@ -1,6 +1,6 @@
-#include <cube-stacks/utils/quat2mat.hh>
+#include <feet-trajectory/utils/quat2mat.hh>
 
-namespace cubestacks
+namespace feettrajectory
 {
 Eigen::Matrix3d quat2mat(const double& qx, const double& qy, const double& qz,
                          const double& qw)
@@ -17,4 +17,4 @@ Eigen::Matrix3d quat2mat(const Eigen::Ref<const Eigen::Vector4d> q)
 {
   return quat2mat(q[0], q[1], q[2], q[3]);
 }
-} /* cubestacks */
+} /* feettrajectory */
