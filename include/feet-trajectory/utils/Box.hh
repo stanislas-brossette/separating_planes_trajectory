@@ -57,6 +57,7 @@ class Box
   const double& cz() const { return center_[2]; };
   const int& index() const { return index_; };
   const Eigen::Vector3d& center() const { return center_; }
+  const Eigen::Vector3d& size() const { return size_; }
 
  private:
   std::vector<Eigen::Vector3d> vertex_;

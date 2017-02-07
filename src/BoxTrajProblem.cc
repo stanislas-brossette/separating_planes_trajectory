@@ -33,13 +33,13 @@ BoxTrajProblemOnManifold::BoxTrajProblemOnManifold(
   nObstacles_ = static_cast<size_t>(config_["nObstacles"].asInt());
   nPlans_ = nBoxes_ * nObstacles_;
 
-  Eigen::Vector3d BoxSize = config_["BoxSize"].asVector3d();
+  boxSize_ = config_["BoxSize"].asVector3d();
   initPos_ = config_["initPos"].asVector3d();
   finalPos_ = config_["finalPos"].asVector3d();
 
   for (int i = 0; i < static_cast<int>(nBoxes_); ++i)
   {
-    Box b(i, BoxSize);
+    Box b(i, boxSize_);
     boxes_.push_back(b);
     boxAbovePlanFcts_.push_back(BoxAbovePlan(b));
   }
@@ -56,7 +56,7 @@ BoxTrajProblemOnManifold::BoxTrajProblemOnManifold(
   {
     for (size_t j = 0; j < nObstacles_; ++j)
     {
-      plans_.push_back(Plan(i, j));
+      plans_.push_back(Plan(j, i));
     }
   }
 
@@ -158,21 +158,21 @@ void BoxTrajProblemOnManifold::getTangentUB(RefVec out) const
 void BoxTrajProblemOnManifold::evalObj(double& out) const
 {
   out = 0;
-  //distance between first mobile box and initial position
+  // distance between first mobile box and initial position
   Eigen::Vector3d pos = initPos_;
   Eigen::Vector3d posNext = phi_x_z()(0)(0)[0];
   Eigen::Vector3d dist = posNext - pos;
   out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
   for (size_t i = 0; i < nBoxes_ - 1; ++i)
   {
-    //distance between successive mobile boxes
+    // distance between successive mobile boxes
     pos = phi_x_z()(0)(i)[0];
     posNext = phi_x_z()(0)(i + 1)[0];
     dist = posNext - pos;
     out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
   }
-  //distance between last mobile box and final position
-  pos = phi_x_z()(0)(nBoxes_-1)[0];
+  // distance between last mobile box and final position
+  pos = phi_x_z()(0)(nBoxes_ - 1)[0];
   posNext = finalPos_;
   dist = posNext - pos;
   out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
@@ -199,7 +199,7 @@ void BoxTrajProblemOnManifold::evalObjDiff(RefMat out) const
     outRepObjDiff_.block(0, (i + 1) * boxRepDim, 1, boxRepDim) +=
         2 * dist.transpose();
   }
-  pos = phi_x_z()(0)(nBoxes_-1)[0];
+  pos = phi_x_z()(0)(nBoxes_ - 1)[0];
   posNext = finalPos_;
   dist = posNext - pos;
   outRepObjDiff_.block(0, (nBoxes_ - 1) * boxRepDim, 1, boxRepDim) +=
@@ -207,36 +207,36 @@ void BoxTrajProblemOnManifold::evalObjDiff(RefMat out) const
   M().applyDiffRetractation(out, outRepObjDiff_, x().value());
 }
 
-void BoxTrajProblemOnManifold::evalLinCstr(RefVec , size_t ) const
+void BoxTrajProblemOnManifold::evalLinCstr(RefVec, size_t) const
 {
-  //if (i == 0)  // Initial point constraint
-    //out << phi_x_z()(0)(0)[0];
-  //else if (i == 1)  // Final point constraint
-    //out << phi_x_z()(0)(static_cast<Index>(nBoxes_) - 1)[0];
+  // if (i == 0)  // Initial point constraint
+  // out << phi_x_z()(0)(0)[0];
+  // else if (i == 1)  // Final point constraint
+  // out << phi_x_z()(0)(static_cast<Index>(nBoxes_) - 1)[0];
 }
 
-void BoxTrajProblemOnManifold::evalLinCstrDiff(RefMat , size_t ) const
+void BoxTrajProblemOnManifold::evalLinCstrDiff(RefMat, size_t) const
 {
-  //if (i == 0)  // Initial point constraint
-    //out.block(0, 0, 3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1;
-  //else if (i == 1)  // Final point constraint
-    //out.block(0, 3 * (nBoxes_ - 1), 3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+  // if (i == 0)  // Initial point constraint
+  // out.block(0, 0, 3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+  // else if (i == 1)  // Final point constraint
+  // out.block(0, 3 * (nBoxes_ - 1), 3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1;
 }
 
-void BoxTrajProblemOnManifold::getLinCstrLB(RefVec , size_t ) const
+void BoxTrajProblemOnManifold::getLinCstrLB(RefVec, size_t) const
 {
-  //if (i == 0)  // Initial point constraint
-    //out << initPos_;
-  //else if (i == 1)  // Final point constraint
-    //out << finalPos_;
+  // if (i == 0)  // Initial point constraint
+  // out << initPos_;
+  // else if (i == 1)  // Final point constraint
+  // out << finalPos_;
 }
 
-void BoxTrajProblemOnManifold::getLinCstrUB(RefVec , size_t ) const
+void BoxTrajProblemOnManifold::getLinCstrUB(RefVec, size_t) const
 {
-  //if (i == 0)  // Initial point constraint
-    //out << initPos_;
-  //else if (i == 1)  // Final point constraint
-    //out << finalPos_;
+  // if (i == 0)  // Initial point constraint
+  // out << initPos_;
+  // else if (i == 1)  // Final point constraint
+  // out << finalPos_;
 }
 
 void BoxTrajProblemOnManifold::evalNonLinCstr(RefVec out, size_t i) const
@@ -245,25 +245,27 @@ void BoxTrajProblemOnManifold::evalNonLinCstr(RefVec out, size_t i) const
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
   out.setZero();
 
-  //if (i < 2)
+  // if (i < 2)
   //{
-    //// nothing to do
+  //// nothing to do
   //}
-  //else
+  // else
   //{
-    auto iPlan = i;
-    auto iBoxAbove = plans_[iPlan].boxAbove();
-    auto iBoxBelow = plans_[iPlan].boxBelow();
-    Eigen::Vector3d transAbove = phi_x_z()(0)(iBoxAbove)[0];
-    Eigen::Vector4d quatAbove(1, 0, 0, 0);
-    Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
-    Eigen::Vector4d quatBelow(1, 0, 0, 0);
-    Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
-    double d = phi_x_z()(1)(iPlan)[0](0);
-    boxAbovePlanFcts_[iBoxAbove].compute(out.head(8), transAbove, quatAbove, d,
-                                         normal);
-    boxAbovePlanFcts_[iBoxBelow].compute(out.tail(8), transBelow, quatBelow, -d,
-                                         -normal);
+  auto iPlan = i;
+  auto iBoxAbove = plans_[iPlan].boxAbove();
+  auto iBoxBelow = plans_[iPlan].boxBelow();
+  Eigen::Vector3d transAbove = phi_x_z()(0)(iBoxAbove)[0];
+  Eigen::Vector4d quatAbove(0, 0, 0, 1);
+  Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
+  Eigen::Vector4d quatBelow(0, 0, 0, 1);
+  Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
+  double d = phi_x_z()(1)(iPlan)[0](0);
+  std::cout << "\nCompute cstr box above: " << std::endl;
+  boxAbovePlanFcts_[iBoxAbove].compute(out.head(8), transAbove, quatAbove, d,
+                                       normal);
+  std::cout << "\nCompute cstr obstacle below: " << std::endl;
+  obstacleAbovePlanFcts_[iBoxBelow].compute(out.tail(8), transBelow, quatBelow,
+                                            -d, -normal);
   //}
 }
 
@@ -273,55 +275,52 @@ void BoxTrajProblemOnManifold::evalNonLinCstrDiff(RefMat out, size_t i) const
   assert(out.rows() == nonLinCstrDim(i) && "wrong row size");
   assert(out.cols() == M().tangentDim() && "Wrong cols size");
 
-  //if (i < 2)
+  // if (i < 2)
   //{
-    //// nothing to do
+  //// nothing to do
   //}
-  //else
+  // else
   //{
-    auto iPlan = i;
-    auto iBoxAbove = plans_[iPlan].boxAbove();
-    auto iBoxBelow = plans_[iPlan].boxBelow();
-    Eigen::Vector3d transAbove = phi_x_z()(0)(iBoxAbove)[0];
-    Eigen::Vector4d quatAbove(1, 0, 0, 0);
-    Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
-    Eigen::Vector4d quatBelow(1, 0, 0, 0);
-    Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
-    double d = phi_x_z()(1)(iPlan)[0](0);
-    auto rowBegin = 16 * iPlan;
-    auto boxAboveBegin = 3 * iBoxAbove;
-    auto boxBelowBegin = 3 * iBoxBelow;
-    auto planBegin = 3 * nBoxes_ + 4 * iPlan;
-    long rowBeginLong = static_cast<long>(rowBegin);
-    long boxAboveBeginLong = static_cast<long>(boxAboveBegin);
-    long boxBelowBeginLong = static_cast<long>(boxBelowBegin);
-    long planBeginLong = static_cast<long>(planBegin);
+  auto iPlan = i;
+  auto iBoxAbove = plans_[iPlan].boxAbove();
+  auto iBoxBelow = plans_[iPlan].boxBelow();
+  Eigen::Vector3d transAbove = phi_x_z()(0)(iBoxAbove)[0];
+  Eigen::Vector4d quatAbove(1, 0, 0, 0);
+  Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
+  Eigen::Vector4d quatBelow(1, 0, 0, 0);
+  Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
+  double d = phi_x_z()(1)(iPlan)[0](0);
+  auto rowBegin = 16 * iPlan;
+  auto boxAboveBegin = 3 * iBoxAbove;
+  auto boxBelowBegin = 3 * iBoxBelow;
+  auto planBegin = 3 * nBoxes_ + 4 * iPlan;
+  long rowBeginLong = static_cast<long>(rowBegin);
+  long boxAboveBeginLong = static_cast<long>(boxAboveBegin);
+  long boxBelowBeginLong = static_cast<long>(boxBelowBegin);
+  long planBeginLong = static_cast<long>(planBegin);
 
-    Eigen::Matrix<double, 8, 1> tmpWTF;
-    //std::cout << "Compute diff cstr plan " << iPlan << " between Box " << iBoxAbove << " and obstacle " << iBoxBelow << std::endl;
+  Eigen::Matrix<double, 8, 1> tmpWTF;
 
-    boxAbovePlanFcts_[iBoxAbove].diffTrans(
-        outRep_.block(rowBeginLong, boxAboveBeginLong, 8, 3), transAbove,
-        quatAbove, d, normal);
-    boxAbovePlanFcts_[iBoxAbove].diffD(tmpWTF, transAbove, quatAbove, d,
-                                       normal);
-    outRep_.block(rowBeginLong, planBeginLong, 8, 1) = tmpWTF;
-    boxAbovePlanFcts_[iBoxAbove].diffNormal(
-        outRep_.block(rowBeginLong, planBeginLong + 1, 8, 3), transAbove,
-        quatAbove, d, normal);
+  boxAbovePlanFcts_[iBoxAbove].diffTrans(
+      outRep_.block(rowBeginLong, boxAboveBeginLong, 8, 3), transAbove,
+      quatAbove, d, normal);
+  boxAbovePlanFcts_[iBoxAbove].diffD(tmpWTF, transAbove, quatAbove, d, normal);
+  outRep_.block(rowBeginLong, planBeginLong, 8, 1) = tmpWTF;
+  boxAbovePlanFcts_[iBoxAbove].diffNormal(
+      outRep_.block(rowBeginLong, planBeginLong + 1, 8, 3), transAbove,
+      quatAbove, d, normal);
 
+  obstacleAbovePlanFcts_[iBoxBelow].diffD(tmpWTF, transBelow, quatBelow, -d,
+                                          -normal);
+  outRep_.block(rowBeginLong + 8, planBeginLong, 8, 1) = -tmpWTF;
 
-    boxAbovePlanFcts_[iBoxBelow].diffD(tmpWTF, transBelow, quatBelow, -d,
-                                       -normal);
-    outRep_.block(rowBeginLong + 8, planBeginLong, 8, 1) = -tmpWTF;
+  Eigen::Matrix<double, 8, 3> tmpDiffNormal;
+  obstacleAbovePlanFcts_[iBoxBelow].diffNormal(tmpDiffNormal, transBelow,
+                                               quatBelow, -d, -normal);
+  outRep_.block(rowBeginLong + 8, planBeginLong + 1, 8, 3) = -tmpDiffNormal;
 
-    Eigen::Matrix<double, 8, 3> tmpDiffNormal;
-    boxAbovePlanFcts_[iBoxBelow].diffNormal(tmpDiffNormal, transBelow,
-                                            quatBelow, -d, -normal);
-    outRep_.block(rowBeginLong + 8, planBeginLong + 1, 8, 3) = -tmpDiffNormal;
-
-    M().applyDiffRetractation(out, outRep_.middleRows(rowBeginLong, 16),
-                              x().value());
+  M().applyDiffRetractation(out, outRep_.middleRows(rowBeginLong, 16),
+                            x().value());
   //}
 }
 
@@ -329,34 +328,34 @@ void BoxTrajProblemOnManifold::getNonLinCstrLB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  //if (i < 2)
+  // if (i < 2)
   //{
-    //// nothing to do
+  //// nothing to do
   //}
-  //else
+  // else
   //{
-    auto iPlan = i;
-    auto iBoxAbove = plans_[iPlan].boxAbove();
-    auto iBoxBelow = plans_[iPlan].boxBelow();
-    boxAbovePlanFcts_[iBoxAbove].LB(out.head(8));
-    boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8));
+  auto iPlan = i;
+  auto iBoxAbove = plans_[iPlan].boxAbove();
+  auto iBoxBelow = plans_[iPlan].boxBelow();
+  boxAbovePlanFcts_[iBoxAbove].LB(out.head(8));
+  boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8));
   //}
 }
 void BoxTrajProblemOnManifold::getNonLinCstrUB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  //if (i < 2)
+  // if (i < 2)
   //{
-    //// nothing to do
+  //// nothing to do
   //}
-  //else
+  // else
   //{
-    auto iPlan = i;
-    auto iBoxAbove = plans_[iPlan].boxAbove();
-    auto iBoxBelow = plans_[iPlan].boxBelow();
-    boxAbovePlanFcts_[iBoxAbove].UB(out.head(8));
-    boxAbovePlanFcts_[iBoxBelow].UB(out.tail(8));
+  auto iPlan = i;
+  auto iBoxAbove = plans_[iPlan].boxAbove();
+  auto iBoxBelow = plans_[iPlan].boxBelow();
+  boxAbovePlanFcts_[iBoxAbove].UB(out.head(8));
+  boxAbovePlanFcts_[iBoxBelow].UB(out.tail(8));
   //}
 }
 
@@ -364,18 +363,18 @@ size_t BoxTrajProblemOnManifold::numberOfCstr() const { return nPlans_; }
 
 Index BoxTrajProblemOnManifold::linCstrDim(size_t) const
 {
-  //if (i < 2)
-    //return 3;
-  //else
-    return 0;
+  // if (i < 2)
+  // return 3;
+  // else
+  return 0;
 }
 
 Index BoxTrajProblemOnManifold::nonLinCstrDim(size_t) const
 {
-  //if (i < 2)
-    //return 0;
-  //else
-    return 16;
+  // if (i < 2)
+  // return 0;
+  // else
+  return 16;
 }
 
 std::string BoxTrajProblemOnManifold::getCstrName(const size_t) const

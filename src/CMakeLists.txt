@@ -5,6 +5,7 @@ SET(SOURCES
   utils/IndexManager.cc
   utils/ProblemConfig.cc
   utils/quat2mat.cc
+  utils/Printer.cc
   functions/BoxAbovePlan.cc
   )
 SET(HEADERS
@@ -13,6 +14,7 @@ SET(HEADERS
   ../include/feet-trajectory/utils/ProblemConfig.hh
   ../include/feet-trajectory/utils/ProblemInfo.hh
   ../include/feet-trajectory/utils/quat2mat.hh
+  ../include/feet-trajectory/utils/Printer.hh
   ../include/feet-trajectory/functions/BoxAbovePlan.hh
   ../include/feet-trajectory/BoxTrajProblem.hh
   )

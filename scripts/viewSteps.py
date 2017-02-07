@@ -1,7 +1,13 @@
+#!/usr/bin/python
+
+import sys
 import yaml
+import numpy as np
 from mayavi import mlab
 
-def plotBox(c, s, col):
+def plotBox(box, col, alpha):
+    c = box['position']
+    s = box['size']
     xmin = c[0] - s[0]/2
     xmax = c[0] + s[0]/2
     ymin = c[1] - s[1]/2
@@ -21,28 +27,56 @@ def plotBox(c, s, col):
             (4, 5, 6), (4,6,7)
             ]
 
-    return mlab.triangular_mesh(x, y, z, triangles, color=col) 
-    
+    return mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
 
-with open("entry.yml", 'r') as stream:
+def plotPlane(p, boxes, obstacles, col, alpha, sizePlane):
+    nVec = np.array(p['normal']) #normal to the plane
+    d = p['d'] #distance from 0 to the plane
+    o = np.array(obstacles[p['obstacleBelow']]['position'])#center of the obstacle
+    b = np.array(boxes[p['boxAbove']]['position']) #center of the box
+    c = d*nVec #center of the plane
+
+    # center = o + (b-o)*(np.dot(c-o,nVec)/np.dot(b-o,nVec))
+    center = c
+
+    tVec= np.array([0, nVec[2], -nVec[1]])
+    tVec = tVec/np.linalg.norm(tVec)
+    bVec = np.cross(nVec,tVec)
+    p0 = center + (sizePlane/2)*tVec + (sizePlane/2)*bVec
+    p1 = center + (sizePlane/2)*tVec - (sizePlane/2)*bVec
+    p2 = center - (sizePlane/2)*tVec + (sizePlane/2)*bVec
+    p3 = center - (sizePlane/2)*tVec - (sizePlane/2)*bVec
+    x = [p0[0],p1[0],p2[0],p3[0]]
+    y = [p0[1],p1[1],p2[1],p3[1]]
+    z = [p0[2],p1[2],p2[2],p3[2]]
+    triangles = [(0, 1, 2), (1,2,3)]
+    return mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+    
+print 'reading file ', str(sys.argv[1])
+
+with open(str(sys.argv[1]), 'r') as stream:
     try:
         content = yaml.load(stream)
     except yaml.YAMLError as exc:
         print(exc)
 
-bSize = content['BoxSize']
-bPos = content['BoxPositions']
-oSize = content['ObstacleSizes']
-oPos = content['ObstaclePositions']
-print(oSize)
-print(len(oSize))
+initBox = content['InitialBox']
+mobileBoxes = content['MobileBoxes']
+finalBox = content['FinalBox']
+obstacles = content['Obstacles']
+planes = content['SeparatingPlanes']
 
+#View it.
+#Initial and final
+plotBox(initBox, (1, 1, 1), 1)
+for b in mobileBoxes:
+    plotBox(b, (0, 0, 1), 1)
+plotBox(finalBox, (0, 0, 0), 1)
 
-# View it.
-for pos in bPos:
-    plotBox(pos, bSize, (0, 0, 1))
+for o in obstacles:
+    plotBox(o, (1, 0, 0), 0.7)
 
-for i in range(0,len(oSize)):
-    plotBox(oPos[i],oSize[i], (1, 0, 0))
+for p in planes:
+    plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 1, 2.1)
 
 mlab.show()

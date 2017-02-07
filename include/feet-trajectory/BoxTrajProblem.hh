@@ -55,12 +55,22 @@ class BoxTrajProblemOnManifold : public pgs::Problem
 
   std::string getCstrName(const size_t i) const;
 
- public:
+  //getters
+  const size_t& nBoxes() const { return nBoxes_; }
+  const size_t& nPlans() const { return nPlans_; }
+  const size_t& nObstacles() const { return nObstacles_; }
+  const std::vector<Box>& boxes() const { return boxes_; }
+  const std::vector<Box>& obstacles() const { return obstacles_; }
+  const std::vector<Plan>& plans() const { return plans_; }
+  const Eigen::Vector3d& initPos() const { return initPos_; }
+  const Eigen::Vector3d& finalPos() const { return finalPos_; }
+  const Eigen::Vector3d& boxSize() const { return boxSize_; }
+
+ private:
   size_t nBoxes_;
   size_t nPlans_;
   size_t nObstacles_;
 
- private:
   std::vector<Box> boxes_;
   std::vector<Box> obstacles_;
   std::vector<Plan> plans_;
@@ -72,6 +82,7 @@ class BoxTrajProblemOnManifold : public pgs::Problem
   
   Eigen::Vector3d initPos_;
   Eigen::Vector3d finalPos_;
+  Eigen::Vector3d boxSize_;
 
   // buffers
   mutable Eigen::MatrixXd outRepObjDiff_;

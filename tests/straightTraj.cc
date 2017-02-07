@@ -11,6 +11,7 @@
 #include <pgsolver/solver/SolverTrustRegionFilter.h>
 
 #include <feet-trajectory/BoxTrajProblem.hh>
+#include <feet-trajectory/utils/Printer.hh>
 
 using namespace feettrajectory;
 
@@ -51,5 +52,8 @@ int main(void)
   pgs::Results res = mySolver.solve();
 
   std::cout << "xSol = \n" << res.x_star << std::endl;
+
+  print("log.yml", myProb, res.x_star);
+
   return 0;
 }

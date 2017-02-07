@@ -43,12 +43,12 @@ logOnlySummary: true
 logName: "straightTraj"
 
 #Boxes
-nBoxes: 3
+nBoxes: 1
 BoxSize: [0.2, 0.1, 0.05]
 
 #Obstacles
 nObstacles: 1
-ObstacleSizes: [0.2, 0.2, 1.0]
+ObstacleSizes: [0.3, 1.2, 0.1]
 ObstaclePositions: [0.5, 0.5, 0.5]
 
 #ground

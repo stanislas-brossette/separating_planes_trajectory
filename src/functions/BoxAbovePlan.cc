@@ -13,8 +13,17 @@ void BoxAbovePlan::compute(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
                             const double& d,
                             const Eigen::Ref<const Eigen::Vector3d> n) const
 {
+  std::cout << "res: " << res.transpose() << std::endl;
+  std::cout << "t: " << t.transpose() << std::endl;
+  std::cout << "q: " << q.transpose() << std::endl;
+  std::cout << "d: " << d << std::endl;
+  std::cout << "n: " << n.transpose() << std::endl;
   for (size_t i = 0; i < 8; i++)
+  {
+    std::cout << "box_.vertex("<<i<<"): " << box_.vertex(i).transpose() << std::endl;
     res[static_cast<long>(i)] = (t + quat2mat(q) * box_.vertex(i)).dot(n) - d;
+  }
+  std::cout << "res: " << res << std::endl;
 }
 
 void BoxAbovePlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 8, 3>> res,
