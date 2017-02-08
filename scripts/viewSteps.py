@@ -73,10 +73,12 @@ for b in mobileBoxes:
     plotBox(b, (0, 0, 1), 1)
 plotBox(finalBox, (0, 0, 0), 1)
 
-for o in obstacles:
-    plotBox(o, (1, 0, 0), 0.7)
+if(hasattr(obstacles, '__iter__')):
+    for o in obstacles:
+        plotBox(o, (1, 0, 0), 0.7)
 
-for p in planes:
-    plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 1, 2.1)
+if(hasattr(planes, '__iter__')):
+    for p in planes:
+        plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 1, 2.1)
 
 mlab.show()

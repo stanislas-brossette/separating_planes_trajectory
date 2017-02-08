@@ -133,7 +133,7 @@ CartesianProduct* BoxTrajProblemOnManifold::buildManifold(
   else
   {
     MPlanes = new CartesianProduct(*MPlane, *MPlane);
-    for (size_t i = 2; i < nPlanes; ++i) MPlanes->multiply(*MPlane);
+    for (size_t i = 2; i < static_cast<size_t>(nPlanes); ++i) MPlanes->multiply(*MPlane);
   }
   CartesianProduct* MBoxesAndPlanes = new CartesianProduct(*MBoxes, *MPlanes);
   return MBoxesAndPlanes;
@@ -191,8 +191,8 @@ void BoxTrajProblemOnManifold::evalObjDiff(RefMat out) const
       2 * dist.transpose();
   for (Index i = 0; i < static_cast<Index>(nBoxes_) - 1; ++i)
   {
-    pos = phi_x_z()(0)(i)[0];
-    posNext = phi_x_z()(0)(i + 1)[0];
+    pos = phi_x_z()(0)(static_cast<size_t>(i))[0];
+    posNext = phi_x_z()(0)(static_cast<size_t>(i) + 1)[0];
     dist = posNext - pos;
     outRepObjDiff_.block(0, i * boxRepDim, 1, boxRepDim) +=
         -2 * dist.transpose();
@@ -202,7 +202,7 @@ void BoxTrajProblemOnManifold::evalObjDiff(RefMat out) const
   pos = phi_x_z()(0)(nBoxes_ - 1)[0];
   posNext = finalPos_;
   dist = posNext - pos;
-  outRepObjDiff_.block(0, (nBoxes_ - 1) * boxRepDim, 1, boxRepDim) +=
+  outRepObjDiff_.block(0, (static_cast<Index>(nBoxes_) - 1) * boxRepDim, 1, boxRepDim) +=
       -2 * dist.transpose();
   M().applyDiffRetractation(out, outRepObjDiff_, x().value());
 }
@@ -292,11 +292,9 @@ void BoxTrajProblemOnManifold::evalNonLinCstrDiff(RefMat out, size_t i) const
   double d = phi_x_z()(1)(iPlan)[0](0);
   auto rowBegin = 16 * iPlan;
   auto boxAboveBegin = 3 * iBoxAbove;
-  auto boxBelowBegin = 3 * iBoxBelow;
   auto planBegin = 3 * nBoxes_ + 4 * iPlan;
   long rowBeginLong = static_cast<long>(rowBegin);
   long boxAboveBeginLong = static_cast<long>(boxAboveBegin);
-  long boxBelowBeginLong = static_cast<long>(boxBelowBegin);
   long planBeginLong = static_cast<long>(planBegin);
 
   Eigen::Matrix<double, 8, 1> tmpWTF;

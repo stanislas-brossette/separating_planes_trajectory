@@ -15,7 +15,7 @@ void print(const std::string& fileName, const BoxTrajProblemOnManifold& pb,
   logFile << "InitialBox: {size: " << bSize
           << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
   logFile << "MobileBoxes:\n";
-  for (int i = 0; i < pb.nBoxes(); i++)
+  for (size_t i = 0; i < pb.nBoxes(); i++)
   {
     logFile << "- {size: " << bSize
             << ", position: " << xStar(0)(i).value().transpose().format(logFmt)
@@ -27,7 +27,7 @@ void print(const std::string& fileName, const BoxTrajProblemOnManifold& pb,
 
   // Obstacles
   logFile << "Obstacles:\n";
-  for (int i = 0; i < pb.nObstacles(); i++)
+  for (size_t i = 0; i < pb.nObstacles(); i++)
   {
     logFile << "- {size: "
             << pb.obstacles()[i].size().transpose().format(logFmt)
@@ -38,7 +38,7 @@ void print(const std::string& fileName, const BoxTrajProblemOnManifold& pb,
 
   // Separating planes
   logFile << "SeparatingPlanes:\n";
-  for (int i = 0; i < pb.nBoxes(); i++)
+  for (size_t i = 0; i < pb.nPlans(); i++)
     logFile << "- { d: " << xStar(1)(i)(0).value()
             << ", normal: " << xStar(1)(i)(1).value().transpose().format(logFmt)
             << ", boxAbove: " << pb.plans()[i].boxAbove()

@@ -25,7 +25,6 @@ int main(void)
 
   int nBoxes = config["nBoxes"];
   int nObstacles = config["nObstacles"];
-  std::cout << "nBoxes: " << nBoxes << std::endl;
 
   mnf::CartesianProduct* M = BoxTrajProblemOnManifold::buildManifold(nBoxes, nObstacles);
   M->display();
@@ -35,13 +34,10 @@ int main(void)
   Eigen::VectorXd v0(M->representationDim());
   v0 = myProb.findInitPoint();
 
-  std::cout << "v0: " << v0 << std::endl;
-
   pgs::utils::finiteDiffCheck(myProb);
 
   myProb.M().forceOnM(v0, v0);
   mnf::Point x0 = myProb.M().createPoint(v0);
-  std::cout << "x0 = \n" << x0 << std::endl;
 
   // Solver mySolver;
   pgs::SolverTrustRegionFilter mySolver;
@@ -53,7 +49,7 @@ int main(void)
 
   std::cout << "xSol = \n" << res.x_star << std::endl;
 
-  print("log.yml", myProb, res.x_star);
+  print(config["logName"], myProb, res.x_star);
 
   return 0;
 }
