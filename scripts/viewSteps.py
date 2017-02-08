@@ -66,17 +66,19 @@ finalBox = content['FinalBox']
 obstacles = content['Obstacles']
 planes = content['SeparatingPlanes']
 
-#View it.
-#Initial and final
+# Initial and final
 plotBox(initBox, (1, 1, 1), 1)
-for b in mobileBoxes:
-    plotBox(b, (0, 0, 1), 1)
+if(hasattr(mobileBoxes, '__iter__')):
+    for b in mobileBoxes:
+        plotBox(b, (0, 0, 1), 1)
 plotBox(finalBox, (0, 0, 0), 1)
 
+# Obstacles
 if(hasattr(obstacles, '__iter__')):
     for o in obstacles:
         plotBox(o, (1, 0, 0), 0.7)
 
+# Separating Planes
 if(hasattr(planes, '__iter__')):
     for p in planes:
         plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 1, 2.1)

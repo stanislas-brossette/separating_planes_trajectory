@@ -28,7 +28,7 @@ FP:
   feasTol: 1e-6
 
 #logs
-logName: "straightTraj.log"
+logName: "logs/straightTraj.log"
 
 #Boxes
 nBoxes: 9
