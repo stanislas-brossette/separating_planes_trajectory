@@ -3,7 +3,6 @@
 #include <Eigen/Core>
 #include <feet-trajectory/utils/Box.hh>
 
-
 namespace feettrajectory
 {
 class BoxAbovePlan
@@ -54,7 +53,7 @@ class BoxAbovePlan
                   const long& index) const;
   void LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   void UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
-  const Box& box() const{return box_;};
+  const Box& box() const { return box_; };
 
  private:
   Box box_;
@@ -72,5 +71,5 @@ class BoxAbovePlan
 //diff(cstr, ny) = ty - vy*(2*qx^2 + 2*qz^2 - 1) + vx*(2*qw*qz + 2*qx*qy) - vz*(2*qw*qx - 2*qy*qz)
 //diff(cstr, nz) = tz - vz*(2*qx^2 + 2*qy^2 - 1) - vx*(2*qw*qy - 2*qx*qz) + vy*(2*qw*qx + 2*qy*qz)
 //diff(cstr, d)  = -1
-  
-} /* feettrajectory */ 
+
+} /* feettrajectory */

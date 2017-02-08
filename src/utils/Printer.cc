@@ -45,4 +45,30 @@ void print(const std::string& fileName, const BoxTrajProblemOnManifold& pb,
             << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
             << std::endl;
 }
+
+void print(const std::string& fileName, const Eigen::Vector3d& bSize,
+           const Eigen::Vector3d& oSize, const Eigen::Vector3d& oPos,
+           const Eigen::Vector3d& t, const double& d, const Eigen::Vector3d& n)
+{
+  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
+  std::ofstream logFile;
+  logFile.open(fileName);
+
+  // Boxes
+  logFile << "MobileBoxes:\n";
+  logFile << "- {size: " << bSize.transpose().format(logFmt)
+          << ", position: " << t.transpose().format(logFmt) << "}\n";
+
+  // Obstacles
+  logFile << "Obstacles:\n";
+  logFile << "- {size: " << oSize.transpose().format(logFmt)
+          << ", position: " << oPos.transpose().format(logFmt) << "}"
+          << std::endl;
+
+  // Separating planes
+  logFile << "SeparatingPlanes:\n";
+  logFile << "- { d: " << d << ", normal: " << n.transpose().format(logFmt)
+          << ", boxAbove: " << 0 << ", obstacleBelow: " << 0 << "}"
+          << std::endl;
+}
 } /* feettrajectory */

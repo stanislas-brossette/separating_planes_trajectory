@@ -12,14 +12,14 @@ IndexManager::IndexManager(const int& nBoxes) : nBoxes_(nBoxes)
 IndexManager::~IndexManager() {}
 
 Eigen::Vector3d IndexManager::getBoxTrans(const int& i,
-                                           const Eigen::VectorXd& x) const
+                                          const Eigen::VectorXd& x) const
 {
   Eigen::Vector3d res = x.segment(7 * i, 3);
   return res;
 }
 
 Eigen::Vector4d IndexManager::getBoxQuat(const int& i,
-                                          const Eigen::VectorXd& x) const
+                                         const Eigen::VectorXd& x) const
 {
   Eigen::Vector4d res = x.segment(7 * i + 3, 4);
   return res;

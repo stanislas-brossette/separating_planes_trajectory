@@ -12,18 +12,17 @@
 
 #include <feet-trajectory/BoxTrajProblem.hh>
 #include <feet-trajectory/utils/Printer.hh>
-#include <feet-trajectory/utils/ProblemConfig.hh>
 
 using namespace feettrajectory;
 
 int main(void)
 {
-  std::cout << "StraightTraj Test: In this test we expect to generate a "
-               "sequence of successive, non colliding, feet positions. It "
-               "should end up describing a straight line" << std::endl;
+  std::cout << "oneObstacleTraj Test: In this test we expect to generate a "
+               "sequence of successive, non colliding, feet positions that "
+               "avoids an obstacle." << std::endl;
   std::srand(static_cast<uint>(std::time(0)));
   std::string testDir = TESTS_DATA_DIR;
-  std::string ymlPath = testDir + "/straightTraj.yml";
+  std::string ymlPath = testDir + "/oneObstacleTraj.yml";
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
@@ -37,6 +36,11 @@ int main(void)
 
   Eigen::VectorXd v0(M->representationDim());
   v0 = myProb.findInitPoint();
+  myProb.M().forceOnM(v0, v0);
+  Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[",
+                           "]");
+
+  std::cout << "v0: " << v0.format(HeavyFmt) << std::endl;
 
   pgs::utils::finiteDiffCheck(myProb);
 

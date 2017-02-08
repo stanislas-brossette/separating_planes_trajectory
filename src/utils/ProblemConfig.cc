@@ -104,10 +104,6 @@ void ProblemConfig::loadFile(std::string configFile)
         {
           prop[globalCategory + prefix + it->first.as<std::string>()] =
               it->second.as<std::string>();
-          // std::cout << prefix + it->first.as<std::string>()
-          //<< ": " << std::flush;
-          // std::cout << it->second.as<std::string>()
-          //<< std::endl;
         }
         else
         {

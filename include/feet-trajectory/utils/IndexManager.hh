@@ -16,7 +16,7 @@ class IndexManager
   int nBoxes() const;
   int nPlanes() const;
   int totalDim() const;
-  
+
   int getBoxTransBegin(const int& i) const;
   int getBoxQuatBegin(const int& i) const;
   int getPlaneDistBegin(const int& i) const;

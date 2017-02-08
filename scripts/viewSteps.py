@@ -36,10 +36,14 @@ def plotPlane(p, boxes, obstacles, col, alpha, sizePlane):
     b = np.array(boxes[p['boxAbove']]['position']) #center of the box
     c = d*nVec #center of the plane
 
-    # center = o + (b-o)*(np.dot(c-o,nVec)/np.dot(b-o,nVec))
-    center = c
+    center = o + (b-o)*(np.dot(c-o,nVec)/np.dot(b-o,nVec))
+    # center = c
 
-    tVec= np.array([0, nVec[2], -nVec[1]])
+    if (nVec[1] == 0 and nVec[2] == 0):
+        tVec= np.array([0, nVec[0], 0])
+    else:
+        tVec= np.array([0, nVec[2], -nVec[1]])
+
     tVec = tVec/np.linalg.norm(tVec)
     bVec = np.cross(nVec,tVec)
     p0 = center + (sizePlane/2)*tVec + (sizePlane/2)*bVec
@@ -50,7 +54,9 @@ def plotPlane(p, boxes, obstacles, col, alpha, sizePlane):
     y = [p0[1],p1[1],p2[1],p3[1]]
     z = [p0[2],p1[2],p2[2],p3[2]]
     triangles = [(0, 1, 2), (1,2,3)]
-    return mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+    mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+    mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2])
+    return
     
 print 'reading file ', str(sys.argv[1])
 
@@ -60,27 +66,31 @@ with open(str(sys.argv[1]), 'r') as stream:
     except yaml.YAMLError as exc:
         print(exc)
 
-initBox = content['InitialBox']
+
 mobileBoxes = content['MobileBoxes']
-finalBox = content['FinalBox']
 obstacles = content['Obstacles']
 planes = content['SeparatingPlanes']
 
 # Initial and final
-plotBox(initBox, (1, 1, 1), 1)
+if 'InitialBox' in content:
+    initBox = content['InitialBox']
+    plotBox(initBox, (1, 1, 1), 1)
+
 if(hasattr(mobileBoxes, '__iter__')):
     for b in mobileBoxes:
         plotBox(b, (0, 0, 1), 1)
-plotBox(finalBox, (0, 0, 0), 1)
+if 'FinalBox' in content:
+    finalBox = content['FinalBox']
+    plotBox(finalBox, (1, 1, 1), 1)
 
 # Obstacles
 if(hasattr(obstacles, '__iter__')):
     for o in obstacles:
-        plotBox(o, (1, 0, 0), 0.7)
+        plotBox(o, (1, 0, 0), 1)
 
 # Separating Planes
 if(hasattr(planes, '__iter__')):
     for p in planes:
-        plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 1, 2.1)
+        plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 0.4, 0.2)
 
 mlab.show()

@@ -1,0 +1,27 @@
+#Boxes
+BoxPos: [0, 0, 0]
+BoxSize: [0.2, 0.1, 0.05]
+
+#Obstacles
+ObstacleSizes: [0.3, 1.2, 0.1]
+ObstaclePositions: [0.9, 1.5, 0.8]
+
+logName: "logs/testBoxAbovePlanCstr.log"
+
+testNumber: 3
+
+t0: [0.304279, 0.372069, 0.720529]
+d0: 0.098299
+n0: [-0.586787, -0.381789, 0.714085]
+
+t1: [0., 0., 0.]
+d1: 0.
+n1: [1., 0., 0.]
+
+t2: [0., 0., 0.]
+d2: 1.
+n2: [1., 0., 0.]
+
+t3: [0.1, 0.01, 0.02]
+d3: 1.
+n3: [1., 0., 0.]

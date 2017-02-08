@@ -23,3 +23,5 @@ ENDMACRO(ADD_SCENARIO)
 
 ADD_SCENARIO("HelloWorld")
 ADD_SCENARIO("straightTraj")
+ADD_SCENARIO("oneObstacleTraj")
+ADD_SCENARIO("testBoxAbovePlanCstr")

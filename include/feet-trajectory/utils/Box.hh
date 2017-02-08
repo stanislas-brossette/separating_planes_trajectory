@@ -16,14 +16,14 @@ class Box
     size_ << lx, ly, lz;
     center_ << cx, cy, cz;
     vertex_.resize(8);
-    vertex_[0] << cx - lx / 2, cy - ly / 2, cz - lz / 2;
-    vertex_[1] << cx - lx / 2, cy - ly / 2, cz + lz / 2;
-    vertex_[2] << cx - lx / 2, cy + ly / 2, cz - lz / 2;
-    vertex_[3] << cx - lx / 2, cy + ly / 2, cz + lz / 2;
-    vertex_[4] << cx + lx / 2, cy - ly / 2, cz - lz / 2;
-    vertex_[5] << cx + lx / 2, cy - ly / 2, cz + lz / 2;
-    vertex_[6] << cx + lx / 2, cy + ly / 2, cz - lz / 2;
-    vertex_[7] << cx + lx / 2, cy + ly / 2, cz + lz / 2;
+    vertex_[0] << -lx / 2, -ly / 2, -lz / 2;
+    vertex_[1] << -lx / 2, -ly / 2, lz / 2;
+    vertex_[2] << -lx / 2, ly / 2, -lz / 2;
+    vertex_[3] << -lx / 2, ly / 2, lz / 2;
+    vertex_[4] << lx / 2, -ly / 2, -lz / 2;
+    vertex_[5] << lx / 2, -ly / 2, lz / 2;
+    vertex_[6] << lx / 2, ly / 2, -lz / 2;
+    vertex_[7] << lx / 2, ly / 2, lz / 2;
     vertexMat_.col(0) = vertex_[0];
     vertexMat_.col(1) = vertex_[1];
     vertexMat_.col(2) = vertex_[2];
@@ -43,10 +43,6 @@ class Box
   }
 
   const std::vector<Eigen::Vector3d>& vertex() const { return vertex_; };
-  const Eigen::Vector3d& vertex(long i) const
-  {
-    return vertex_[static_cast<size_t>(i)];
-  }
   const Eigen::Matrix<double, 3, 8>& vertexMat() const { return vertexMat_; };
   const Eigen::Vector3d& vertex(size_t i) const { return vertex_[i]; };
   const double& lx() const { return size_[0]; };
@@ -58,6 +54,17 @@ class Box
   const int& index() const { return index_; };
   const Eigen::Vector3d& center() const { return center_; }
   const Eigen::Vector3d& size() const { return size_; }
+
+  void print() const
+  {
+    std::cout << "Box " << index() << std::endl;
+    std::cout << "center: " << center() << std::endl;
+    std::cout << "size: " << size() << std::endl;
+    for (size_t i = 0; i < 8; i++)
+    {
+      std::cout << "vertex(i): " << vertex(i).transpose() << std::endl;
+    }
+  }
 
  private:
   std::vector<Eigen::Vector3d> vertex_;

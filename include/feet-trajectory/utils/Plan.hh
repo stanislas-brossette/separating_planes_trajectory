@@ -6,7 +6,6 @@
 
 namespace feettrajectory
 {
-
 class Plan
 {
  public:
@@ -22,6 +21,6 @@ class Plan
  private:
   size_t boxBelow_, boxAbove_;
 };
-  
-} /* feettrajectory */ 
+
+} /* feettrajectory */
 

@@ -24,7 +24,8 @@ namespace feettrajectory
 class BoxTrajProblemOnManifold : public pgs::Problem
 {
  public:
-  BoxTrajProblemOnManifold(const mnf::Manifold& M, const std::string& configPath);
+  BoxTrajProblemOnManifold(const mnf::Manifold& M,
+                           const std::string& configPath);
   virtual ~BoxTrajProblemOnManifold();
 
   static mnf::CartesianProduct* buildManifold(const Index& nBoxes,
@@ -51,11 +52,11 @@ class BoxTrajProblemOnManifold : public pgs::Problem
   Index linCstrDim(size_t i) const;
   Index nonLinCstrDim(size_t i) const;
 
-  //void fileForMatlab(std::string fileName, const mnf::Point& x) const;
+  // void fileForMatlab(std::string fileName, const mnf::Point& x) const;
 
   std::string getCstrName(const size_t i) const;
 
-  //getters
+  // getters
   const size_t& nBoxes() const { return nBoxes_; }
   const size_t& nPlans() const { return nPlans_; }
   const size_t& nObstacles() const { return nObstacles_; }
@@ -74,20 +75,20 @@ class BoxTrajProblemOnManifold : public pgs::Problem
   std::vector<Box> boxes_;
   std::vector<Box> obstacles_;
   std::vector<Plan> plans_;
-  //std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
+  // std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
   std::vector<BoxAbovePlan> boxAbovePlanFcts_;
   std::vector<BoxAbovePlan> obstacleAbovePlanFcts_;
   std::vector<std::string> cstrNames_;
   ProblemConfig config_;
-  
+
   Eigen::Vector3d initPos_;
   Eigen::Vector3d finalPos_;
   Eigen::Vector3d boxSize_;
 
   // buffers
   mutable Eigen::MatrixXd outRepObjDiff_;
-  //mutable Eigen::MatrixXd outRepLinCstrDiff_;
+  // mutable Eigen::MatrixXd outRepLinCstrDiff_;
   mutable Eigen::MatrixXd outRep_;
 };
-  
-} /* feettrajectory */ 
+
+} /* feettrajectory */
