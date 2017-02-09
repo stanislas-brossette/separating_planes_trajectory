@@ -23,7 +23,7 @@ int main(void)
             << std::endl;
   std::srand(static_cast<uint>(std::time(0)));
   std::string testDir = TESTS_DATA_DIR;
-  std::string ymlPath = testDir + "/oneObstacleHullTraj.yml";
+  std::string ymlPath = testDir + "/stepOnStairs.yml";
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
@@ -42,8 +42,6 @@ int main(void)
                            "]");
 
   std::cout << "v0: " << v0.format(HeavyFmt) << std::endl;
-
-  std::cout << "myProb.numberOfCstr(): " << myProb.numberOfCstr() << std::endl;
 
   pgs::utils::finiteDiffCheck(myProb);
 
