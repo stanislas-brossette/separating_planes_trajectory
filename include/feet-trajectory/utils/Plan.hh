@@ -9,17 +9,17 @@ namespace feettrajectory
 class Plan
 {
  public:
-  Plan(size_t boxBelow, size_t boxAbove)
+  Plan(int boxBelow, int boxAbove)
   {
     boxBelow_ = boxBelow;
     boxAbove_ = boxAbove;
   }
 
-  const size_t& boxBelow() const { return boxBelow_; };
-  const size_t& boxAbove() const { return boxAbove_; };
+  const int& boxBelow() const { return boxBelow_; };
+  const int& boxAbove() const { return boxAbove_; };
 
  private:
-  size_t boxBelow_, boxAbove_;
+  int boxBelow_, boxAbove_;
 };
 
 } /* feettrajectory */

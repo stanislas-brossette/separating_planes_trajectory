@@ -6,10 +6,13 @@
 #include <manifolds/Point.h>
 
 #include <feet-trajectory/BoxTrajProblem.hh>
+#include <feet-trajectory/BoxesHullTrajProblem.hh>
 
 namespace feettrajectory
 {
-void print(const std::string& fileName, const BoxTrajProblemOnManifold& pb,
+void print(const std::string& fileName, const BoxTrajProblem& pb,
+           const mnf::Point& xStar);
+void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
            const mnf::Point& xStar);
 void print(const std::string& fileName, const Eigen::Vector3d& bSize,
            const Eigen::Vector3d& oSize, const Eigen::Vector3d& oPos,

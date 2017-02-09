@@ -30,10 +30,10 @@ int main(void)
   int nObstacles = config["nObstacles"];
 
   mnf::CartesianProduct* M =
-      BoxTrajProblemOnManifold::buildManifold(nBoxes, nObstacles);
+      BoxTrajProblem::buildManifold(nBoxes, nObstacles);
   M->display();
 
-  BoxTrajProblemOnManifold myProb(*M, ymlPath);
+  BoxTrajProblem myProb(*M, ymlPath);
 
   Eigen::VectorXd v0(M->representationDim());
   v0 = myProb.findInitPoint();

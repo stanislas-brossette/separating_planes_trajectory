@@ -2,6 +2,7 @@ INCLUDE_DIRECTORIES(BEFORE ${Boost_INCLUDE_DIR})
 
 SET(SOURCES
   BoxTrajProblem.cc
+  BoxesHullTrajProblem.cc
   utils/IndexManager.cc
   utils/ProblemConfig.cc
   utils/quat2mat.cc
@@ -11,12 +12,14 @@ SET(SOURCES
 SET(HEADERS
   ../include/feet-trajectory/utils/Box.hh
   ../include/feet-trajectory/utils/Plan.hh
+  ../include/feet-trajectory/utils/PlanForHull.hh
   ../include/feet-trajectory/utils/ProblemConfig.hh
   ../include/feet-trajectory/utils/ProblemInfo.hh
   ../include/feet-trajectory/utils/quat2mat.hh
   ../include/feet-trajectory/utils/Printer.hh
   ../include/feet-trajectory/functions/BoxAbovePlan.hh
   ../include/feet-trajectory/BoxTrajProblem.hh
+  ../include/feet-trajectory/BoxesHullTrajProblem.hh
   )
 
 ADD_LIBRARY(feet-trajectory SHARED ${SOURCES} ${HEADERS})

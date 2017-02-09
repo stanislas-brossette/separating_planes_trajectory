@@ -10,29 +10,30 @@
 #include <pgsolver/solver/Results.h>
 #include <pgsolver/solver/SolverTrustRegionFilter.h>
 
-#include <feet-trajectory/BoxTrajProblem.hh>
+#include <feet-trajectory/BoxesHullTrajProblem.hh>
 #include <feet-trajectory/utils/Printer.hh>
 
 using namespace feettrajectory;
 
 int main(void)
 {
-  std::cout << "oneObstacleTraj Test: In this test we expect to generate a "
-               "sequence of successive, non colliding, feet positions that "
-               "avoids an obstacle." << std::endl;
+  std::cout << "oneObstacleHullTraj Test: In this test we expect to generate a "
+               "sequence of successive feet positions such that the hull "
+               "convex around 2 successive feet avoids an obstacle."
+            << std::endl;
   std::srand(static_cast<uint>(std::time(0)));
   std::string testDir = TESTS_DATA_DIR;
-  std::string ymlPath = testDir + "/oneObstacleTraj.yml";
+  std::string ymlPath = testDir + "/oneObstacleHullTraj.yml";
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
   int nObstacles = config["nObstacles"];
 
   mnf::CartesianProduct* M =
-      BoxTrajProblem::buildManifold(nBoxes, nObstacles);
+      BoxesHullTrajProblem::buildManifold(nBoxes, nObstacles);
   M->display();
 
-  BoxTrajProblem myProb(*M, ymlPath);
+  BoxesHullTrajProblem myProb(*M, ymlPath);
 
   Eigen::VectorXd v0(M->representationDim());
   v0 = myProb.findInitPoint();
@@ -41,6 +42,8 @@ int main(void)
                            "]");
 
   std::cout << "v0: " << v0.format(HeavyFmt) << std::endl;
+
+  std::cout << "myProb.numberOfCstr(): " << myProb.numberOfCstr() << std::endl;
 
   pgs::utils::finiteDiffCheck(myProb);
 

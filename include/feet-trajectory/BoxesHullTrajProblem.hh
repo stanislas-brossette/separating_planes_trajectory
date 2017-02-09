@@ -15,18 +15,17 @@
 #include <pgsolver/utils/defs.h>
 
 #include <feet-trajectory/utils/Box.hh>
-#include <feet-trajectory/utils/Plan.hh>
+#include <feet-trajectory/utils/PlanForHull.hh>
 #include <feet-trajectory/utils/ProblemConfig.hh>
 #include <feet-trajectory/functions/BoxAbovePlan.hh>
 
 namespace feettrajectory
 {
-class BoxTrajProblem: public pgs::Problem
+class BoxesHullTrajProblem : public pgs::Problem
 {
  public:
-  BoxTrajProblem(const mnf::Manifold& M,
-                           const std::string& configPath);
-  virtual ~BoxTrajProblem();
+  BoxesHullTrajProblem(const mnf::Manifold& M, const std::string& configPath);
+  virtual ~BoxesHullTrajProblem();
 
   static mnf::CartesianProduct* buildManifold(const Index& nBoxes,
                                               const Index& nObstacles);
@@ -62,28 +61,33 @@ class BoxTrajProblem: public pgs::Problem
   const size_t& nObstacles() const { return nObstacles_; }
   const std::vector<Box>& boxes() const { return boxes_; }
   const std::vector<Box>& obstacles() const { return obstacles_; }
-  const std::vector<Plan>& plans() const { return plans_; }
+  const std::vector<PlanForHull>& plans() const { return plans_; }
   const Eigen::Vector3d& initPos() const { return initPos_; }
   const Eigen::Vector3d& finalPos() const { return finalPos_; }
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
 
  private:
-  size_t nBoxes_;
-  size_t nPlans_;
-  size_t nObstacles_;
+  ProblemConfig config_;
+
+  int nBoxes_;
+  int nPlans_;
+  int nObstacles_;
+
+  Eigen::Vector3d boxSize_;
+  Eigen::Vector3d initPos_;
+  Eigen::Vector3d finalPos_;
+
+  Box initBox_, finalBox_;
+  BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;
 
   std::vector<Box> boxes_;
   std::vector<Box> obstacles_;
-  std::vector<Plan> plans_;
+  std::vector<PlanForHull> plans_;
   // std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
   std::vector<BoxAbovePlan> boxAbovePlanFcts_;
   std::vector<BoxAbovePlan> obstacleAbovePlanFcts_;
   std::vector<std::string> cstrNames_;
-  ProblemConfig config_;
 
-  Eigen::Vector3d initPos_;
-  Eigen::Vector3d finalPos_;
-  Eigen::Vector3d boxSize_;
 
   // buffers
   mutable Eigen::MatrixXd outRepObjDiff_;

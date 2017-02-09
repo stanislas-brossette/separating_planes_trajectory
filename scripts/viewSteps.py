@@ -29,11 +29,26 @@ def plotBox(box, col, alpha):
 
     return mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
 
-def plotPlane(p, boxes, obstacles, col, alpha, sizePlane):
+def plotPlane(p, initBox, boxes, finalBox, obstacles, col, alpha, sizePlane):
     nVec = np.array(p['normal']) #normal to the plane
     d = p['d'] #distance from 0 to the plane
     o = np.array(obstacles[p['obstacleBelow']]['position'])#center of the obstacle
-    b = np.array(boxes[p['boxAbove']]['position']) #center of the box
+    if 'boxAbove' in p:
+        b = np.array(boxes[p['boxAbove']]['position']) #center of the box
+    elif 'box0Above' in p and 'box1Above' in p:
+        if p['box0Above'] == -1 and p['box1Above'] != len(boxes):
+            b0 = np.array(initBox['position'])
+            b1 = np.array(boxes[p['box1Above']]['position']) #center of the box
+        elif p['box0Above'] != -1 and p['box1Above'] == len(boxes):
+            b0 = np.array(boxes[p['box0Above']]['position']) #center of the box
+            b1 = np.array(finalBox['position'])
+        elif p['box0Above'] != -1 and p['box1Above'] != len(boxes):
+            b0 = np.array(boxes[p['box0Above']]['position']) #center of the box
+            b1 = np.array(boxes[p['box1Above']]['position']) #center of the box
+        else:
+            print("Something is wrong, there is no mobile box above this plane")
+        b = (b0+b1)/2
+
     c = d*nVec #center of the plane
 
     center = o + (b-o)*(np.dot(c-o,nVec)/np.dot(b-o,nVec))
@@ -55,7 +70,7 @@ def plotPlane(p, boxes, obstacles, col, alpha, sizePlane):
     z = [p0[2],p1[2],p2[2],p3[2]]
     triangles = [(0, 1, 2), (1,2,3)]
     mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
-    mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2])
+    mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
     return
     
 print 'reading file ', str(sys.argv[1])
@@ -91,6 +106,6 @@ if(hasattr(obstacles, '__iter__')):
 # Separating Planes
 if(hasattr(planes, '__iter__')):
     for p in planes:
-        plotPlane(p, mobileBoxes, obstacles, (0, 1, 0), 0.4, 0.2)
+        plotPlane(p, initBox, mobileBoxes, finalBox, obstacles, (0, 1, 0), 0.4, 0.2)
 
 mlab.show()
