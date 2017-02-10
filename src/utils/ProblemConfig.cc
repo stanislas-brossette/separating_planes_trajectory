@@ -43,6 +43,21 @@ int ProblemConfig::CustomString::asInt() const
     return 0;
   }
 }
+size_t ProblemConfig::CustomString::asSize_t() const
+{
+  int res(std::stoi(this->c_str()));
+  assert(
+      res >= 0 &&
+      "Trying to cast a negative number into a size_t, BAD things will happen");
+  try
+  {
+    return static_cast<size_t>(res);
+  }
+  catch (std::exception& e)
+  {
+    return 0;
+  }
+}
 bool ProblemConfig::CustomString::asBool() const { return *this == "true"; }
 Eigen::VectorXd ProblemConfig::CustomString::asVectorXd() const { return v; }
 Eigen::Vector3d ProblemConfig::CustomString::asVector3d() const

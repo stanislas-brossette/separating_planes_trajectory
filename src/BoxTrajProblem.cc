@@ -29,8 +29,8 @@ BoxTrajProblem::BoxTrajProblem(
     const Manifold& M, const std::string& configPath)
     : Problem(M), config_(configPath)
 {
-  nBoxes_ = static_cast<size_t>(config_["nBoxes"].asInt());
-  nObstacles_ = static_cast<size_t>(config_["nObstacles"].asInt());
+  nBoxes_ = config_["nBoxes"].asSize_t();
+  nObstacles_ = config_["nObstacles"].asSize_t();
   nPlans_ = nBoxes_ * nObstacles_;
 
   boxSize_ = config_["BoxSize"].asVector3d();
@@ -52,9 +52,9 @@ BoxTrajProblem::BoxTrajProblem(
     obstacleAbovePlanFcts_.push_back(BoxAbovePlan(o));
   }
 
-  for (size_t i = 0; i < nBoxes_; ++i)
+  for (int i = 0; i < static_cast<int>(nBoxes_); ++i)
   {
-    for (size_t j = 0; j < nObstacles_; ++j)
+    for (int j = 0; j < static_cast<int>(nObstacles_); ++j)
     {
       plans_.push_back(Plan(j, i));
     }
@@ -219,9 +219,9 @@ void BoxTrajProblem::evalNonLinCstr(RefVec out, size_t i) const
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
   out.setZero();
 
-  auto iPlan = i;
-  auto iBoxAbove = plans_[iPlan].boxAbove();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
+  size_t iPlan(static_cast<size_t>(i));
+  size_t iBoxAbove(static_cast<size_t>(plans_[iPlan].boxAbove()));
+  size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
   Eigen::Vector3d transAbove = phi_x_z()(0)(iBoxAbove)[0];
   Eigen::Vector4d quatAbove(0, 0, 0, 1);
   Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
@@ -240,21 +240,18 @@ void BoxTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
   assert(out.rows() == nonLinCstrDim(i) && "wrong row size");
   assert(out.cols() == M().tangentDim() && "Wrong cols size");
 
-  auto iPlan = i;
-  auto iBoxAbove = plans_[iPlan].boxAbove();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
+  size_t iPlan(static_cast<size_t>(i));
+  size_t iBoxAbove(static_cast<size_t>(plans_[iPlan].boxAbove()));
+  size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
   Eigen::Vector3d transAbove = phi_x_z()(0)(iBoxAbove)[0];
   Eigen::Vector4d quatAbove(0, 0, 0, 1);
   Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
   Eigen::Vector4d quatBelow(0, 0, 0, 1);
   Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
   double d = phi_x_z()(1)(iPlan)[0](0);
-  auto rowBegin = 16 * iPlan;
-  auto boxAboveBegin = 3 * iBoxAbove;
-  auto planBegin = 3 * nBoxes_ + 4 * iPlan;
-  long rowBeginLong = static_cast<long>(rowBegin);
-  long boxAboveBeginLong = static_cast<long>(boxAboveBegin);
-  long planBeginLong = static_cast<long>(planBegin);
+  long rowBeginLong = static_cast<long>(16 * iPlan);
+  long boxAboveBeginLong = static_cast<long>(3 * iBoxAbove);
+  long planBeginLong = static_cast<long>(3 * nBoxes_ + 4 * iPlan);
 
   Eigen::Matrix<double, 8, 1> tmpWTF;
 
@@ -284,9 +281,9 @@ void BoxTrajProblem::getNonLinCstrLB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  auto iPlan = i;
-  auto iBoxAbove = plans_[iPlan].boxAbove();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
+  size_t iPlan(static_cast<size_t>(i));
+  size_t iBoxAbove(static_cast<size_t>(plans_[iPlan].boxAbove()));
+  size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
   boxAbovePlanFcts_[iBoxAbove].LB(out.head(8));
   boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8));
 }
@@ -294,9 +291,9 @@ void BoxTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  auto iPlan = i;
-  auto iBoxAbove = plans_[iPlan].boxAbove();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
+  size_t iPlan(static_cast<size_t>(i));
+  size_t iBoxAbove(static_cast<size_t>(plans_[iPlan].boxAbove()));
+  size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
   boxAbovePlanFcts_[iBoxAbove].UB(out.head(8));
   boxAbovePlanFcts_[iBoxBelow].UB(out.tail(8));
 }

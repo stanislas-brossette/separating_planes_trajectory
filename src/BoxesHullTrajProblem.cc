@@ -29,13 +29,13 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
                                            const std::string& configPath)
     : Problem(M),
       config_(configPath),
-      nBoxes_(config_["nBoxes"].asInt()),
-      nObstacles_(config_["nObstacles"].asInt()),
+      nBoxes_(config_["nBoxes"].asSize_t()),
+      nObstacles_(config_["nObstacles"].asSize_t()),
       boxSize_(config_["BoxSize"].asVector3d()),
       initPos_(config_["initPos"].asVector3d()),
       finalPos_(config_["finalPos"].asVector3d()),
       initBox_(-1, boxSize_),
-      finalBox_(nBoxes_, boxSize_),
+      finalBox_(static_cast<int>(nBoxes_), boxSize_),
       initBoxAbovePlanFct_(initBox_),
       finalBoxAbovePlanFct_(finalBox_)
 {
@@ -58,13 +58,13 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
 
   for (int i = -1; i < static_cast<int>(nBoxes_); ++i)
   {
-    for (int j = 0; j < nObstacles_; ++j)
+    for (int j = 0; j < static_cast<int>(nObstacles_); ++j)
     {
       plans_.push_back(PlanForHull(j, i, i + 1));
     }
   }
 
-  for (int i = 0; i < nPlans_; i++)
+  for (size_t i = 0; i < static_cast<size_t>(nPlans_); i++)
   {
     std::string str("Plan" + std::to_string(i) + "BetweenHullBoxes" +
                     std::to_string(plans_[i].box0Above()) + "And" +
@@ -226,10 +226,12 @@ void BoxesHullTrajProblem::evalNonLinCstr(RefVec out, size_t i) const
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
   out.setZero();
 
-  auto iPlan = i;
-  auto iBox0Above = plans_[iPlan].box0Above();
-  auto iBox1Above = plans_[iPlan].box1Above();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
+  const size_t iPlan(static_cast<size_t>(i));
+  const int iBox0Above(plans_[iPlan].box0Above());
+  const int iBox1Above(plans_[iPlan].box1Above());
+  const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
+  const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
+  const size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
   Eigen::Vector4d nullQuat(0, 0, 0, 1);
   Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
   Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
@@ -237,24 +239,28 @@ void BoxesHullTrajProblem::evalNonLinCstr(RefVec out, size_t i) const
 
   Eigen::Vector3d trans0Above, trans1Above;
 
-  const BoxAbovePlan* box0AbovePlanFct = &boxAbovePlanFcts_[iBox0Above];
-  const BoxAbovePlan* box1AbovePlanFct = &boxAbovePlanFcts_[iBox1Above];
+  const BoxAbovePlan* box0AbovePlanFct(nullptr);
+  const BoxAbovePlan* box1AbovePlanFct(nullptr);
 
-  if (iBox0Above != -1 && iBox1Above != nBoxes_)
+  if (iBox0Above != -1 && iBox1AboveSize_t != nBoxes_)
   {
-    trans0Above = phi_x_z()(0)(iBox0Above)[0];
-    trans1Above = phi_x_z()(0)(iBox1Above)[0];
+    trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
+    trans1Above = phi_x_z()(0)(iBox1AboveSize_t)[0];
+    box0AbovePlanFct = &boxAbovePlanFcts_[iBox0AboveSize_t];
+    box1AbovePlanFct = &boxAbovePlanFcts_[iBox1AboveSize_t];
   }
-  else if (iBox0Above == -1 && iBox1Above != nBoxes_)
+  else if (iBox0Above == -1 && iBox1AboveSize_t != nBoxes_)
   {
     trans0Above = initPos_;
-    trans1Above = phi_x_z()(0)(iBox1Above)[0];
+    trans1Above = phi_x_z()(0)(iBox1AboveSize_t)[0];
     box0AbovePlanFct = &initBoxAbovePlanFct_;
+    box1AbovePlanFct = &boxAbovePlanFcts_[iBox1AboveSize_t];
   }
-  else if (iBox0Above != -1 && iBox1Above == nBoxes_)
+  else if (iBox0Above != -1 && iBox1AboveSize_t == nBoxes_)
   {
-    trans0Above = phi_x_z()(0)(iBox0Above)[0];
+    trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
     trans1Above = finalPos_;
+    box0AbovePlanFct = &boxAbovePlanFcts_[iBox0AboveSize_t];
     box1AbovePlanFct = &finalBoxAbovePlanFct_;
   }
   else
@@ -276,33 +282,32 @@ void BoxesHullTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
   assert(out.rows() == nonLinCstrDim(i) && "wrong row size");
   assert(out.cols() == M().tangentDim() && "Wrong cols size");
 
-  auto iPlan = i;
-  auto iBox0Above = plans_[iPlan].box0Above();
-  auto iBox1Above = plans_[iPlan].box1Above();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
+  const size_t iPlan(static_cast<size_t>(i));
+  const int iBox0Above(plans_[iPlan].box0Above());
+  const int iBox1Above(plans_[iPlan].box1Above());
+  const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
+  const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
+  const size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
 
   Eigen::Vector4d nullQuat(0, 0, 0, 1);
   Eigen::Vector3d transBelow = obstacles_[iBoxBelow].center();
   Eigen::Vector3d normal = phi_x_z()(1)(iPlan)[1];
   double d = phi_x_z()(1)(iPlan)[0](0);
-  auto rowBegin = 24 * iPlan;
-  auto box0AboveBegin = 3 * iBox0Above;
-  auto box1AboveBegin = 3 * iBox1Above;
-  auto planBegin = 3 * nBoxes_ + 4 * iPlan;
-  long rowBeginLong = static_cast<long>(rowBegin);
-  long box0AboveBeginLong = static_cast<long>(box0AboveBegin);
-  long box1AboveBeginLong = static_cast<long>(box1AboveBegin);
-  long planBeginLong = static_cast<long>(planBegin);
+
+  long rowBeginLong = static_cast<long>(16 * iPlan);
+  long box0AboveBeginLong = static_cast<long>(3 * iBox0Above);
+  long box1AboveBeginLong = static_cast<long>(3 * iBox1Above);
+  long planBeginLong = static_cast<long>(3 * nBoxes_ + 4 * iPlan);
 
   Eigen::Matrix<double, 8, 1> tmpWTF;
 
   Eigen::Vector3d trans0Above, trans1Above;
-  const BoxAbovePlan* box0AbovePlanFct = &boxAbovePlanFcts_[iBox0Above];
-  const BoxAbovePlan* box1AbovePlanFct = &boxAbovePlanFcts_[iBox1Above];
-  if (iBox0Above != -1 && iBox1Above != nBoxes_)
+  const BoxAbovePlan* box0AbovePlanFct = &boxAbovePlanFcts_[iBox0AboveSize_t];
+  const BoxAbovePlan* box1AbovePlanFct = &boxAbovePlanFcts_[iBox1AboveSize_t];
+  if (iBox0Above != -1 && iBox1AboveSize_t != nBoxes_)
   {
-    trans0Above = phi_x_z()(0)(iBox0Above)[0];
-    trans1Above = phi_x_z()(0)(iBox1Above)[0];
+    trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
+    trans1Above = phi_x_z()(0)(iBox1AboveSize_t)[0];
     box0AbovePlanFct->diffTrans(
         outRep_.block(rowBeginLong, box0AboveBeginLong, 8, 3), trans0Above,
         nullQuat, d, normal);
@@ -310,18 +315,18 @@ void BoxesHullTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
         outRep_.block(rowBeginLong + 8, box1AboveBeginLong, 8, 3), trans1Above,
         nullQuat, d, normal);
   }
-  else if (iBox0Above == -1 && iBox1Above != nBoxes_)
+  else if (iBox0Above == -1 && iBox1AboveSize_t != nBoxes_)
   {
     trans0Above = initPos_;
-    trans1Above = phi_x_z()(0)(iBox1Above)[0];
+    trans1Above = phi_x_z()(0)(iBox1AboveSize_t)[0];
     box0AbovePlanFct = &initBoxAbovePlanFct_;
     box1AbovePlanFct->diffTrans(
         outRep_.block(rowBeginLong + 8, box1AboveBeginLong, 8, 3), trans1Above,
         nullQuat, d, normal);
   }
-  else if (iBox0Above != -1 && iBox1Above == nBoxes_)
+  else if (iBox0Above != -1 && iBox1AboveSize_t == nBoxes_)
   {
-    trans0Above = phi_x_z()(0)(iBox0Above)[0];
+    trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
     trans1Above = finalPos_;
     box1AbovePlanFct = &finalBoxAbovePlanFct_;
     box0AbovePlanFct->diffTrans(
@@ -367,24 +372,30 @@ void BoxesHullTrajProblem::getNonLinCstrLB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  auto iPlan = i;
-  auto iBox0Above = plans_[iPlan].box0Above();
-  auto iBox1Above = plans_[iPlan].box1Above();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
-  boxAbovePlanFcts_[iBox0Above].LB(out.head(8));
-  boxAbovePlanFcts_[iBox1Above].LB(out.segment(8, 8));
+  const size_t iPlan(static_cast<size_t>(i));
+  const int iBox0Above(plans_[iPlan].box0Above());
+  const int iBox1Above(plans_[iPlan].box1Above());
+  const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
+  const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
+  const size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
+  boxAbovePlanFcts_[iBox0AboveSize_t].LB(out.head(8));
+  boxAbovePlanFcts_[iBox1AboveSize_t].LB(out.segment(8, 8));
+
   boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8));
 }
 void BoxesHullTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const
 {
   assert(i < numberOfCstr() && "This constraint index is out of bounds");
   assert(out.size() == nonLinCstrDim(i) && "wrong size");
-  auto iPlan = i;
-  auto iBox0Above = plans_[iPlan].box0Above();
-  auto iBox1Above = plans_[iPlan].box1Above();
-  auto iBoxBelow = plans_[iPlan].boxBelow();
-  boxAbovePlanFcts_[iBox0Above].UB(out.head(8));
-  boxAbovePlanFcts_[iBox1Above].UB(out.segment(8, 8));
+  const size_t iPlan(static_cast<size_t>(i));
+  const int iBox0Above(plans_[iPlan].box0Above());
+  const int iBox1Above(plans_[iPlan].box1Above());
+  const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
+  const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
+  const size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
+
+  boxAbovePlanFcts_[iBox0AboveSize_t].UB(out.head(8));
+  boxAbovePlanFcts_[iBox1AboveSize_t].UB(out.segment(8, 8));
   boxAbovePlanFcts_[iBoxBelow].UB(out.tail(8));
 }
 

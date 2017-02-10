@@ -69,9 +69,9 @@ class BoxesHullTrajProblem : public pgs::Problem
  private:
   ProblemConfig config_;
 
-  int nBoxes_;
-  int nPlans_;
-  int nObstacles_;
+  size_t nBoxes_;
+  size_t nPlans_;
+  size_t nObstacles_;
 
   Eigen::Vector3d boxSize_;
   Eigen::Vector3d initPos_;

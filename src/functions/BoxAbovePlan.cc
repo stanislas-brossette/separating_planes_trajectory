@@ -154,7 +154,7 @@ void BoxAbovePlan::diffNormal(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
 
 void BoxAbovePlan::LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const
 {
-  for (long i = 0; i < 8; i++) res << 0, 0, 0, 0, 0, 0, 0, 0;
+  res << 0, 0, 0, 0, 0, 0, 0, 0;
 }
 
 void BoxAbovePlan::UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const

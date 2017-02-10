@@ -23,7 +23,7 @@ int main(void)
             << std::endl;
   std::srand(static_cast<uint>(std::time(0)));
   std::string testDir = TESTS_DATA_DIR;
-  std::string ymlPath = testDir + "/stepOnStairs.yml";
+  std::string ymlPath = testDir + "/oneObstacleHullTraj.yml";
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];

@@ -28,6 +28,7 @@ struct ProblemConfig
 
     double asDouble() const;
     int asInt() const;
+    size_t asSize_t() const;
     bool asBool() const;
     Eigen::VectorXd asVectorXd() const;
     Eigen::Vector3d asVector3d() const;
