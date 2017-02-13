@@ -282,6 +282,8 @@ void BoxesHullTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
   assert(out.rows() == nonLinCstrDim(i) && "wrong row size");
   assert(out.cols() == M().tangentDim() && "Wrong cols size");
 
+  outRep_.setZero();
+
   const size_t iPlan(static_cast<size_t>(i));
   const int iBox0Above(plans_[iPlan].box0Above());
   const int iBox1Above(plans_[iPlan].box1Above());
