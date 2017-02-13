@@ -1,0 +1,57 @@
+VERBOSE: 0
+VERBOSE_QP: false
+VERBOSE_SOC: false
+displayFilter: false
+epsilon_D: 1e-4
+epsilon_P: 1e-4
+finiteDiffCheck: false
+hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+logLevel: "NO_LOG"
+logDirectory: "log/withCFSQP/"
+maxIter: 200
+regularizationValMin: 1e-8
+resetHessianAfterRestoration: false
+resetHessianBeforeRestoration: false
+warmStart: true
+rho0: 1
+rhoMax: 10
+rhoMin: 1e-8
+updatePrevDiffLagWithMostRecentLambda: true
+RestQP:
+  feasTol: 1e-6
+RestFP:
+  feasTol: 1e-6
+QP:
+  feasTol: 1e-6
+FP:
+  feasTol: 1e-6
+
+#logs
+logName: "logs/withFloor.log"
+
+#Boxes
+nBoxes: 7
+BoxSize: [0.2, 0.1, 0.05]
+
+#Obstacles
+nObstacles: 1
+ObstacleSizes: [0.3, 1.1, 0.3]
+ObstaclePositions: [0.5, 0.0, 0.15]
+#obstacles:
+  #- {size: [0.3, 1.1, 0.3], pos: [0.5, 0.0, 0.15]}
+  #- {size: [0.3, 1.1, 0.3], pos: [0.3, 0.3, 0.05]}
+
+#ground
+normalZPlus: [0, 0, 1]
+distZPlus: 0
+
+nFixedPlanes: 1
+#fixedPlanes:
+  #- { normal: [0,0,1], dist: 0}
+
+#initial and final positions
+initPos: [0, 0, 0.025]
+finalPos: [1.8, 0.1, 0.14]
+
+
