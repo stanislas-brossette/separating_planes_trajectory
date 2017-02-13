@@ -29,11 +29,12 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
                                            const std::string& configPath)
     : Problem(M),
       config_(configPath),
-      nBoxes_(config_["nBoxes"].asSize_t()),
-      nObstacles_(config_["nObstacles"].asSize_t()),
-      boxSize_(config_["BoxSize"].asVector3d()),
       initPos_(config_["initPos"].asVector3d()),
       finalPos_(config_["finalPos"].asVector3d()),
+      obstacles_(config_["obstacles"].asVecBox()),
+      boxSize_(config_["BoxSize"].asVector3d()),
+      nBoxes_(config_["nBoxes"].asSize_t()),
+      nObstacles_(obstacles_.size()),
       initBox_(-1, boxSize_),
       finalBox_(static_cast<int>(nBoxes_), boxSize_),
       initBoxAbovePlanFct_(initBox_),
@@ -48,11 +49,8 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
     boxAbovePlanFcts_.push_back(BoxAbovePlan(b));
   }
 
-  for (int i = 0; i < static_cast<int>(nObstacles_); ++i)
+  for (auto o : obstacles_)
   {
-    Box o(i, config_["ObstacleSizes"].asVector3d(),
-          config_["ObstaclePositions"].asVector3d());
-    obstacles_.push_back(o);
     obstacleAbovePlanFcts_.push_back(BoxAbovePlan(o));
   }
 

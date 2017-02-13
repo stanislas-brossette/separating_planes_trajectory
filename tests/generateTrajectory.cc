@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
-  int nObstacles = config["nObstacles"];
+  int nObstacles = config["obstacles"].asVecBox().size();
   int nFixedPlanes = config["nFixedPlanes"];
 
   mnf::CartesianProduct* M =

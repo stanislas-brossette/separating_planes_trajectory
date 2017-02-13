@@ -69,19 +69,22 @@ class BoxesHullTrajProblem : public pgs::Problem
  private:
   ProblemConfig config_;
 
+  Eigen::Vector3d initPos_;
+  Eigen::Vector3d finalPos_;
+
+  std::vector<Box> obstacles_;
+
+  Eigen::Vector3d boxSize_;
+
   size_t nBoxes_;
   size_t nPlans_;
   size_t nObstacles_;
 
-  Eigen::Vector3d boxSize_;
-  Eigen::Vector3d initPos_;
-  Eigen::Vector3d finalPos_;
 
   Box initBox_, finalBox_;
   BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;
 
   std::vector<Box> boxes_;
-  std::vector<Box> obstacles_;
   std::vector<PlanForHull> plans_;
   // std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
   std::vector<BoxAbovePlan> boxAbovePlanFcts_;

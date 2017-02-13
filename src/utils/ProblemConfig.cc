@@ -1,23 +1,40 @@
+#include <sstream>
+#include <stdexcept>
+#include <boost/filesystem.hpp>
+
 #include <feet-trajectory/utils/ProblemConfig.hh>
 
 namespace feettrajectory
 {
 ProblemConfig::CustomString::CustomString() {}
 ProblemConfig::CustomString::CustomString(const CustomString& cS)
-    : std::string(cS), v(cS.v)
+    : std::string(cS),
+      vEigen(cS.vEigen),
+      vBox(cS.vBox),
+      vString(cS.vString)
 {
 }
 ProblemConfig::CustomString::CustomString(std::string s)
-    : std::string(s), v(Eigen::VectorXd::Zero(0))
+    : std::string(s)
 {
 }
 ProblemConfig::CustomString::CustomString(std::string* s)
-    : std::string(*s), v(Eigen::VectorXd::Zero(0))
+    : std::string(*s)
 {
 }
 
 ProblemConfig::CustomString::CustomString(Eigen::VectorXd& vect, std::string s)
-    : std::string(s), v(vect)
+    : std::string(s), vEigen(vect)
+{
+}
+
+ProblemConfig::CustomString::CustomString(std::vector<Box>& vect, std::string s)
+    : std::string(s), vBox(vect)
+{
+}
+
+ProblemConfig::CustomString::CustomString(std::vector<std::string>& v, std::string s)
+  : std::string(s), vString(v)
 {
 }
 
@@ -58,17 +75,28 @@ size_t ProblemConfig::CustomString::asSize_t() const
     return 0;
   }
 }
+
 bool ProblemConfig::CustomString::asBool() const { return *this == "true"; }
-Eigen::VectorXd ProblemConfig::CustomString::asVectorXd() const { return v; }
+
+Eigen::VectorXd ProblemConfig::CustomString::asVectorXd() const
+{
+  return vEigen;
+}
+
 Eigen::Vector3d ProblemConfig::CustomString::asVector3d() const
 {
-  assert(v.size() == 3);
-  return Eigen::Vector3d(v);
+  assert(vEigen.size() == 3);
+  return Eigen::Vector3d(vEigen);
 }
-Eigen::Vector4d ProblemConfig::CustomString::asVector4d() const
+
+std::vector<Box> ProblemConfig::CustomString::asVecBox() const
 {
-  assert(v.size() == 4);
-  return Eigen::Vector4d(v);
+  return vBox;
+}
+
+std::vector<std::string> ProblemConfig::CustomString::asVecString() const
+{
+  return vString;
 }
 
 ProblemConfig::CustomString::operator double() const { return asDouble(); }
@@ -81,6 +109,14 @@ ProblemConfig::CustomString::operator Eigen::VectorXd() const
 ProblemConfig::CustomString::operator Eigen::Vector3d() const
 {
   return asVector3d();
+}
+ProblemConfig::CustomString::operator std::vector<Box>() const
+{
+  return asVecBox();
+}
+ProblemConfig::CustomString::operator std::vector<std::string>() const
+{
+  return asVecString();
 }
 
 ProblemConfig::ProblemConfig(std::string configFile)
@@ -105,40 +141,111 @@ void ProblemConfig::loadFile(std::string configFile)
   {
     return;
   }
-
+  if (!boost::filesystem::exists(configFile))
+  {
+    std::stringstream errorMsg;
+    errorMsg << "\nError loading YAML File:\n" << configFile
+             << "\nDoes not exist!\n" << std::endl;
+    throw std::runtime_error(errorMsg.str());
+  }
   YAML::Node node = YAML::LoadFile(configFile);
 
   std::function<void(const YAML::Node&, std::string)> getAsCustomString =
-      [this, &getAsCustomString](const YAML::Node& tree, std::string prefix)
+      [this, &getAsCustomString](const YAML::Node& node, std::string prefix)
   {
-    if (tree.Type() == YAML::NodeType::Map)
+    if (node.IsMap())
     {
-      for (YAML::const_iterator it = tree.begin(); it != tree.end(); ++it)
+      for (auto subNode: node)
       {
-        if (it->second.Type() == YAML::NodeType::Scalar)
+        if (subNode.second.IsScalar())
         {
-          prop[globalCategory + prefix + it->first.as<std::string>()] =
-              it->second.as<std::string>();
+          prop[globalCategory + prefix + subNode.first.as<std::string>()] =
+              subNode.second.as<std::string>();
+        }
+        else if (subNode.second.IsSequence())
+        {
+          bool isBoxMap = false;
+          for (auto subSubNode : subNode.second)
+          {
+            if(subSubNode.IsMap() && subSubNode.size() == 2)
+            {
+              isBoxMap = true;
+            }
+            else
+            {
+              isBoxMap = false;
+              getAsCustomString(subNode.second,
+                                prefix + subNode.first.as<std::string>() + ".");
+              break;
+            }
+          }
+          std::string entry = prefix + subNode.first.as<std::string>();
+          if(isBoxMap)
+          {
+            std::vector<Box> vecC;
+            size_t index(0);
+            std::string acc("");
+            for (auto subSubNode: subNode.second)
+            {
+              Eigen::Vector3d size, center;
+              for (int i = 0; i < 3; i++)
+              {
+                size[i] = subSubNode["size"][i].as<double>();
+                center[i] = subSubNode["center"][i].as<double>();
+              }
+              vecC.push_back(Box(index, size, center));
+              index++;
+            }
+            prop[entry] = CustomString(vecC, acc);
+          }
         }
         else
         {
-          getAsCustomString(it->second,
-                            prefix + it->first.as<std::string>() + ".");
+          getAsCustomString(subNode.second,
+                            prefix + subNode.first.as<std::string>() + ".");
         }
       }
     }
-    if (tree.Type() == YAML::NodeType::Sequence)
+    if (node.IsSequence())
     {
-      Eigen::VectorXd vect(static_cast<long>(tree.size()));
-      std::string acc("");
-      int i = 0;
-      for (YAML::const_iterator it = tree.begin(); it != tree.end(); ++it)
+      if(node.size() && node[0].IsScalar())
       {
-        acc += it->as<std::string>();
-        vect(i++) = it->as<double>();
+        bool is_double_sequence = true;
+        try
+        {
+          double d = node[0].as<double>();
+          (void)(d);
+        }
+        catch(std::runtime_error &)
+        {
+          is_double_sequence = false;
+        }
+        if(is_double_sequence)
+        {
+          Eigen::VectorXd vect(static_cast<long>(node.size()));
+          std::string acc("");
+          int i = 0;
+          for (auto subNode: node)
+          {
+            acc += subNode.as<std::string>();
+            vect(i++) = subNode.as<double>();
+          }
+          prop[globalCategory + prefix.substr(0, prefix.length() - 1)] =
+              CustomString(vect, acc);
+        }
+        else
+        {
+          std::vector<std::string> v(static_cast<size_t>(node.size()));
+          std::string acc("");
+          size_t i = 0;
+          for(const auto & subNode : node)
+          {
+            acc += ";"; acc += subNode.as<std::string>();
+            v[i++] = subNode.as<std::string>();
+          }
+          prop[globalCategory + prefix.substr(0, prefix.length() - 1)] = CustomString(v, acc);
+        }
       }
-      prop[globalCategory + prefix.substr(0, prefix.length() - 1)] =
-          CustomString(vect, acc);
     }
   };
 
@@ -154,6 +261,14 @@ const ProblemConfig::CustomString ProblemConfig::get(std::string key)
   }
 
   return prop[globalCategory + key];
+}
+
+bool ProblemConfig::has(std::string key)
+{
+  if (prop.find(globalCategory + key) == prop.end())
+    return false;
+  else
+    return true;
 }
 
 const ProblemConfig::CustomString ProblemConfig::operator[](std::string key)
@@ -175,32 +290,26 @@ ProblemConfig ProblemConfig::operator()(std::string section)
   return std::move(subSection(section));
 }
 
-bool ProblemConfig::has(std::string key)
-{
-  if (prop.find(globalCategory + key) == prop.end())
-    return false;
-  else
-    return true;
-}
-
-ProblemConfig ProblemConfig::loadUserConfig(std::string envVar)
-{
-  ProblemConfig config;
-  char* userConfigPath;
-  if ((userConfigPath = std::getenv("PROBLEM_GENERATOR_USER_CONFIG")) !=
-      nullptr)
-  {
-    std::cout << "loading config from:" << userConfigPath << std::endl;
-    config.loadFile(userConfigPath);
-  }
-  else
-  {
-    std::cerr
-        << "\033[31mWARNING\033[0m: no user config file found (environment "
-           "variable \033[34m" << envVar
-        << "\033[0m not set). Robot models and other user-dependent parameters"
-           "may not be set correctly." << std::endl;
-  }
-  return config;
-}
-}  // end of namespace inertialidentification
+//ProblemConfig ProblemConfig::loadUserConfig()
+//{
+  //ProblemConfig config;
+  //char* userConfigPath;
+  //if ((userConfigPath = std::getenv("PROBLEM_GENERATOR_USER_CONFIG")) !=
+      //nullptr)
+  //{
+    //config.loadFile(userConfigPath);
+  //}
+  //else
+  //{
+    //std::cerr
+        //<< "\033[31mWARNING\033[0m: no user config file found (environment "
+           //"variable \033[34m" << "PROBLEM_GENERATOR_USER_CONFIG"
+        //<< "\033[0m not set)."
+        //<< " Will default to the default file: " << PG_DEFAULT_CONFIG
+        //<< " Robot models and other user-dependent parameters"
+           //"may not be set correctly." << std::endl;
+    //config.loadFile(PG_DEFAULT_CONFIG);
+  //}
+  //return config;
+//}
+}  // end of namespace feettrajectory
