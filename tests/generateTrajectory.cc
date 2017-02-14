@@ -62,11 +62,14 @@ int main(int argc, char *argv[])
 
   print(config["logName"], myProb, res.x_star);
 
-  // Call the Python script passing a filename argument.
-  std::string command = "./viewSteps.py logs/";
-  command += argv[1];
-  command += ".log";
-  system(command.c_str());
+  if (config.has("plotResult") && config["plotResult"])
+  {
+    // Call the Python script passing a filename argument.
+    std::string command = "./viewSteps.py logs/";
+    command += argv[1];
+    command += ".log";
+    system(command.c_str());
+  }
 
   return 0;
 }
