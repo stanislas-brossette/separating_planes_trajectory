@@ -17,6 +17,7 @@ using namespace feettrajectory;
 
 int main(int argc, char *argv[])
 {
+  assert(argc > 1 && "Please provide a file to load");
   std::cout << "Generate Trajectory: Loads a config and generates a trajectory "
                "between initPos and finalPos that avoids the obstacles and "
                "some fixed planes" << std::endl;
@@ -26,8 +27,7 @@ int main(int argc, char *argv[])
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
-  int nObstacles = config["obstacles"].asVecBox().size();
-  int nFixedPlanes = config["nFixedPlanes"];
+  int nObstacles = static_cast<int>(config["obstacles"].asVecBox().size());
 
   mnf::CartesianProduct* M =
       BoxesHullTrajProblem::buildManifold(nBoxes, nObstacles);

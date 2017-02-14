@@ -15,9 +15,11 @@
 #include <pgsolver/utils/defs.h>
 
 #include <feet-trajectory/utils/Box.hh>
+#include <feet-trajectory/utils/FixedPlan.hh>
 #include <feet-trajectory/utils/PlanForHull.hh>
 #include <feet-trajectory/utils/ProblemConfig.hh>
 #include <feet-trajectory/functions/BoxAbovePlan.hh>
+#include <feet-trajectory/functions/BoxAboveFixedPlan.hh>
 
 namespace feettrajectory
 {
@@ -73,6 +75,7 @@ class BoxesHullTrajProblem : public pgs::Problem
   Eigen::Vector3d finalPos_;
 
   std::vector<Box> obstacles_;
+  std::vector<FixedPlan> fixedPlanes_;
 
   Eigen::Vector3d boxSize_;
 
@@ -80,13 +83,14 @@ class BoxesHullTrajProblem : public pgs::Problem
   size_t nPlans_;
   size_t nObstacles_;
 
+  //double threshold_; //half of the min dimension of the box
 
   Box initBox_, finalBox_;
   BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;
 
   std::vector<Box> boxes_;
   std::vector<PlanForHull> plans_;
-  // std::vector<CubeAboveFixedPlan> cubeAboveFixedPlanCstrs_;
+  std::vector<BoxAboveFixedPlan> boxAboveFixedPlanFcts_;
   std::vector<BoxAbovePlan> boxAbovePlanFcts_;
   std::vector<BoxAbovePlan> obstacleAbovePlanFcts_;
   std::vector<std::string> cstrNames_;

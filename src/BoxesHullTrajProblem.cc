@@ -32,6 +32,7 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
       initPos_(config_["initPos"].asVector3d()),
       finalPos_(config_["finalPos"].asVector3d()),
       obstacles_(config_["obstacles"].asVecBox()),
+      fixedPlanes_(config_["fixedPlanes"].asVecFixedPlan()),
       boxSize_(config_["BoxSize"].asVector3d()),
       nBoxes_(config_["nBoxes"].asSize_t()),
       nObstacles_(obstacles_.size()),
@@ -42,11 +43,21 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
 {
   nPlans_ = (nBoxes_ + 1) * nObstacles_;
 
+  //threshold_ = -boxSize_.minCoeff() / 2;
+
   for (int i = 0; i < static_cast<int>(nBoxes_); ++i)
   {
     Box b(i, boxSize_);
     boxes_.push_back(b);
     boxAbovePlanFcts_.push_back(BoxAbovePlan(b));
+  }
+
+  for (auto p : fixedPlanes_)
+  {
+    for (auto b : boxes_)
+    {
+      boxAboveFixedPlanFcts_.push_back(BoxAboveFixedPlan(b, p));
+    }
   }
 
   for (auto o : obstacles_)
@@ -378,8 +389,18 @@ void BoxesHullTrajProblem::getNonLinCstrLB(RefVec out, size_t i) const
   const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
   const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
   const size_t iBoxBelow(static_cast<size_t>(plans_[iPlan].boxBelow()));
-  boxAbovePlanFcts_[iBox0AboveSize_t].LB(out.head(8));
-  boxAbovePlanFcts_[iBox1AboveSize_t].LB(out.segment(8, 8));
+
+  //if (iBox0Above == -1)
+    //out.head(8) << threshold_, threshold_, threshold_, threshold_, threshold_,
+        //threshold_, threshold_, threshold_;
+  //else
+    boxAbovePlanFcts_[iBox0AboveSize_t].LB(out.head(8));
+
+  //if (iBox1Above == nBoxes_)
+    //out.segment(8, 8) << threshold_, threshold_, threshold_, threshold_,
+        //threshold_, threshold_, threshold_, threshold_;
+  //else
+    boxAbovePlanFcts_[iBox1AboveSize_t].LB(out.segment(8, 8));
 
   boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8));
 }

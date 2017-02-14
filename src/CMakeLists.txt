@@ -8,9 +8,11 @@ SET(SOURCES
   utils/quat2mat.cc
   utils/Printer.cc
   functions/BoxAbovePlan.cc
+  functions/BoxAboveFixedPlan.cc
   )
 SET(HEADERS
   ../include/feet-trajectory/utils/Box.hh
+  ../include/feet-trajectory/utils/FixedPlan.hh
   ../include/feet-trajectory/utils/Plan.hh
   ../include/feet-trajectory/utils/PlanForHull.hh
   ../include/feet-trajectory/utils/ProblemConfig.hh
@@ -18,6 +20,7 @@ SET(HEADERS
   ../include/feet-trajectory/utils/quat2mat.hh
   ../include/feet-trajectory/utils/Printer.hh
   ../include/feet-trajectory/functions/BoxAbovePlan.hh
+  ../include/feet-trajectory/functions/BoxAboveFixedPlan.hh
   ../include/feet-trajectory/BoxTrajProblem.hh
   ../include/feet-trajectory/BoxesHullTrajProblem.hh
   )

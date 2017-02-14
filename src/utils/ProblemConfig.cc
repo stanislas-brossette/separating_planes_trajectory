@@ -11,30 +11,31 @@ ProblemConfig::CustomString::CustomString(const CustomString& cS)
     : std::string(cS),
       vEigen(cS.vEigen),
       vBox(cS.vBox),
+      vFixedPlan(cS.vFixedPlan),
       vString(cS.vString)
 {
 }
-ProblemConfig::CustomString::CustomString(std::string s)
-    : std::string(s)
-{
-}
-ProblemConfig::CustomString::CustomString(std::string* s)
-    : std::string(*s)
-{
-}
+ProblemConfig::CustomString::CustomString(std::string s) : std::string(s) {}
+ProblemConfig::CustomString::CustomString(std::string* s) : std::string(*s) {}
 
 ProblemConfig::CustomString::CustomString(Eigen::VectorXd& vect, std::string s)
     : std::string(s), vEigen(vect)
 {
 }
 
+ProblemConfig::CustomString::CustomString(std::vector<FixedPlan>& vect,
+                                          std::string s)
+    : std::string(s), vFixedPlan(vect)
+{
+}
 ProblemConfig::CustomString::CustomString(std::vector<Box>& vect, std::string s)
     : std::string(s), vBox(vect)
 {
 }
 
-ProblemConfig::CustomString::CustomString(std::vector<std::string>& v, std::string s)
-  : std::string(s), vString(v)
+ProblemConfig::CustomString::CustomString(std::vector<std::string>& v,
+                                          std::string s)
+    : std::string(s), vString(v)
 {
 }
 
@@ -89,9 +90,10 @@ Eigen::Vector3d ProblemConfig::CustomString::asVector3d() const
   return Eigen::Vector3d(vEigen);
 }
 
-std::vector<Box> ProblemConfig::CustomString::asVecBox() const
+std::vector<Box> ProblemConfig::CustomString::asVecBox() const { return vBox; }
+std::vector<FixedPlan> ProblemConfig::CustomString::asVecFixedPlan() const
 {
-  return vBox;
+  return vFixedPlan;
 }
 
 std::vector<std::string> ProblemConfig::CustomString::asVecString() const
@@ -113,6 +115,10 @@ ProblemConfig::CustomString::operator Eigen::Vector3d() const
 ProblemConfig::CustomString::operator std::vector<Box>() const
 {
   return asVecBox();
+}
+ProblemConfig::CustomString::operator std::vector<FixedPlan>() const
+{
+  return asVecFixedPlan();
 }
 ProblemConfig::CustomString::operator std::vector<std::string>() const
 {
@@ -155,7 +161,7 @@ void ProblemConfig::loadFile(std::string configFile)
   {
     if (node.IsMap())
     {
-      for (auto subNode: node)
+      for (auto subNode : node)
       {
         if (subNode.second.IsScalar())
         {
@@ -165,27 +171,55 @@ void ProblemConfig::loadFile(std::string configFile)
         else if (subNode.second.IsSequence())
         {
           bool isBoxMap = false;
+          bool isFixedPlanMap = false;
           for (auto subSubNode : subNode.second)
           {
-            if(subSubNode.IsMap() && subSubNode.size() == 2)
+            bool hasNormal = false;
+            bool hasD= false;
+            bool hasCenter = false;
+            bool hasSize = false;
+            if (subSubNode.IsMap() && subSubNode.size() == 2)
+            {
+              for (auto i : subSubNode)
+              {
+                if (std::string("normal").compare(i.first.as<std::string>()) ==
+                    0)
+                  hasNormal = true;
+                else if (std::string("d")
+                             .compare(i.first.as<std::string>()) == 0)
+                  hasD= true;
+                else if (std::string("center")
+                             .compare(i.first.as<std::string>()) == 0)
+                  hasCenter = true;
+                else if (std::string("size")
+                             .compare(i.first.as<std::string>()) == 0)
+                  hasSize = true;
+              }
+            }
+            if (hasNormal && hasD)
+            {
+              isFixedPlanMap = true;
+            }
+            else if (hasCenter && hasSize)
             {
               isBoxMap = true;
             }
             else
             {
               isBoxMap = false;
+              isFixedPlanMap = false;
               getAsCustomString(subNode.second,
                                 prefix + subNode.first.as<std::string>() + ".");
               break;
             }
           }
           std::string entry = prefix + subNode.first.as<std::string>();
-          if(isBoxMap)
+          if (isBoxMap)
           {
             std::vector<Box> vecC;
-            size_t index(0);
+            int index(0);
             std::string acc("");
-            for (auto subSubNode: subNode.second)
+            for (auto subSubNode : subNode.second)
             {
               Eigen::Vector3d size, center;
               for (int i = 0; i < 3; i++)
@@ -195,6 +229,22 @@ void ProblemConfig::loadFile(std::string configFile)
               }
               vecC.push_back(Box(index, size, center));
               index++;
+            }
+            prop[entry] = CustomString(vecC, acc);
+          }
+          else if (isFixedPlanMap)
+          {
+            std::vector<FixedPlan> vecC;
+            std::string acc("");
+            for (auto subSubNode : subNode.second)
+            {
+              double d = subSubNode["d"].as<double>();
+              Eigen::Vector3d normal;
+              for (int i = 0; i < 3; i++)
+              {
+                normal[i] = subSubNode["normal"][i].as<double>();
+              }
+              vecC.push_back(FixedPlan(d, normal));
             }
             prop[entry] = CustomString(vecC, acc);
           }
@@ -208,7 +258,7 @@ void ProblemConfig::loadFile(std::string configFile)
     }
     if (node.IsSequence())
     {
-      if(node.size() && node[0].IsScalar())
+      if (node.size() && node[0].IsScalar())
       {
         bool is_double_sequence = true;
         try
@@ -216,16 +266,16 @@ void ProblemConfig::loadFile(std::string configFile)
           double d = node[0].as<double>();
           (void)(d);
         }
-        catch(std::runtime_error &)
+        catch (std::runtime_error&)
         {
           is_double_sequence = false;
         }
-        if(is_double_sequence)
+        if (is_double_sequence)
         {
           Eigen::VectorXd vect(static_cast<long>(node.size()));
           std::string acc("");
           int i = 0;
-          for (auto subNode: node)
+          for (auto subNode : node)
           {
             acc += subNode.as<std::string>();
             vect(i++) = subNode.as<double>();
@@ -238,12 +288,14 @@ void ProblemConfig::loadFile(std::string configFile)
           std::vector<std::string> v(static_cast<size_t>(node.size()));
           std::string acc("");
           size_t i = 0;
-          for(const auto & subNode : node)
+          for (const auto& subNode : node)
           {
-            acc += ";"; acc += subNode.as<std::string>();
+            acc += ";";
+            acc += subNode.as<std::string>();
             v[i++] = subNode.as<std::string>();
           }
-          prop[globalCategory + prefix.substr(0, prefix.length() - 1)] = CustomString(v, acc);
+          prop[globalCategory + prefix.substr(0, prefix.length() - 1)] =
+              CustomString(v, acc);
         }
       }
     }
@@ -290,26 +342,26 @@ ProblemConfig ProblemConfig::operator()(std::string section)
   return std::move(subSection(section));
 }
 
-//ProblemConfig ProblemConfig::loadUserConfig()
+// ProblemConfig ProblemConfig::loadUserConfig()
 //{
-  //ProblemConfig config;
-  //char* userConfigPath;
-  //if ((userConfigPath = std::getenv("PROBLEM_GENERATOR_USER_CONFIG")) !=
-      //nullptr)
-  //{
-    //config.loadFile(userConfigPath);
-  //}
-  //else
-  //{
-    //std::cerr
-        //<< "\033[31mWARNING\033[0m: no user config file found (environment "
-           //"variable \033[34m" << "PROBLEM_GENERATOR_USER_CONFIG"
-        //<< "\033[0m not set)."
-        //<< " Will default to the default file: " << PG_DEFAULT_CONFIG
-        //<< " Robot models and other user-dependent parameters"
-           //"may not be set correctly." << std::endl;
-    //config.loadFile(PG_DEFAULT_CONFIG);
-  //}
-  //return config;
+// ProblemConfig config;
+// char* userConfigPath;
+// if ((userConfigPath = std::getenv("PROBLEM_GENERATOR_USER_CONFIG")) !=
+// nullptr)
+//{
+// config.loadFile(userConfigPath);
+//}
+// else
+//{
+// std::cerr
+//<< "\033[31mWARNING\033[0m: no user config file found (environment "
+//"variable \033[34m" << "PROBLEM_GENERATOR_USER_CONFIG"
+//<< "\033[0m not set)."
+//<< " Will default to the default file: " << PG_DEFAULT_CONFIG
+//<< " Robot models and other user-dependent parameters"
+//"may not be set correctly." << std::endl;
+// config.loadFile(PG_DEFAULT_CONFIG);
+//}
+// return config;
 //}
 }  // end of namespace feettrajectory

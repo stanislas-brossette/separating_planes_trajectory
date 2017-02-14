@@ -12,6 +12,7 @@
 
 #include <Eigen/Core>
 #include <feet-trajectory/utils/Box.hh>
+#include <feet-trajectory/utils/FixedPlan.hh>
 
 namespace feettrajectory
 {
@@ -23,6 +24,7 @@ struct ProblemConfig
    public:
     Eigen::VectorXd vEigen = Eigen::VectorXd::Zero(0);
     std::vector<Box> vBox = {};
+    std::vector<FixedPlan> vFixedPlan = {};
     std::vector<std::string> vString = {};
 
     CustomString();
@@ -31,6 +33,7 @@ struct ProblemConfig
     CustomString(std::string* s);
     CustomString(Eigen::VectorXd& vect, std::string s = "");
     CustomString(std::vector<Box>& vect, std::string s = "");
+    CustomString(std::vector<FixedPlan>& vect, std::string s = "");
     CustomString(std::vector<std::string>& v, std::string s = "");
 
     double asDouble() const;
@@ -40,6 +43,7 @@ struct ProblemConfig
     Eigen::VectorXd asVectorXd() const;
     Eigen::Vector3d asVector3d() const;
     std::vector<Box> asVecBox() const;
+    std::vector<FixedPlan> asVecFixedPlan() const;
     std::vector<std::string> asVecString() const;
 
     operator double() const;
@@ -49,6 +53,7 @@ struct ProblemConfig
     operator Eigen::VectorXd() const;
     operator Eigen::Vector3d() const;
     operator std::vector<Box>() const;
+    operator std::vector<FixedPlan>() const;
     operator std::vector<std::string>() const;
   };
 
