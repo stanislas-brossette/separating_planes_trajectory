@@ -8,12 +8,12 @@ from mayavi import mlab
 def plotBox(box, col, alpha):
     c = box['position']
     s = box['size']
-    xmin = c[0] - s[0]/2
-    xmax = c[0] + s[0]/2
-    ymin = c[1] - s[1]/2
-    ymax = c[1] + s[1]/2
-    zmin = c[2] - s[2]/2
-    zmax = c[2] + s[2]/2
+    xmin = float(c[0]) - float(s[0])/2
+    xmax = float(c[0]) + float(s[0])/2
+    ymin = float(c[1]) - float(s[1])/2
+    ymax = float(c[1]) + float(s[1])/2
+    zmin = float(c[2]) - float(s[2])/2
+    zmax = float(c[2]) + float(s[2])/2
 
     x = [xmin, xmax, xmax, xmin, xmin, xmax, xmax, xmin] 
     y = [ymin, ymin, ymax, ymax, ymin, ymin, ymax, ymax]
@@ -30,21 +30,21 @@ def plotBox(box, col, alpha):
     return mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
 
 def plotPlane(p, initBox, boxes, finalBox, obstacles, sizePlane, col, alpha):
-    nVec = np.array(p['normal']) #normal to the plane
+    nVec = np.array(map(float,p['normal'])) #normal to the plane
     d = p['d'] #distance from 0 to the plane
-    o = np.array(obstacles[p['obstacleBelow']]['position'])#center of the obstacle
+    o = np.array(map(float,obstacles[p['obstacleBelow']]['position']))#center of the obstacle
     if 'boxAbove' in p:
-        b = np.array(boxes[p['boxAbove']]['position']) #center of the box
+        b = np.array(map(float,boxes[p['boxAbove']]['position'])) #center of the box
     elif 'box0Above' in p and 'box1Above' in p:
         if p['box0Above'] == -1 and p['box1Above'] != len(boxes):
-            b0 = np.array(initBox['position'])
-            b1 = np.array(boxes[p['box1Above']]['position']) #center of the box
+            b0 = np.array(map(float,initBox['position']))
+            b1 = np.array(map(float,boxes[p['box1Above']]['position'])) #center of the box
         elif p['box0Above'] != -1 and p['box1Above'] == len(boxes):
-            b0 = np.array(boxes[p['box0Above']]['position']) #center of the box
-            b1 = np.array(finalBox['position'])
+            b0 = np.array(map(float,boxes[p['box0Above']]['position'])) #center of the box
+            b1 = np.array(map(float,finalBox['position']))
         elif p['box0Above'] != -1 and p['box1Above'] != len(boxes):
-            b0 = np.array(boxes[p['box0Above']]['position']) #center of the box
-            b1 = np.array(boxes[p['box1Above']]['position']) #center of the box
+            b0 = np.array(map(float,boxes[p['box0Above']]['position'])) #center of the box
+            b1 = np.array(map(float,boxes[p['box1Above']]['position'])) #center of the box
         else:
             print("Something is wrong, there is no mobile box above this plane")
         b = (b0+b1)/2
