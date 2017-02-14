@@ -23,11 +23,13 @@ int main(int argc, char *argv[])
                "some fixed planes" << std::endl;
 
   std::srand(static_cast<uint>(std::time(0)));
-  std::string ymlPath = std::string(CONFIGS_DATA_DIR) + "/" + argv[1];
+  std::string ymlPath = std::string(CONFIGS_DATA_DIR) + "/" + argv[1] + ".yml";
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
-  int nObstacles = static_cast<int>(config["obstacles"].asVecBox().size());
+  int nObstacles = 0;
+  if (config.has("obstacles"))
+    nObstacles = static_cast<int>(config["obstacles"].asVecBox().size());
 
   mnf::CartesianProduct* M =
       BoxesHullTrajProblem::buildManifold(nBoxes, nObstacles);
@@ -59,6 +61,12 @@ int main(int argc, char *argv[])
   std::cout << "xSol = \n" << res.x_star << std::endl;
 
   print(config["logName"], myProb, res.x_star);
+
+  // Call the Python script passing a filename argument.
+  std::string command = "./viewSteps.py logs/";
+  command += argv[1];
+  command += ".log";
+  system(command.c_str());
 
   return 0;
 }

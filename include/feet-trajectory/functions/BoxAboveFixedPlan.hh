@@ -35,6 +35,8 @@ class BoxAboveFixedPlan : public BoxAbovePlan
                 const Eigen::Ref<const Eigen::Vector3d> trans,
                 const Eigen::Ref<const Eigen::Vector4d> quat,
                 const long& index) const;
+  const Eigen::Vector3d& normal() const { return normal_; }
+  const double& d() const { return d_; }
 
  private:
   Eigen::Vector3d normal_;

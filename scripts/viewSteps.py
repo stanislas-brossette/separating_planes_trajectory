@@ -29,7 +29,7 @@ def plotBox(box, col, alpha):
 
     return mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
 
-def plotPlane(p, initBox, boxes, finalBox, obstacles, col, alpha, sizePlane):
+def plotPlane(p, initBox, boxes, finalBox, obstacles, sizePlane, col, alpha):
     nVec = np.array(p['normal']) #normal to the plane
     d = p['d'] #distance from 0 to the plane
     o = np.array(obstacles[p['obstacleBelow']]['position'])#center of the obstacle
@@ -72,6 +72,31 @@ def plotPlane(p, initBox, boxes, finalBox, obstacles, col, alpha, sizePlane):
     mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
     mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
     return
+
+def plotFixedPlane(p, sizePlane, col, alpha):
+    nVec = np.array(p['normal']) #normal to the plane
+    d = p['d'] #distance from 0 to the plane
+
+    center = d*nVec #center of the plane
+
+    if (nVec[1] == 0 and nVec[2] == 0):
+        tVec= np.array([0, nVec[0], 0])
+    else:
+        tVec= np.array([0, nVec[2], -nVec[1]])
+
+    tVec = tVec/np.linalg.norm(tVec)
+    bVec = np.cross(nVec,tVec)
+    p0 = center + (sizePlane/2)*tVec + (sizePlane/2)*bVec
+    p1 = center + (sizePlane/2)*tVec - (sizePlane/2)*bVec
+    p2 = center - (sizePlane/2)*tVec + (sizePlane/2)*bVec
+    p3 = center - (sizePlane/2)*tVec - (sizePlane/2)*bVec
+    x = [p0[0],p1[0],p2[0],p3[0]]
+    y = [p0[1],p1[1],p2[1],p3[1]]
+    z = [p0[2],p1[2],p2[2],p3[2]]
+    triangles = [(0, 1, 2), (1,2,3)]
+    mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+    mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
+    return
     
 print 'reading file ', str(sys.argv[1])
 
@@ -85,6 +110,7 @@ with open(str(sys.argv[1]), 'r') as stream:
 mobileBoxes = content['MobileBoxes']
 obstacles = content['Obstacles']
 planes = content['SeparatingPlanes']
+fixedPlanes = content['FixedPlanes']
 
 # Initial and final
 if 'InitialBox' in content:
@@ -106,6 +132,10 @@ if(hasattr(obstacles, '__iter__')):
 # Separating Planes
 if(hasattr(planes, '__iter__')):
     for p in planes:
-        plotPlane(p, initBox, mobileBoxes, finalBox, obstacles, (0, 1, 0), 0.4, 0.2)
+        plotPlane(p, initBox, mobileBoxes, finalBox, obstacles, 0.2, (0, 1, 0), 0.4)
+
+if(hasattr(fixedPlanes, '__iter__')):
+    for p in fixedPlanes:
+        plotFixedPlane(p, 2.0, (1, 1, 0), 1.)
 
 mlab.show()

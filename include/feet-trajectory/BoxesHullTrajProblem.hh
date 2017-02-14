@@ -61,12 +61,15 @@ class BoxesHullTrajProblem : public pgs::Problem
   const size_t& nBoxes() const { return nBoxes_; }
   const size_t& nPlans() const { return nPlans_; }
   const size_t& nObstacles() const { return nObstacles_; }
+  const size_t& nFixedPlanes() const { return nFixedPlanes_; }
   const std::vector<Box>& boxes() const { return boxes_; }
   const std::vector<Box>& obstacles() const { return obstacles_; }
+  const std::vector<FixedPlan>& fixedPlanes() const { return fixedPlanes_; }
   const std::vector<PlanForHull>& plans() const { return plans_; }
   const Eigen::Vector3d& initPos() const { return initPos_; }
   const Eigen::Vector3d& finalPos() const { return finalPos_; }
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
+  const std::vector<std::string> cstrNames() const { return cstrNames_; };
 
  private:
   ProblemConfig config_;
@@ -82,6 +85,9 @@ class BoxesHullTrajProblem : public pgs::Problem
   size_t nBoxes_;
   size_t nPlans_;
   size_t nObstacles_;
+  size_t nFixedPlanes_;
+  size_t nMobilePlanCstr_;
+  size_t nFixedPlanCstr_;
 
   //double threshold_; //half of the min dimension of the box
 

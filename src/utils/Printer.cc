@@ -90,6 +90,15 @@ void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
             << ", box1Above: " << pb.plans()[i].box1Above()
             << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
             << std::endl;
+
+  // Fixed Planes
+  logFile << "FixedPlanes:\n";
+  for (size_t i = 0; i < pb.nFixedPlanes(); i++)
+  {
+    logFile << "- { d: " << pb.fixedPlanes()[i].d() << ", normal: "
+            << pb.fixedPlanes()[i].normal().transpose().format(logFmt) << "}"
+            << std::endl;
+  }
 }
 
 void print(const std::string& fileName, const Eigen::Vector3d& bSize,

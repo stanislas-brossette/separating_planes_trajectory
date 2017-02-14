@@ -23,9 +23,10 @@ BoxAboveFixedPlan::BoxAboveFixedPlan(const Box& c, const FixedPlan& p)
 
 BoxAboveFixedPlan::~BoxAboveFixedPlan() {}
 
-void BoxAboveFixedPlan::compute(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
-                                 const Eigen::Ref<const Eigen::Vector3d> trans,
-                                 const Eigen::Ref<const Eigen::Vector4d> quat) const
+void BoxAboveFixedPlan::compute(
+    Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,
+    const Eigen::Ref<const Eigen::Vector3d> trans,
+    const Eigen::Ref<const Eigen::Vector4d> quat) const
 {
   BoxAbovePlan::compute(res, trans, quat, d_, normal_);
 }
@@ -38,26 +39,26 @@ void BoxAboveFixedPlan::diffTrans(
   BoxAbovePlan::diffTrans(res, trans, quat, d_, normal_);
 }
 
-void BoxAboveFixedPlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
-                                  const Eigen::Ref<const Eigen::Vector3d> trans,
-                                  const Eigen::Ref<const Eigen::Vector4d> quat) const
+void BoxAboveFixedPlan::diffQuat(
+    Eigen::Ref<Eigen::Matrix<double, 8, 4>> res,
+    const Eigen::Ref<const Eigen::Vector3d> trans,
+    const Eigen::Ref<const Eigen::Vector4d> quat) const
 {
   BoxAbovePlan::diffQuat(res, trans, quat, d_, normal_);
 }
 
-void BoxAboveFixedPlan::diffTrans(
-    Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
-    const Eigen::Ref<const Eigen::Vector3d> trans,
-    const Eigen::Ref<const Eigen::Vector4d> quat,
-    const long& index) const
+void BoxAboveFixedPlan::diffTrans(Eigen::Ref<Eigen::Matrix<double, 1, 3>> res,
+                                  const Eigen::Ref<const Eigen::Vector3d> trans,
+                                  const Eigen::Ref<const Eigen::Vector4d> quat,
+                                  const long& index) const
 {
   BoxAbovePlan::diffTrans(res, trans, quat, d_, normal_, index);
 }
 
 void BoxAboveFixedPlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
-                                  const Eigen::Ref<const Eigen::Vector3d> trans,
-                                  const Eigen::Ref<const Eigen::Vector4d> quat,
-                                  const long& index) const
+                                 const Eigen::Ref<const Eigen::Vector3d> trans,
+                                 const Eigen::Ref<const Eigen::Vector4d> quat,
+                                 const long& index) const
 {
   BoxAbovePlan::diffQuat(res, trans, quat, d_, normal_, index);
 }
