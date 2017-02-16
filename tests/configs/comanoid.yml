@@ -51,15 +51,15 @@ fixedPlanes:
 #INITIAL AND FINAL POSITIONS
 
 #Step 1
-#initPos: [-0.1, 0, 0.025]
-#finalPos: [0.3, 0.0, 0.25]
+initPos: [-0.1, 0.3, 0.025]
+finalPos: [0.3, 0.3, 0.25]
 
 #Step 2
-#initPos: [0.3, 0, 0.25]
-#finalPos: [0.6, 0.0, 0.45]
+#initPos: [0.3, -0.3, 0.25]
+#finalPos: [0.6, -0.3, 0.45]
 
 #Step 3
-initPos: [0.6, 0, 0.45]
-finalPos: [0.9, 0.0, 0.65]
+#initPos: [0.6, 0.3, 0.45]
+#finalPos: [0.9, 0.3, 0.65]
 
 

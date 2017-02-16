@@ -17,5 +17,9 @@ void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
 void print(const std::string& fileName, const Eigen::Vector3d& bSize,
            const Eigen::Vector3d& oSize, const Eigen::Vector3d& oPos,
            const Eigen::Vector3d& t, const double& d, const Eigen::Vector3d& n);
+void printAllIterations(const std::string& fileName,
+                        const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
+                        const std::string& folder);
+std::vector<Eigen::VectorXd> parseX(const std::string& file, const mnf::Point& x);
 } /* feettrajectory */
 

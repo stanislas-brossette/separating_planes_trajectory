@@ -60,15 +60,28 @@ int main(int argc, char *argv[])
 
   std::cout << "xSol = \n" << res.x_star << std::endl;
 
-  print(config["logName"], myProb, res.x_star);
+  if (config.has("logLevel") && config["logLevel"].compare("NO_LOG") != 0)
+  {
+    if (config.has("plotResult") && config["plotResult"])
+    {
+      std::cout << "Plotting all iterations" << std::endl;
+      std::cout << "mySolver.logger().folder(): " << mySolver.logger().folder()
+                << std::endl;
+      printAllIterations(config["logName"], myProb, res.x_star,
+                         mySolver.logger().folder());
+      return 0;
+    }
+  }
 
   if (config.has("plotResult") && config["plotResult"])
   {
+    print(config["logName"], myProb, res.x_star);
     // Call the Python script passing a filename argument.
     std::string command = "./viewSteps.py logs/";
     command += argv[1];
     command += ".log";
     system(command.c_str());
+    return 0;
   }
 
   return 0;

@@ -7,8 +7,8 @@ epsilon_P: 1e-2
 finiteDiffCheck: false
 hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
-logLevel: "NO_LOG"
-logDirectory: "log/withCFSQP/"
+logLevel: "ONLY_X"
+logDirectory: "logs/multiObstacles/"
 maxIter: 200
 regularizationValMin: 1e-8
 resetHessianAfterRestoration: false
