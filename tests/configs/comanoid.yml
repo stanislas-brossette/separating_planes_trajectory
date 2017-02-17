@@ -7,8 +7,8 @@ epsilon_P: 1e-4
 finiteDiffCheck: false
 hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
-logLevel: "NO_LOG"
-logDirectory: "log/withCFSQP/"
+logLevel: "ONLY_X"
+logDirectory: "logs/comanoid/"
 maxIter: 500
 regularizationValMin: 1e-8
 resetHessianAfterRestoration: false

@@ -1,8 +1,0 @@
-InitialBox: {size: [ 0.2,  0.1, 0.05], position: [0, 0, 0]}
-MobileBoxes:
-- {size: [ 0.2,  0.1, 0.05], position: [0.494, 0.455, 0.457]}
-FinalBox: {size: [ 0.2,  0.1, 0.05], position: [1, 1, 1]}
-Obstacles:
-- {size: [0.3, 1.2, 0.1], position: [0.5, 0.5, 0.5]}
-SeparatingPlanes:
-- { d: -1.01129, normal: [-0.654, -0.284, -0.701], boxAbove: 0, obstacleBelow: 0}

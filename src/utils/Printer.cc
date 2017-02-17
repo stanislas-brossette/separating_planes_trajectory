@@ -132,9 +132,6 @@ void printAllIterations(const std::string& fileName,
                         const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
                         const std::string& folder)
 {
-  std::cout << "printAllIterations" << std::endl;
-  std::cout << folder << std::endl;
-
   Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
   std::ofstream logFile;
   logFile.open(fileName);
@@ -166,26 +163,9 @@ void printAllIterations(const std::string& fileName,
             << std::endl;
   }
 
-  //// Separating planes
-  //logFile << "SeparatingPlanes:\n";
-  //for (size_t i = 0; i < pb.nPlans(); i++)
-    //logFile << "- { d: " << xStar(1)(i)(0).value()
-            //<< ", normal: " << xStar(1)(i)(1).value().transpose().format(logFmt)
-            //<< ", box0Above: " << pb.plans()[i].box0Above()
-            //<< ", box1Above: " << pb.plans()[i].box1Above()
-            //<< ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
-            //<< std::endl;
-  //logFile << "MobileBoxes:\n";
-  //for (size_t i = 0; i < pb.nBoxes(); i++)
-  //{
-    //logFile << "- {size: " << bSize
-            //<< ", position: " << xStar(0)(i).value().transpose().format(logFmt)
-            //<< "}\n";
-  //}
-
   std::string xFile(folder + "xLog.m");
   std::vector<Eigen::VectorXd> all_x = parseX(xFile, xStar);
-  logFile << "nIter: " << all_x.size() << "\n";
+  logFile << "nIter: " << all_x.size() << std::endl;
   for (size_t iter = 0; iter < all_x.size(); iter++)
   {
     mnf::Point xIter = xStar.getManifold().createPoint(all_x[iter]);

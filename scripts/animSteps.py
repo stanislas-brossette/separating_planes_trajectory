@@ -13,7 +13,7 @@ from mayavi.core.api import PipelineBase
 from mayavi.core.ui.api import MayaviScene, SceneEditor, \
                 MlabSceneModel
 
-def plotBox(scene, box, col, alpha):
+def plotBox(triangleMesh, box, col, alpha):
     c = box['position']
     s = box['size']
     xmin = float(c[0]) - float(s[0])/2
@@ -35,9 +35,13 @@ def plotBox(scene, box, col, alpha):
             (4, 5, 6), (4,6,7)
             ]
 
-    return scene.mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+    if (triangleMesh == None):
+        triangleMesh = mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+    else:
+        triangleMesh.mlab_source.set(x=x,y=y,z=z)
+    return triangleMesh
 
-def plotPlane(scene, p, initBox, boxes, finalBox, obstacles, sizePlane, col, alpha):
+def plotPlane(triangleMesh, quiver, p, initBox, boxes, finalBox, obstacles, sizePlane, col, alpha):
     nVec = np.array(map(float,p['normal'])) #normal to the plane
     d = p['d'] #distance from 0 to the plane
     o = np.array(map(float,obstacles[p['obstacleBelow']]['position']))#center of the obstacle
@@ -77,11 +81,15 @@ def plotPlane(scene, p, initBox, boxes, finalBox, obstacles, sizePlane, col, alp
     y = [p0[1],p1[1],p2[1],p3[1]]
     z = [p0[2],p1[2],p2[2],p3[2]]
     triangles = [(0, 1, 2), (1,2,3)]
-    scene.mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
-    scene.mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
-    return
+    if (triangleMesh == None):
+        triangleMesh = mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+        quiver = mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
+    else:
+        triangleMesh.mlab_source.set(x=x,y=y,z=z)
+        quiver.mlab_source.set(x=center[0], y=center[1], z=center[2], u=nVec[0], v=nVec[1], w=nVec[2])
+    return triangleMesh, quiver
 
-def plotFixedPlane(scene, p, sizePlane, col, alpha):
+def plotFixedPlane(triangleMesh, quiver, p, sizePlane, col, alpha):
     nVec = np.array(p['normal']) #normal to the plane
     d = p['d'] #distance from 0 to the plane
 
@@ -102,9 +110,14 @@ def plotFixedPlane(scene, p, sizePlane, col, alpha):
     y = [p0[1],p1[1],p2[1],p3[1]]
     z = [p0[2],p1[2],p2[2],p3[2]]
     triangles = [(0, 1, 2), (1,2,3)]
-    scene.mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
-    scene.mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
-    return
+    # scene.mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
+    if (triangleMesh == None):
+        triangleMesh = mlab.triangular_mesh(x, y, z, triangles, color=col, opacity=alpha)
+        quiver = mlab.quiver3d(center[0], center[1], center[2], nVec[0], nVec[1], nVec[2], color=col, opacity=alpha)
+    else:
+        triangleMesh.mlab_source.set(x=x,y=y,z=z)
+        quiver.mlab_source.set(x=center[0], y=center[1], z=center[2], u=nVec[0], v=nVec[1], w=nVec[2])
+    return triangleMesh, quiver
     
 
 class MyModel(HasTraits):
@@ -115,17 +128,28 @@ class MyModel(HasTraits):
             content = yaml.load(stream)
         except yaml.YAMLError as exc:
             print(exc)
+    nIter = content['nIter']
+    iter = Range(0,nIter-1,1)
+
     initBox = content['InitialBox']
     finalBox = content['FinalBox']
     obstacles = content['Obstacles']
     fixedPlanes = content['FixedPlanes']
-    nIter = content['nIter']
-    iter = Range(0,nIter,1)
     mobileBoxes = []
     planes = []
-    for i in range(0,nIter):
+    for i in range(0,nIter,1):
         mobileBoxes.append(content['MobileBoxes'+str(i)])
         planes.append(content['SeparatingPlanes'+str(i)])
+
+    initBoxPlot = None
+    finalBoxPlot = None
+    fixedPlanesPlot = [None]*len(fixedPlanes)
+    fixedPlanesQuiver = [None]*len(fixedPlanes)
+    obstacleBoxesPlot = [None]*len(obstacles)
+
+    mobileBoxesPlot = [None]*len(mobileBoxes)
+    mobilePlanesPlot = [None]*len(planes)
+    mobilePlanesQuiver = [None]*len(planes)
 
     # When the scene is activated, or when the parameters are changed, we
     # update the plot.
@@ -137,29 +161,30 @@ class MyModel(HasTraits):
     @on_trait_change('iter,scene.activated')
     def update_plot(self):
         iterBoxes = self.mobileBoxes[self.iter]
-        # iterPlanes = self.planes[self.iter]
+        iterPlanes = self.planes[self.iter]
         if self.plot is None:
             # Initial and final
-            plotBox(self.scene, self.initBox, (1, 1, 1), 1)
-            plotBox(self.scene, self.finalBox, (1, 1, 1), 1)
+            self.initBoxPlot = plotBox(self.initBoxPlot, self.initBox, (1, 1, 1), 1)
+            self.finalBoxPlot = plotBox(self.finalBoxPlot, self.finalBox, (1, 1, 1), 1)
             # Fixed Planes
-            if(hasattr(self.fixedPlanes, '__iter__')):
-                for p in self.fixedPlanes:
-                    plotFixedPlane(self.scene, p, 2.0, (1, 1, 0), 1.)
+            for i in range(0,len(self.fixedPlanes),1):
+                self.fixedPlanesPlot[i], self.fixedPlanesQuiver[i] = plotFixedPlane(self.fixedPlanesPlot[i], self.fixedPlanesQuiver[i], self.fixedPlanes[i], 2.0, (1, 1, 0), 1)
             # Obstacles
-            if(hasattr(self.obstacles, '__iter__')):
-                for o in self.obstacles:
-                    plotBox(self.scene, o, (1, 0, 0), 1)
-
-            if(hasattr(iterBoxes, '__iter__')):
-                for b in iterBoxes:
-                    plotBox(self.scene, b, (0, 0, 1), 1)
+            for i in range(0,len(self.obstacles),1):
+                self.obstacleBoxesPlot[i] = plotBox(self.obstacleBoxesPlot[i], self.obstacles[i], (1, 0, 0), 1)
+            # Mobile Boxes
+            for i in range(0,len(iterBoxes),1):
+                self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)
             # Separating Planes
-            # if(hasattr(iterPlanes, '__iter__')):
-                # for p in iterPlanes:
-                    # plotPlane(p, self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
+            for i in range(0,len(iterPlanes),1):
+                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
+            self.scene.mlab.view(azimuth=100, elevation=50, distance=4, focalpoint=[0,0,0.5],
+     roll=None, reset_roll=True, figure=None)
         else:
-            self.plot.mlab_source.set(iter=iter)
+            for i in range(0,len(iterBoxes),1):
+                self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)
+            for i in range(0,len(iterPlanes),1):
+                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
 
 
     # The layout of the dialog created

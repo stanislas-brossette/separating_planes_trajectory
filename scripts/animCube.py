@@ -38,6 +38,11 @@ class MyModel(HasTraits):
     posZ = Range(-10, 10, 5)
     size = [1, 2, 3]
 
+    scene = Instance(MlabSceneModel, ())
+
+    plot = Instance(PipelineBase)
+
+
     # When the scene is activated, or when the parameters are changed, we
     # update the plot.
     @on_trait_change('posX,posY,posZ,scene.activated')
