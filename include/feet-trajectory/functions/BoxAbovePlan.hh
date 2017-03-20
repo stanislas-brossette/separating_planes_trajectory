@@ -54,6 +54,20 @@ class BoxAbovePlan
   void LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   void UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   const Box& box() const { return box_; };
+  long dim() const { return 8; }
+
+  void fillLinCstrNFixed(Eigen::Ref<Eigen::Matrix<double, 8, 1>> lb,
+                         Eigen::Ref<Eigen::Matrix<double, 8, 3>> CboxPart,
+                         Eigen::Ref<Eigen::Matrix<double, 8, 1>> CdPart,
+                         const Eigen::Ref<const Eigen::Vector3d>& trans,
+                         const double& d,
+                         const Eigen::Ref<const Eigen::Vector3d>& normal) const;
+  void fillLinCstrNFixedBoxFixed(Eigen::Ref<Eigen::Matrix<double, 8, 1>> lb,
+                         Eigen::Ref<Eigen::Matrix<double, 8, 3>> CboxPart,
+                         Eigen::Ref<Eigen::Matrix<double, 8, 1>> CdPart,
+                         const Eigen::Ref<const Eigen::Vector3d>& trans,
+                         const double& d,
+                         const Eigen::Ref<const Eigen::Vector3d>& normal) const;
 
  private:
   Box box_;

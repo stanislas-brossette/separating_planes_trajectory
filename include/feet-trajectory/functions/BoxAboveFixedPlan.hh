@@ -38,6 +38,9 @@ class BoxAboveFixedPlan : public BoxAbovePlan
   const Eigen::Vector3d& normal() const { return normal_; }
   const double& d() const { return d_; }
 
+  void fillLinCstr(Eigen::Ref<Eigen::Matrix<double, 8, 1>> lb,
+                   Eigen::Ref<Eigen::Matrix<double, 8, 3>> C) const;
+
  private:
   Eigen::Vector3d normal_;
   double d_;

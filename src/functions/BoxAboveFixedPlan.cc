@@ -63,4 +63,12 @@ void BoxAboveFixedPlan::diffQuat(Eigen::Ref<Eigen::Matrix<double, 1, 4>> res,
   BoxAbovePlan::diffQuat(res, trans, quat, d_, normal_, index);
 }
 
+void BoxAboveFixedPlan::fillLinCstr(
+    Eigen::Ref<Eigen::Matrix<double, 8, 1>> lb,
+    Eigen::Ref<Eigen::Matrix<double, 8, 3>> C) const
+{
+  lb << -box().vertexMat().transpose() * normal_;
+  for (long i = 0; i < 8; ++i) C.row(i) << normal_.transpose();
+}
+
 } /* feettrajectory */
