@@ -29,5 +29,7 @@ int main()
 
   std::cout << "altQP.QPWithNFixed(): " << altQP.qpNfixed() << std::endl;
 
+  altQP.solve();
+
   return 0;
 }

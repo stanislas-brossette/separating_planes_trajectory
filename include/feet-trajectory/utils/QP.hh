@@ -13,6 +13,17 @@ class QP
   void setDimensions(const long& dimVar, const long& dimCstr);
   virtual ~QP();
 
+  const long& dimVar() const { return dimVar_; }
+  const long& dimCstr() const { return dimCstr_; }
+  const Eigen::MatrixXd& A() const { return A_; }
+  Eigen::MatrixXd Acopy() const { return A_; }
+  const Eigen::MatrixXd& C() const { return C_; }
+  const Eigen::VectorXd& c() const { return c_; }
+  const Eigen::VectorXd& lVar() const { return lVar_; }
+  const Eigen::VectorXd& uVar() const { return uVar_; }
+  const Eigen::VectorXd& l() const { return l_; }
+  const Eigen::VectorXd& u() const { return u_; }
+
   /// \brief Print method.
   /// \param o output stream.
   /// \return output stream.

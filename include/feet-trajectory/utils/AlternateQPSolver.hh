@@ -1,6 +1,10 @@
 #pragma once
 
 #include <iostream>
+
+#include <EigenQP/LSSOL.h>
+#include <EigenQP/LSSOL_QP.h>
+
 #include <feet-trajectory/TrajectoryProblem.hh>
 #include <feet-trajectory/utils/QP.hh>
 #include <feet-trajectory/utils/QPWithNFixed.hh>
@@ -20,6 +24,9 @@ class AlternateQPSolver
   const TrajectoryProblem& pb_;
   QPWithNFixed qpNfixed_;
   QP qpBfixed_;
+
+  /// @brief QP solver
+  Eigen::LSSOL_QP QPSolver_;
 
 };
 } /* feettrajectory */

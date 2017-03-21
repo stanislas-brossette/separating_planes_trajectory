@@ -62,7 +62,7 @@ class TrajectoryProblem
 
   long dimVar() const
   {
-    return 3 * nBoxes_ + 4 * nPlans_;
+    return static_cast<long>(3 * nBoxes_ + 4 * nPlans_);
   }
 
   Eigen::VectorXd getBoxPositionsFromX(const Eigen::VectorXd& x) const;

@@ -25,7 +25,7 @@ ADD_REQUIRED_DEPENDENCY("roboptim-core > 3.0")
 ADD_REQUIRED_DEPENDENCY(roboptim-core-manifold roboptim-core-manifold_d)
 ADD_REQUIRED_DEPENDENCY(manifolds manifolds_d)
 ADD_REQUIRED_DEPENDENCY(PGSolver PGSolver_d)
-
+ADD_REQUIRED_DEPENDENCY(EigenQP EigenQP_d)
 ########################
 
 ADD_DEFINITIONS(-DROBOPTIM_DO_NOT_CHECK_ALLOCATION)

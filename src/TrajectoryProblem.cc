@@ -16,9 +16,9 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
       nBoxes_(config_["nBoxes"].asSize_t()),
       initBox_(-1, boxSize_),
       finalBox_(static_cast<int>(nBoxes_), boxSize_),
-      costFct_(nBoxes_, initPos_, finalPos_),
       initBoxAbovePlanFct_(initBox_),
-      finalBoxAbovePlanFct_(finalBox_)
+      finalBoxAbovePlanFct_(finalBox_),
+      costFct_(static_cast<long>(nBoxes_), initPos_, finalPos_)
 {
   if (config_.has("obstacles")) obstacles_ = config_["obstacles"].asVecBox();
 
@@ -104,18 +104,19 @@ std::ostream& operator<<(std::ostream& o, const TrajectoryProblem& f)
 Eigen::VectorXd TrajectoryProblem::getBoxPositionsFromX(
     const Eigen::VectorXd& x) const
 {
-  Eigen::VectorXd boxPos(3 * nBoxes_);
-  boxPos << x.head(3 * nBoxes_);
+  Eigen::VectorXd boxPos(3 * static_cast<long>(nBoxes_));
+  boxPos << x.head(3 * static_cast<long>(nBoxes_));
   return boxPos;
 }
 
 Eigen::VectorXd TrajectoryProblem::getPlansNormalsFromX(
     const Eigen::VectorXd& x) const
 {
-  Eigen::VectorXd plansN(3 * nPlans_);
+  Eigen::VectorXd plansN(3 * static_cast<long>(nPlans_));
   for (long i = 0; i < nPlans_; i++)
   {
-    plansN.segment<3>(3 * i) << x.segment<3>(3 * nBoxes_ + 4 * i + 1);
+    plansN.segment<3>(3 * i)
+        << x.segment<3>(3 * static_cast<long>(nBoxes_) + 4 * i + 1);
   }
   return plansN;
 }
@@ -126,7 +127,7 @@ Eigen::VectorXd TrajectoryProblem::getPlansDistancesFromX(
   Eigen::VectorXd plansD(nPlans_);
   for (long i = 0; i < nPlans_; i++)
   {
-    plansD[i] = x[3 * nBoxes_ + 4 * i];
+    plansD[i] = x[3 * static_cast<double>(nBoxes_) + 4 * i];
   }
   return plansD;
 }
@@ -135,7 +136,7 @@ void TrajectoryProblem::normalizeNormals(Eigen::Ref<Eigen::VectorXd> x) const
 {
   for (int i = 0; i < nPlans_; i++)
   {
-    x.segment<3>(3 * nBoxes_ + 4 * i + 1).normalize();
+    x.segment<3>(3 * static_cast<long>(nBoxes_) + 4 * i + 1).normalize();
   }
 }
 } /* feettrajectory */
