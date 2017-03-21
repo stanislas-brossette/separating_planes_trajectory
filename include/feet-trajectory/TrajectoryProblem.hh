@@ -26,6 +26,9 @@ class TrajectoryProblem
   const size_t& nPlans() const { return nPlans_; }
   const size_t& nObstacles() const { return nObstacles_; }
   const size_t& nFixedPlanes() const { return nFixedPlanes_; }
+  const size_t& nFixedPlanCstr() const { return nFixedPlanCstr_; }
+  const size_t& nMobilePlanCstr() const { return nMobilePlanCstr_; }
+  const size_t& numberOfCstr() const { return numberOfCstr_; }
   const std::vector<Box>& boxes() const { return boxes_; }
   const std::vector<Box>& obstacles() const { return obstacles_; }
   const std::vector<FixedPlan>& fixedPlanes() const { return fixedPlanes_; }
@@ -33,21 +36,39 @@ class TrajectoryProblem
   const Eigen::Vector3d& initPos() const { return initPos_; }
   const Eigen::Vector3d& finalPos() const { return finalPos_; }
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
-  const std::vector<std::string> cstrNames() const { return cstrNames_; };
+  const std::vector<std::string>& cstrNames() const { return cstrNames_; };
 
-  const std::vector<BoxAboveFixedPlan> boxAboveFixedPlanFcts() const
+  const std::vector<BoxAboveFixedPlan>& boxAboveFixedPlanFcts() const
   {
     return boxAboveFixedPlanFcts_;
   }
-  const std::vector<BoxAbovePlan> boxAbovePlanFcts() const
+  const BoxAbovePlan& initBoxAbovePlanFct() const
+  {
+    return initBoxAbovePlanFct_;
+  }
+  const BoxAbovePlan& finalBoxAbovePlanFct() const
+  {
+    return finalBoxAbovePlanFct_;
+  }
+  const std::vector<BoxAbovePlan>& boxAbovePlanFcts() const
   {
     return boxAbovePlanFcts_;
   }
-  const std::vector<BoxAbovePlan> obstacleAbovePlanFcts() const
+  const std::vector<BoxAbovePlan>& obstacleAbovePlanFcts() const
   {
     return obstacleAbovePlanFcts_;
   }
   const CostDistance& costFct() const { return costFct_; };
+
+  long dimVar() const
+  {
+    return 3 * nBoxes_ + 4 * nPlans_;
+  }
+
+  Eigen::VectorXd getBoxPositionsFromX(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd getPlansNormalsFromX(const Eigen::VectorXd& x) const;
+  Eigen::VectorXd getPlansDistancesFromX(const Eigen::VectorXd& x) const;
+  void normalizeNormals(Eigen::Ref<Eigen::VectorXd> x) const;
 
   /// \brief Print method.
   /// \param o output stream.
@@ -71,8 +92,10 @@ class TrajectoryProblem
   size_t nFixedPlanes_;
   size_t nMobilePlanCstr_;
   size_t nFixedPlanCstr_;
+  size_t numberOfCstr_;
 
   Box initBox_, finalBox_;
+  BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;
 
   std::vector<Box> boxes_;
   std::vector<PlanForHull> plans_;

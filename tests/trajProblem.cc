@@ -21,5 +21,13 @@ int main()
   std::cout << "myProb: " << myProb << std::endl;
   AlternateQPSolver altQP(myProb);
 
+  Eigen::VectorXd initVec(myProb.dimVar());
+  initVec.setRandom();
+  myProb.normalizeNormals(initVec);
+
+  altQP.init(initVec);
+
+  std::cout << "altQP.QPWithNFixed(): " << altQP.qpNfixed() << std::endl;
+
   return 0;
 }

@@ -34,4 +34,11 @@ double CostDistance::compute(const Eigen::VectorXd& x)
   return res;
 }
 
+void CostDistance::fillQuadCost(Eigen::Ref<Eigen::MatrixXd> Q,
+                                Eigen::Ref<Eigen::VectorXd> c) const
+{
+  Q << Q_;
+  c << c_;
+}
+
 } /* feettrajectory */

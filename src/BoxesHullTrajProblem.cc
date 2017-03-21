@@ -33,8 +33,8 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
       finalPos_(config_["finalPos"].asVector3d()),
       boxSize_(config_["BoxSize"].asVector3d()),
       nBoxes_(config_["nBoxes"].asSize_t()),
-      initBox_(-1, boxSize_),
-      finalBox_(static_cast<int>(nBoxes_), boxSize_),
+      initBox_(-1, boxSize_, initPos_),
+      finalBox_(static_cast<int>(nBoxes_), boxSize_, finalPos_),
       initBoxAbovePlanFct_(initBox_),
       finalBoxAbovePlanFct_(finalBox_)
 {

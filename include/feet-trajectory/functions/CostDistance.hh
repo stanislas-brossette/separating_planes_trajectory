@@ -14,6 +14,9 @@ namespace feettrajectory
     const Eigen::MatrixXd& Q() const { return Q_; }
     const Eigen::VectorXd& c() const { return c_; }
 
+    void fillQuadCost(Eigen::Ref<Eigen::MatrixXd> Q,
+                      Eigen::Ref<Eigen::VectorXd> c) const;
+
   private:
     long n_;
     Eigen::MatrixXd Q_;

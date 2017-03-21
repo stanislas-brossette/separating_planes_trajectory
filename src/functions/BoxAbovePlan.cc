@@ -163,4 +163,34 @@ void BoxAbovePlan::UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const
   res << inf, inf, inf, inf, inf, inf, inf, inf;
 }
 
+void BoxAbovePlan::fillLinCstrNFixed(double& lb,
+                                     Eigen::Ref<Eigen::MatrixXd> CboxPart,
+                                     double& CdPart, Eigen::Vector3d normal,
+                                     bool isBoxBelow) const
+{
+  // Constraint is:
+  // for all i in [1:8]
+  // -vi.n <= n.b - d
+  // Simplified into
+  // max_i -vi.n <= n.b - d
+  if (isBoxBelow) normal << -normal;
+
+  lb = -std::numeric_limits<double>::infinity();
+  double val;
+  for (size_t i = 0; i < box().vertex().size(); i++)
+  {
+    if (!box().fixed())
+      val = -box().vertex(i).dot(normal);
+    else
+      val = -(box().vertex(i) + box().center()).dot(normal);
+
+    if (val > lb) lb = val;
+  }
+  if (isBoxBelow)
+    CdPart = 1;
+  else
+    CdPart = -1;
+  if (!box().fixed()) CboxPart << normal.transpose();
+}
+
 } /* feettrajectory */
