@@ -14,13 +14,20 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
       finalPos_(config_["finalPos"].asVector3d()),
       boxSize_(config_["BoxSize"].asVector3d()),
       nBoxes_(config_["nBoxes"].asSize_t()),
-      initBox_(-1, boxSize_),
-      finalBox_(static_cast<int>(nBoxes_), boxSize_),
+      initBox_(-1, boxSize_, initPos_, true),
+      finalBox_(static_cast<int>(nBoxes_), boxSize_, finalPos_, true),
       initBoxAbovePlanFct_(initBox_),
       finalBoxAbovePlanFct_(finalBox_),
       costFct_(static_cast<long>(nBoxes_), initPos_, finalPos_)
 {
-  if (config_.has("obstacles")) obstacles_ = config_["obstacles"].asVecBox();
+  if (config_.has("obstacles"))
+  {
+    obstacles_ = config_["obstacles"].asVecBox();
+    for (size_t i = 0; i < obstacles_.size(); i++)
+    {
+      obstacles_[i].setFixed(true);
+    }
+  }
 
   if (config_.has("fixedPlanes"))
     fixedPlanes_ = config_["fixedPlanes"].asVecFixedPlan();

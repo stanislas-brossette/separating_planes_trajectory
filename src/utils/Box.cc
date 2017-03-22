@@ -32,8 +32,9 @@ Box::Box(int index, Eigen::Vector3d size)
 {
 }
 
-Box::Box(int index, Eigen::Vector3d size, Eigen::Vector3d center)
-    : Box(index, size[0], size[1], size[2], center[0], center[1], center[2])
+Box::Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix)
+    : Box(index, size[0], size[1], size[2], center[0], center[1], center[2],
+          fix)
 {
 }
 
@@ -44,7 +45,7 @@ std::ostream& Box::print(std::ostream& o) const
   o << "size: " << size() << std::endl;
   for (size_t i = 0; i < 8; i++)
   {
-    o << "vertex(i): " << vertex(i).transpose() << std::endl;
+    o << "vertex(" << i << "): " << vertex(i).transpose() << std::endl;
   }
   return o;
 }

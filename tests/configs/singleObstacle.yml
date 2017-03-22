@@ -1,0 +1,33 @@
+#logs
+logName: "logs/singleObstacle.log"
+
+#Boxes
+nBoxes: 3
+BoxSize: [0.1, 0.1, 0.1]
+
+#Obstacles
+obstacles:
+  - {size: [1.0, 1.0, 1.0], center: [0.0, 0.0, 0.0]}
+
+#ground
+fixedPlanes:
+  - { normal: [0,0,1], d: -1.0}
+
+#initial and final positions
+initPos: [-1.0, 0., 0.]
+finalPos: [1.0, 0., 0.]
+
+plotResult: true
+
+#Initial Guess
+x0: [-1., 0., 1.,
+     0., 0., 1.,
+     1., 0., 1.,
+     0.75,
+     -1., 0., 0.,
+     0.75,
+     0., 1., 0.,
+     0.75,
+     0., 1., 0.,
+     0.75,
+     1., 0., 0.,]

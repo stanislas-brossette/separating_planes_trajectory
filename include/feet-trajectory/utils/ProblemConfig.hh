@@ -67,10 +67,10 @@ struct ProblemConfig
   void loadFile(std::string configFile);
 
   /// @brief Checks if key exists
-  bool has(std::string key);
+  bool has(const std::string& key) const;
 
-  const CustomString get(std::string key);
-  const CustomString operator[](std::string key);
+  const CustomString get(const std::string& key) const;
+  const CustomString operator[](const std::string& key) const;
   ProblemConfig subSection(std::string section);
   ProblemConfig operator()(std::string section);
   //static ProblemConfig loadUserConfig();

@@ -17,7 +17,7 @@ void AlternateQPSolver::init(const Eigen::VectorXd& xInit)
 
 void AlternateQPSolver::solve()
 {
-  Eigen::VectorXd res;
+  Eigen::VectorXd res(qpNfixed_.dimVar());
   Eigen::MatrixXd Acopy(qpNfixed_.A());
   QPSolver_.print(qpNfixed_.lVar(), qpNfixed_.uVar(), Acopy, qpNfixed_.c(),
                   qpNfixed_.C(), qpNfixed_.l(), qpNfixed_.u());

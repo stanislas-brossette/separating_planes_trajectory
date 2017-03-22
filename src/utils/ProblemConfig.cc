@@ -304,7 +304,8 @@ void ProblemConfig::loadFile(std::string configFile)
   getAsCustomString(node, "");
 }
 
-const ProblemConfig::CustomString ProblemConfig::get(std::string key)
+const ProblemConfig::CustomString ProblemConfig::get(
+    const std::string& key) const
 {
   if (prop.find(globalCategory + key) == prop.end())
   {
@@ -312,10 +313,10 @@ const ProblemConfig::CustomString ProblemConfig::get(std::string key)
                             key);
   }
 
-  return prop[globalCategory + key];
+  return prop.at(globalCategory + key);
 }
 
-bool ProblemConfig::has(std::string key)
+bool ProblemConfig::has(const std::string& key) const
 {
   if (prop.find(globalCategory + key) == prop.end())
     return false;
@@ -323,7 +324,8 @@ bool ProblemConfig::has(std::string key)
     return true;
 }
 
-const ProblemConfig::CustomString ProblemConfig::operator[](std::string key)
+const ProblemConfig::CustomString ProblemConfig::operator[](
+    const std::string& key) const
 {
   return get(key);
 }

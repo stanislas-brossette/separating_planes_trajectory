@@ -37,6 +37,7 @@ class TrajectoryProblem
   const Eigen::Vector3d& finalPos() const { return finalPos_; }
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
   const std::vector<std::string>& cstrNames() const { return cstrNames_; };
+  const ProblemConfig& config() const { return config_; }
 
   const std::vector<BoxAboveFixedPlan>& boxAboveFixedPlanFcts() const
   {

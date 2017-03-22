@@ -79,7 +79,7 @@ void BoxAboveFixedPlan::fillLinCstr(double& lb,
     val = -box().vertex(i).dot(normal_) + d_;
     if (val > maxLB) maxLB = val;
   }
-  lb = val;
+  lb = maxLB;
   C << normal_.transpose();
 }
 

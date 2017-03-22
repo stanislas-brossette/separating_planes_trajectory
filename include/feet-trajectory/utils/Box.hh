@@ -12,7 +12,7 @@ class Box
   Box(int index, double lx, double ly, double lz, double cx = 0.,
       double cy = 0., double cz = 0., bool fixed = false);
   Box(int index, Eigen::Vector3d size);
-  Box(int index, Eigen::Vector3d size, Eigen::Vector3d center);
+  Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix = false);
 
   const std::vector<Eigen::Vector3d>& vertex() const { return vertex_; };
   const Eigen::Matrix<double, 3, 8>& vertexMat() const { return vertexMat_; };
@@ -25,6 +25,7 @@ class Box
   const double& cz() const { return center_[2]; };
   const int& index() const { return index_; };
   const bool& fixed() const { return fixed_; };
+  void setFixed(bool f) { fixed_ = f; };
   const Eigen::Vector3d& center() const { return center_; }
   const Eigen::Vector3d& size() const { return size_; }
 
