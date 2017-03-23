@@ -2,20 +2,20 @@
 #include <iostream>
 #include <Eigen/Core>
 #include <feet-trajectory/utils/Box.hh>
+#include <feet-trajectory/utils/defs.hh>
 namespace feettrajectory
 {
   class CostDistance
   {
   public:
-    CostDistance (const long& nMobileBoxes, const Eigen::Vector3d& initPos, const Eigen::Vector3d& finalPos);
+    CostDistance (const long& nMobileBoxes, ConstRefVec3d initPos, ConstRefVec3d finalPos);
     virtual ~CostDistance ();
-    double compute(const Eigen::VectorXd& x);
+    double compute(ConstRefVec x);
 
     const Eigen::MatrixXd& Q() const { return Q_; }
     const Eigen::VectorXd& c() const { return c_; }
 
-    void fillQuadCost(Eigen::Ref<Eigen::MatrixXd> Q,
-                      Eigen::Ref<Eigen::VectorXd> c) const;
+    void fillQuadCost(RefMat Q, RefVec c) const;
 
   private:
     long n_;

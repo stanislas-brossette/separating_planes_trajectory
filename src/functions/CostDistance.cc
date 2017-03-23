@@ -3,8 +3,8 @@
 namespace feettrajectory
 {
 CostDistance::CostDistance(const long& nMobileBoxes,
-                           const Eigen::Vector3d& initPos,
-                           const Eigen::Vector3d& finalPos)
+                           ConstRefVec3d initPos,
+                           ConstRefVec3d finalPos)
     : n_(3 * nMobileBoxes), Q_(n_, n_), c_(n_)
 {
   Q_.setZero();
@@ -25,7 +25,7 @@ CostDistance::CostDistance(const long& nMobileBoxes,
 
 CostDistance::~CostDistance() {}
 
-double CostDistance::compute(const Eigen::VectorXd& x)
+double CostDistance::compute(ConstRefVec x)
 {
   assert(x.size() == n_ &&
          "x should be the same size as 3*numberOfMobileBoxes");
@@ -34,8 +34,7 @@ double CostDistance::compute(const Eigen::VectorXd& x)
   return res;
 }
 
-void CostDistance::fillQuadCost(Eigen::Ref<Eigen::MatrixXd> Q,
-                                Eigen::Ref<Eigen::VectorXd> c) const
+void CostDistance::fillQuadCost(RefMat Q, RefVec c) const
 {
   Q << Q_;
   c << c_;

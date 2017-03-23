@@ -40,6 +40,16 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
   nFixedPlanCstr_ = nFixedPlanes_ * nBoxes_;
   numberOfCstr_ = 3 * nMobilePlanCstr_ + nFixedPlanCstr_;
 
+  dimBox_ = 3;
+  dimPlan_ = 4;
+  dimNormal_ = 3;
+  dimDistance_ = 1;
+  dimBoxes_ = dimBox_ * nBoxes_;
+  dimPlans_ = dimPlan_ * nPlans_;
+  dimNormals_ = dimNormal_ * nPlans_;
+  dimDistances_ = dimDistance_ * nPlans_;
+  dimVar_ = dimBoxes_ + dimPlans_;
+
   for (int i = 0; i < static_cast<int>(nBoxes_); ++i)
   {
     Box b(i, boxSize_);

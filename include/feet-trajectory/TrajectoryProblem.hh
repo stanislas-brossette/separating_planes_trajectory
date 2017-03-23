@@ -38,6 +38,16 @@ class TrajectoryProblem
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
   const std::vector<std::string>& cstrNames() const { return cstrNames_; };
   const ProblemConfig& config() const { return config_; }
+  const Index& dimBox() const { return dimBox_; }
+  const Index& dimPlan() const { return dimPlan_; }
+  const Index& dimNormal() const { return dimNormal_; }
+  const Index& dimDistance() const { return dimDistance_; }
+  const Index& dimBoxes() const { return dimBoxes_; }
+  const Index& dimPlans() const { return dimPlans_; }
+  const Index& dimNormals() const { return dimNormals_; }
+  const Index& dimDistances() const { return dimDistances_; }
+  const Index& dimVar() const { return dimVar_; }
+  const CostDistance& costFct() const { return costFct_; };
 
   const std::vector<BoxAboveFixedPlan>& boxAboveFixedPlanFcts() const
   {
@@ -58,12 +68,6 @@ class TrajectoryProblem
   const std::vector<BoxAbovePlan>& obstacleAbovePlanFcts() const
   {
     return obstacleAbovePlanFcts_;
-  }
-  const CostDistance& costFct() const { return costFct_; };
-
-  long dimVar() const
-  {
-    return static_cast<long>(3 * nBoxes_ + 4 * nPlans_);
   }
 
   Eigen::VectorXd getBoxPositionsFromX(const Eigen::VectorXd& x) const;
@@ -94,6 +98,9 @@ class TrajectoryProblem
   size_t nMobilePlanCstr_;
   size_t nFixedPlanCstr_;
   size_t numberOfCstr_;
+
+  Index dimBox_, dimPlan_, dimNormal_, dimDistance_;
+  Index dimBoxes_, dimPlans_, dimNormals_, dimDistances_, dimVar_;
 
   Box initBox_, finalBox_;
   BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;

@@ -19,6 +19,7 @@ SET(SOURCES
 SET(HEADERS
   ../include/feet-trajectory/utils/AlternateQPSolver.hh
   ../include/feet-trajectory/utils/Box.hh
+  ../include/feet-trajectory/utils/defs.hh
   ../include/feet-trajectory/utils/FixedPlan.hh
   ../include/feet-trajectory/utils/Plan.hh
   ../include/feet-trajectory/utils/PlanForHull.hh
