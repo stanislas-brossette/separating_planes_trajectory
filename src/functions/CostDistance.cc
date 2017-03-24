@@ -16,9 +16,9 @@ CostDistance::CostDistance(const long& nMobileBoxes,
     for (long j = 0; j < n_; ++j)
     {
       if (j == i)
-        Q_(i, j) = 2;
+        Q_(i, j) = 4;
       else if (j == i + 3 || j == i - 3)
-        Q_(i, j) = -1;
+        Q_(i, j) = -2;
     }
   }
 }

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <Eigen/Core>
+#include <feet-trajectory/utils/defs.hh>
 
 namespace feettrajectory
 {
@@ -9,12 +10,12 @@ class QP
 {
  public:
   QP();
-  QP(const long& dimVar, const long& dimCstr);
-  void setDimensions(const long& dimVar, const long& dimCstr);
+  QP(const Index& dimVar, const Index& dimCstr);
+  void setDimensions(const Index& dimVar, const Index& dimCstr);
   virtual ~QP();
 
-  const long& dimVar() const { return dimVar_; }
-  const long& dimCstr() const { return dimCstr_; }
+  const Index& dimVar() const { return dimVar_; }
+  const Index& dimCstr() const { return dimCstr_; }
   const Eigen::MatrixXd& A() const { return A_; }
   Eigen::MatrixXd Acopy() const { return A_; }
   const Eigen::MatrixXd& C() const { return C_; }
@@ -30,8 +31,8 @@ class QP
   std::ostream& print (std::ostream& o) const;
 
  protected:
-  long dimVar_;           // Size variables
-  long dimCstr_;          // Size constraints
+  Index dimVar_;           // Size variables
+  Index dimCstr_;          // Size constraints
   Eigen::MatrixXd A_;     // Quadratic cost
   Eigen::MatrixXd C_;     // Constraint
   Eigen::VectorXd c_;     // linear cost

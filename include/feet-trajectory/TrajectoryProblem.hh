@@ -29,6 +29,8 @@ class TrajectoryProblem
   const size_t& nFixedPlanCstr() const { return nFixedPlanCstr_; }
   const size_t& nMobilePlanCstr() const { return nMobilePlanCstr_; }
   const size_t& numberOfCstr() const { return numberOfCstr_; }
+  const Box& initBox() const { return initBox_; }
+  const Box& finalBox() const { return finalBox_; }
   const std::vector<Box>& boxes() const { return boxes_; }
   const std::vector<Box>& obstacles() const { return obstacles_; }
   const std::vector<FixedPlan>& fixedPlanes() const { return fixedPlanes_; }
@@ -48,6 +50,18 @@ class TrajectoryProblem
   const Index& dimDistances() const { return dimDistances_; }
   const Index& dimVar() const { return dimVar_; }
   const CostDistance& costFct() const { return costFct_; };
+
+  const Box& getBox(Index i) const
+  {
+    if (i == -1)
+      return initBox_;
+    else if (i == nBoxes_)
+      return finalBox_;
+    else if (i > -1 && i < nBoxes_)
+      return boxes().at(i);
+    else
+      std::cerr << "No box with index " << i << std::endl;
+  }
 
   const std::vector<BoxAboveFixedPlan>& boxAboveFixedPlanFcts() const
   {

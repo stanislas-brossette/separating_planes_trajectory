@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
   altQP.init(initVec);
 
-  std::cout << "altQP.QPWithNFixed(): " << altQP.qpNfixed() << std::endl;
+  std::cout << "altQP.qpPlanesFixed(): " << altQP.qpPlanesFixed() << std::endl;
 
   altQP.solve();
 

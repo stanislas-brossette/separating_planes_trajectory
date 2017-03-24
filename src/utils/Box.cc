@@ -41,8 +41,9 @@ Box::Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix)
 std::ostream& Box::print(std::ostream& o) const
 {
   o << "Box " << index() << std::endl;
-  o << "center: " << center() << std::endl;
-  o << "size: " << size() << std::endl;
+  o << "fixed: " << fixed() << std::endl;
+  o << "center: " << center().transpose() << std::endl;
+  o << "size: " << size().transpose() << std::endl;
   for (size_t i = 0; i < 8; i++)
   {
     o << "vertex(" << i << "): " << vertex(i).transpose() << std::endl;

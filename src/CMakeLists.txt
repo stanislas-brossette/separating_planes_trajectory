@@ -12,9 +12,11 @@ SET(SOURCES
   utils/Printer.cc
   utils/QP.cc
   utils/QPWithNFixed.cc
+  utils/QPPlanesFixed.cc
   functions/BoxAbovePlan.cc
   functions/BoxAboveFixedPlan.cc
   functions/CostDistance.cc
+  functions/PlanBetweenBoxAndObstacle.cc
   )
 SET(HEADERS
   ../include/feet-trajectory/utils/AlternateQPSolver.hh
@@ -29,9 +31,11 @@ SET(HEADERS
   ../include/feet-trajectory/utils/Printer.hh
   ../include/feet-trajectory/utils/QP.hh
   ../include/feet-trajectory/utils/QPWithNFixed.hh
+  ../include/feet-trajectory/utils/QPPlanesFixed.hh
   ../include/feet-trajectory/functions/BoxAbovePlan.hh
   ../include/feet-trajectory/functions/BoxAboveFixedPlan.hh
   ../include/feet-trajectory/functions/CostDistance.hh
+  ../include/feet-trajectory/functions/PlanBetweenBoxAndObstacle.hh
   ../include/feet-trajectory/BoxTrajProblem.hh
   ../include/feet-trajectory/BoxesHullTrajProblem.hh
   ../include/feet-trajectory/TrajectoryProblem.hh

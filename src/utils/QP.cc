@@ -5,12 +5,12 @@ namespace feettrajectory
 {
 QP::QP() : QP(0, 0) {}
 
-QP::QP(const long& dimVar, const long& dimCstr)
+QP::QP(const Index& dimVar, const Index& dimCstr)
 {
   setDimensions(dimVar, dimCstr);
 }
 
-void QP::setDimensions(const long& dimVar, const long& dimCstr)
+void QP::setDimensions(const Index& dimVar, const Index& dimCstr)
 {
   dimVar_ = dimVar;
   dimCstr_ = dimCstr;
