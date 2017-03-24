@@ -11,8 +11,8 @@ SET(SOURCES
   utils/quat2mat.cc
   utils/Printer.cc
   utils/QP.cc
-  utils/QPWithNFixed.cc
   utils/QPPlanesFixed.cc
+  utils/QPBoxesFixed.cc
   functions/BoxAbovePlan.cc
   functions/BoxAboveFixedPlan.cc
   functions/CostDistance.cc
@@ -30,8 +30,8 @@ SET(HEADERS
   ../include/feet-trajectory/utils/quat2mat.hh
   ../include/feet-trajectory/utils/Printer.hh
   ../include/feet-trajectory/utils/QP.hh
-  ../include/feet-trajectory/utils/QPWithNFixed.hh
   ../include/feet-trajectory/utils/QPPlanesFixed.hh
+  ../include/feet-trajectory/utils/QPBoxesFixed.hh
   ../include/feet-trajectory/functions/BoxAbovePlan.hh
   ../include/feet-trajectory/functions/BoxAboveFixedPlan.hh
   ../include/feet-trajectory/functions/CostDistance.hh

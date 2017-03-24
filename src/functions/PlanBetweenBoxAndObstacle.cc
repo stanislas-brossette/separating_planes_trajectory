@@ -7,11 +7,6 @@ void PlanBetweenBoxAndObstacle::fillLinCstr(const Box& box, const Box& obstacle,
                                             const Eigen::Vector3d& planN,
                                             RefVec lb, RefMat C)
 {
-  std::cout << "PlanBetweenBoxAndObstacle::fillLinCstr" << std::endl;
-  std::cout << "box: " << box << std::endl;
-  std::cout << "obstacle: " << obstacle << std::endl;
-  std::cout << "planD: " << planD << std::endl;
-  std::cout << "planN: " << planN.transpose() << std::endl;
   C << planN.transpose();
   const double inf(std::numeric_limits<double>::infinity());
   double maxObs = -inf;

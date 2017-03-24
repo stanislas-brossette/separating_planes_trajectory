@@ -3,9 +3,7 @@
 namespace feettrajectory
 {
 AlternateQPSolver::AlternateQPSolver(const TrajectoryProblem& pb)
-    : pb_(pb),
-      // qpNfixed_(pb),
-      qpPlanesFixed_(pb)
+    : pb_(pb), qpPlanesFixed_(pb_), qpBoxesFixed_(pb_), res_(pb_.dimVar())
 {
 }
 
@@ -13,19 +11,20 @@ AlternateQPSolver::~AlternateQPSolver() {}
 
 void AlternateQPSolver::init(const Eigen::VectorXd& xInit)
 {
-  // qpNfixed_.formQP(pb_, pb_.getPlansNormalsFromX(xInit));
+  res_ << xInit;
   qpPlanesFixed_.formQP(xInit.tail(pb_.dimPlans()));
   std::cout << "qpPlanesFixed_: " << qpPlanesFixed_ << std::endl;
-  QPSolver_.resize(pb_.dimVar(), pb_.numberOfCstr(), Eigen::lssol::eType::QP2);
+  qpBoxesFixed_.formQP(xInit.head(pb_.dimBoxes()));
+  std::cout << "qpBoxesFixed_: " << qpBoxesFixed_ << std::endl;
+  QPSolver_.resize(qpPlanesFixed_.dimVar(), qpPlanesFixed_.dimCstr(),
+                   Eigen::lssol::eType::QP2);
+  LPSolver_.resize(qpBoxesFixed_.dimVar(), qpBoxesFixed_.dimCstr());
 }
 
-void AlternateQPSolver::solve()
+void AlternateQPSolver::formAndSolveQPPlanesFixed(RefVec x)
 {
-  Eigen::VectorXd resFixedPlanes(qpPlanesFixed_.dimVar());
+  qpPlanesFixed_.formQP(x.tail(pb_.dimPlans()));
   Eigen::MatrixXd Acopy(qpPlanesFixed_.A());
-  QPSolver_.print(qpPlanesFixed_.lVar(), qpPlanesFixed_.uVar(),
-                  qpPlanesFixed_.A(), qpPlanesFixed_.c(), qpPlanesFixed_.C(),
-                  qpPlanesFixed_.l(), qpPlanesFixed_.u());
   QPSolver_.solve(qpPlanesFixed_.lVar(), qpPlanesFixed_.uVar(), Acopy,
                   qpPlanesFixed_.c(), qpPlanesFixed_.C(), qpPlanesFixed_.l(),
                   qpPlanesFixed_.u());
@@ -34,10 +33,40 @@ void AlternateQPSolver::solve()
     QPSolver_.print_inform();
     std::cout << "QP solver FAILED!!! Damnit" << std::endl;
   }
-  else
+  std::cout << "QPSolver_.result(): " << QPSolver_.result().transpose()
+            << std::endl;
+  x.head(pb_.dimBoxes()) << QPSolver_.result().head(pb_.dimBoxes());
+}
+
+void AlternateQPSolver::formAndSolveLPBoxesFixed(RefVec x)
+{
+  qpBoxesFixed_.formQP(x.tail(pb_.dimPlans()));
+  LPSolver_.solve(qpBoxesFixed_.lVar(), qpBoxesFixed_.uVar(), qpBoxesFixed_.c(),
+                  qpBoxesFixed_.C(), qpBoxesFixed_.l(), qpBoxesFixed_.u());
+  if (!(LPSolver_.inform() == 0 || LPSolver_.inform() == 1))
   {
-    resFixedPlanes = QPSolver_.result();
-    std::cout << "resFixedPlanes: " << resFixedPlanes << std::endl;
+    LPSolver_.print_inform();
+    std::cout << "LP solver FAILED!!! Damnit" << std::endl;
+  }
+
+  std::cout << "LPSolver_.result(): " << LPSolver_.result().transpose()
+            << std::endl;
+  x.tail(pb_.dimPlans()) << LPSolver_.result().head(pb_.dimPlans());
+}
+
+void AlternateQPSolver::solve()
+{
+  Eigen::VectorXd resFixedPlanes(qpPlanesFixed_.dimVar());
+  Eigen::VectorXd resFixedBoxes(qpBoxesFixed_.dimVar());
+
+  int nIter = 0;
+  while (nIter < 10)
+  {
+    formAndSolveQPPlanesFixed(res_);
+    std::cout << "res_.transpose(): " << res_.transpose() << std::endl;
+    formAndSolveLPBoxesFixed(res_);
+    std::cout << "res_.transpose(): " << res_.transpose() << std::endl;
+    pb_.normalizeNormals(res_);
   }
 }
 
