@@ -49,7 +49,9 @@ class TrajectoryProblem
   const Index& dimNormals() const { return dimNormals_; }
   const Index& dimDistances() const { return dimDistances_; }
   const Index& dimVar() const { return dimVar_; }
+  const size_t& maxIter() const { return maxIter_; }
   const CostDistance& costFct() const { return costFct_; };
+  Eigen::VectorXd findInitPoint() const;
 
   const Box& getBox(Index i) const
   {
@@ -87,6 +89,10 @@ class TrajectoryProblem
   Eigen::VectorXd getBoxPositionsFromX(const Eigen::VectorXd& x) const;
   Eigen::VectorXd getPlansNormalsFromX(const Eigen::VectorXd& x) const;
   Eigen::VectorXd getPlansDistancesFromX(const Eigen::VectorXd& x) const;
+  Eigen::Vector3d getBoxPositionFromX(size_t i, const Eigen::VectorXd& x) const;
+  Eigen::Vector3d getPlanNormalFromX(size_t i, const Eigen::VectorXd& x) const;
+  double getPlanDistanceFromX(size_t i, const Eigen::VectorXd& x) const;
+
   void normalizeNormals(Eigen::Ref<Eigen::VectorXd> x) const;
 
   /// \brief Print method.
@@ -112,6 +118,8 @@ class TrajectoryProblem
   size_t nMobilePlanCstr_;
   size_t nFixedPlanCstr_;
   size_t numberOfCstr_;
+
+  size_t maxIter_;
 
   Index dimBox_, dimPlan_, dimNormal_, dimDistance_;
   Index dimBoxes_, dimPlans_, dimNormals_, dimDistances_, dimVar_;

@@ -14,6 +14,7 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
       finalPos_(config_["finalPos"].asVector3d()),
       boxSize_(config_["BoxSize"].asVector3d()),
       nBoxes_(config_["nBoxes"].asSize_t()),
+      maxIter_(config_["maxIter"].asSize_t()),
       initBox_(-1, boxSize_, initPos_, true),
       finalBox_(static_cast<int>(nBoxes_), boxSize_, finalPos_, true),
       initBoxAbovePlanFct_(initBox_),
@@ -118,6 +119,18 @@ std::ostream& operator<<(std::ostream& o, const TrajectoryProblem& f)
   return f.print(o);
 }
 
+Eigen::VectorXd TrajectoryProblem::findInitPoint() const
+{
+  Eigen::VectorXd xInit(dimVar());
+  xInit.setRandom();
+  for (int i = 0; i < nBoxes(); i++)
+  {
+    xInit.segment<3>(3 * i) =
+        initPos_ + (i + 1) * (finalPos_ - initPos_) / (nBoxes_ + 1);
+  }
+  return xInit;
+}
+
 Eigen::VectorXd TrajectoryProblem::getBoxPositionsFromX(
     const Eigen::VectorXd& x) const
 {
@@ -149,11 +162,31 @@ Eigen::VectorXd TrajectoryProblem::getPlansDistancesFromX(
   return plansD;
 }
 
+Eigen::Vector3d TrajectoryProblem::getBoxPositionFromX(
+    size_t i, const Eigen::VectorXd& x) const
+{
+  return x.segment(3 * i, 3);
+}
+
+Eigen::Vector3d TrajectoryProblem::getPlanNormalFromX(
+    size_t i, const Eigen::VectorXd& x) const
+{
+  return x.segment(dimBoxes_ + 4 * i + 1, 3);
+}
+
+double TrajectoryProblem::getPlanDistanceFromX(size_t i,
+                                               const Eigen::VectorXd& x) const
+{
+  return x(dimBoxes_ + 4 * i);
+}
+
 void TrajectoryProblem::normalizeNormals(Eigen::Ref<Eigen::VectorXd> x) const
 {
   for (int i = 0; i < nPlans_; i++)
   {
-    x.segment<3>(3 * static_cast<long>(nBoxes_) + 4 * i + 1).normalize();
+    double norm = x.segment<3>(dimBoxes_ + 4 * i + 1).norm();
+    x.segment<3>(dimBoxes_ + 4 * i + 1).normalize();
+    x(dimBoxes_ + 4 * i) /= norm;
   }
 }
 } /* feettrajectory */

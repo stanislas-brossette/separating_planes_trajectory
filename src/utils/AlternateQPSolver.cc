@@ -1,10 +1,22 @@
 #include <feet-trajectory/utils/AlternateQPSolver.hh>
+#include <feet-trajectory/utils/defs.hh>
 
 namespace feettrajectory
 {
-AlternateQPSolver::AlternateQPSolver(const TrajectoryProblem& pb)
-    : pb_(pb), qpPlanesFixed_(pb_), qpBoxesFixed_(pb_), res_(pb_.dimVar())
+AlternateQPSolver::AlternateQPSolver(const TrajectoryProblem& pb,
+                                     const size_t& maxIter)
+    : pb_(pb),
+      qpPlanesFixed_(pb_),
+      qpBoxesFixed_(pb_),
+      res_(pb_.dimVar()),
+      maxIter_(maxIter)
 {
+  resHistory_.resize(maxIter_ + 1);
+  for (size_t i = 0; i < resHistory_.size(); i++)
+  {
+    resHistory_[i].resize(pb_.dimVar());
+    resHistory_[i].setZero();
+  }
 }
 
 AlternateQPSolver::~AlternateQPSolver() {}
@@ -12,10 +24,9 @@ AlternateQPSolver::~AlternateQPSolver() {}
 void AlternateQPSolver::init(const Eigen::VectorXd& xInit)
 {
   res_ << xInit;
+  resHistory_[0] << res_;
   qpPlanesFixed_.formQP(xInit.tail(pb_.dimPlans()));
-  std::cout << "qpPlanesFixed_: " << qpPlanesFixed_ << std::endl;
   qpBoxesFixed_.formQP(xInit.head(pb_.dimBoxes()), xInit.tail(pb_.dimPlans()));
-  std::cout << "qpBoxesFixed_: " << qpBoxesFixed_ << std::endl;
   QPSolver_.resize(qpPlanesFixed_.dimVar(), qpPlanesFixed_.dimCstr(),
                    Eigen::lssol::eType::QP2);
   LPSolver_.resize(qpBoxesFixed_.dimVar(), qpBoxesFixed_.dimCstr());
@@ -31,10 +42,10 @@ void AlternateQPSolver::formAndSolveQPPlanesFixed(RefVec x)
   if (!(QPSolver_.inform() == 0 || QPSolver_.inform() == 1))
   {
     QPSolver_.print_inform();
-    std::cout << "QP solver FAILED!!! Damnit" << std::endl;
+    std::cerr << "QP solver FAILED!!! Damnit" << std::endl;
   }
-  std::cout << "QPSolver_.result(): " << QPSolver_.result().transpose()
-            << std::endl;
+  // std::cout << "QPSolver_.result(): \n" << QPSolver_.result().transpose()
+  //<< std::endl;
   x.head(pb_.dimBoxes()) << QPSolver_.result().head(pb_.dimBoxes());
 }
 
@@ -46,11 +57,11 @@ void AlternateQPSolver::formAndSolveLPBoxesFixed(RefVec x)
   if (!(LPSolver_.inform() == 0 || LPSolver_.inform() == 1))
   {
     LPSolver_.print_inform();
-    std::cout << "LP solver FAILED!!! Damnit" << std::endl;
+    std::cerr << "LP solver FAILED!!! Damnit" << std::endl;
   }
-
-  std::cout << "LPSolver_.result(): " << LPSolver_.result().transpose()
-            << std::endl;
+  // std::cout << "LPSolver_.result(): \n" <<
+  // LPSolver_.result().transpose().format(fmt::custom)
+  //<< std::endl;
   x.tail(pb_.dimPlans()) << LPSolver_.result().head(pb_.dimPlans());
 }
 
@@ -59,16 +70,52 @@ void AlternateQPSolver::solve()
   Eigen::VectorXd resFixedPlanes(qpPlanesFixed_.dimVar());
   Eigen::VectorXd resFixedBoxes(qpBoxesFixed_.dimVar());
 
-  int nIter = 0;
+  int nIter = 1;
   while (nIter < 10)
   {
-    formAndSolveQPPlanesFixed(res_);
-    std::cout << "res_.transpose(): " << res_.transpose() << std::endl;
     formAndSolveLPBoxesFixed(res_);
-    std::cout << "res_.transpose(): " << res_.transpose() << std::endl;
+    // std::cout << "res_: \n" << res_.transpose().format(fmt::custom) <<
+    // std::endl;
     pb_.normalizeNormals(res_);
+    // std::cout << "normalized res_: \n" <<
+    // res_.transpose().format(fmt::custom) << std::endl;
+    resHistory_[nIter] << res_;
     nIter++;
   }
+  while (nIter < maxIter_)
+  {
+    // std::cout << "Solving QP planes fixed" << std::endl;
+    formAndSolveQPPlanesFixed(res_);
+    // std::cout << "res_: \n" << res_.transpose() << std::endl;
+    resHistory_[nIter] << res_;
+    nIter++;
+
+    // std::cout << "Solving LP boxes fixed" << std::endl;
+    formAndSolveLPBoxesFixed(res_);
+    // std::cout << "res_: \n" << res_.transpose().format(fmt::custom) <<
+    // std::endl;
+    pb_.normalizeNormals(res_);
+    // std::cout << "normalized res_: \n" <<
+    // res_.transpose().format(fmt::custom) << std::endl;
+    resHistory_[nIter] << res_;
+    nIter++;
+  }
+  totalIter_ = nIter;
+}
+
+void AlternateQPSolver::logAllX(const std::string& folderName) const
+{
+  std::ofstream xLogFile;
+  xLogFile.open(folderName + "xLog.m");
+
+  for (size_t i = 0; i < totalIter_; i++)
+  {
+    xLogFile << "%============== iteration " << i
+             << "==================" << std::endl;
+    xLogFile << "x_" << i << " = ";
+    xLogFile << resHistory_[i].format(fmt::matlab) << std::endl;
+  }
+  xLogFile.close();
 }
 
 } /* feettrajectory */

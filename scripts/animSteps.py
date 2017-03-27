@@ -171,7 +171,7 @@ class MyModel(HasTraits):
                 self.fixedPlanesPlot[i], self.fixedPlanesQuiver[i] = plotFixedPlane(self.fixedPlanesPlot[i], self.fixedPlanesQuiver[i], self.fixedPlanes[i], 2.0, (1, 1, 0), 1)
             # Obstacles
             for i in range(0,len(self.obstacles),1):
-                self.obstacleBoxesPlot[i] = plotBox(self.obstacleBoxesPlot[i], self.obstacles[i], (1, 0, 0), 1)
+                self.obstacleBoxesPlot[i] = plotBox(self.obstacleBoxesPlot[i], self.obstacles[i], (1, 0, 0), 0.6)
             # Mobile Boxes
             for i in range(0,len(iterBoxes),1):
                 self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)

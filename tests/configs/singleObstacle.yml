@@ -1,3 +1,6 @@
+#Solver
+maxIter: 10
+
 #logs
 logName: "logs/singleObstacle.log"
 

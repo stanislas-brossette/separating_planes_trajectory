@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <feet-trajectory/TrajectoryProblem.hh>
+#include <feet-trajectory/utils/Printer.hh>
 #include <feet-trajectory/utils/AlternateQPSolver.hh>
 
 using namespace feettrajectory;
@@ -24,23 +25,41 @@ int main(int argc, char *argv[])
 
   TrajectoryProblem myProb(ymlPath);
   std::cout << "myProb: " << myProb << std::endl;
-  AlternateQPSolver altQP(myProb);
+  AlternateQPSolver altQP(myProb, myProb.maxIter());
 
   Eigen::VectorXd initVec(myProb.dimVar());
-  std::cout << "myProb.config()[x0].asVectorXd(): "
-            << myProb.config()["x0"].asVectorXd() << std::endl;
   if (myProb.config().has("x0"))
+  {
     initVec << myProb.config()["x0"].asVectorXd();
+    std::cout << "myProb.config()[x0].asVectorXd(): "
+              << myProb.config()["x0"].asVectorXd().transpose() << std::endl;
+  }
   else
-    initVec.setRandom();
+    initVec = myProb.findInitPoint();
 
   myProb.normalizeNormals(initVec);
 
   altQP.init(initVec);
-
-  std::cout << "altQP.qpPlanesFixed(): " << altQP.qpPlanesFixed() << std::endl;
+  std::cout << "qpPlanesFixed: " << altQP.qpPlanesFixed() << std::endl;
+  std::cout << "qpBoxesFixed: " << altQP.qpBoxesFixed() << std::endl;
 
   altQP.solve();
+  altQP.logAllX("logs/altQP/");
+
+  printAllIterations(myProb.config()["logName"], myProb, altQP.res(),
+                     "logs/altQP/");
+  std::string command = "./animSteps.py logs/";
+  if (argc > 1)
+  {
+    command += argv[1];
+  }
+  else
+  {
+    command += "singleObstacle";
+  }
+
+  command += ".log";
+  system(command.c_str());
 
   return 0;
 }

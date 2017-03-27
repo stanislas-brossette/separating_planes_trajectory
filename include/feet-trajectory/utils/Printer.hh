@@ -7,6 +7,8 @@
 
 #include <feet-trajectory/BoxTrajProblem.hh>
 #include <feet-trajectory/BoxesHullTrajProblem.hh>
+#include <feet-trajectory/TrajectoryProblem.hh>
+#include <feet-trajectory/utils/defs.hh>
 
 namespace feettrajectory
 {
@@ -20,6 +22,11 @@ void print(const std::string& fileName, const Eigen::Vector3d& bSize,
 void printAllIterations(const std::string& fileName,
                         const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
                         const std::string& folder);
-std::vector<Eigen::VectorXd> parseX(const std::string& file, const mnf::Point& x);
+void printAllIterations(const std::string& fileName,
+                        const TrajectoryProblem& pb,
+                        const Eigen::VectorXd& xStar,
+                        const std::string& folder);
+std::vector<Eigen::VectorXd> parseX(const std::string& file,
+                                    const Index& x);
 } /* feettrajectory */
 
