@@ -4,7 +4,11 @@ namespace feettrajectory
 {
 QPBoxesFixed::QPBoxesFixed(const TrajectoryProblem& pb) : pb_(pb)
 {
-  setDimensions(pb_.dimPlans() + 1, 24 * pb_.nPlans());
+  // The problem's dimension is all the variables of the planes plus the
+  // relaxation term.
+  // Each box above plane constraint results in 8 dim-1 constraints, thus 24 per
+  // plane. And each norm-1 constraint results in one dim-1 constraint
+  setDimensions(pb_.dimPlans() + 1, 24 * pb_.nPlans() + pb_.nPlans());
 }
 QPBoxesFixed::~QPBoxesFixed() {}
 
@@ -29,7 +33,7 @@ Eigen::Vector3d QPBoxesFixed::getBoxPos(Index iBox, ConstRefVec xBoxes)
   return boxPos;
 }
 
-void QPBoxesFixed::formQP(ConstRefVec xBoxes)
+void QPBoxesFixed::formQP(ConstRefVec xBoxes, ConstRefVec xPreviousPlanes)
 {
   std::cout << "QPBoxesFixed::formQP" << std::endl;
   addRelaxationTerm(10);
@@ -74,6 +78,14 @@ void QPBoxesFixed::formQP(ConstRefVec xBoxes)
       C_.block(cstrIndexBegin, distanceIndexBegin, 1, 1) << 1;
       cstrIndexBegin++;
     }
+
+    // Adding norm 1 constraint approximation
+    C_.block(cstrIndexBegin, normalIndexBegin, 1, 3)
+        << xPreviousPlanes.segment(normalIndexBegin, 3).transpose();
+    C_(cstrIndexBegin, C_.cols() - 1) = 0;
+    l_(cstrIndexBegin) = 0.6;
+    u_(cstrIndexBegin) = 1.0;
+    cstrIndexBegin++;
   }
 }
 

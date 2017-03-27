@@ -14,7 +14,7 @@ class QPBoxesFixed : public QP
   QPBoxesFixed(const TrajectoryProblem& pb);
   virtual ~QPBoxesFixed();
   void addRelaxationTerm(const double& alpha);
-  void formQP(ConstRefVec boxesVariables);
+  void formQP(ConstRefVec boxesVariables, ConstRefVec xPreviousPlanes);
 
  private:
   const TrajectoryProblem& pb_;

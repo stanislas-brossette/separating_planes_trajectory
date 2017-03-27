@@ -14,7 +14,7 @@ void AlternateQPSolver::init(const Eigen::VectorXd& xInit)
   res_ << xInit;
   qpPlanesFixed_.formQP(xInit.tail(pb_.dimPlans()));
   std::cout << "qpPlanesFixed_: " << qpPlanesFixed_ << std::endl;
-  qpBoxesFixed_.formQP(xInit.head(pb_.dimBoxes()));
+  qpBoxesFixed_.formQP(xInit.head(pb_.dimBoxes()), xInit.tail(pb_.dimPlans()));
   std::cout << "qpBoxesFixed_: " << qpBoxesFixed_ << std::endl;
   QPSolver_.resize(qpPlanesFixed_.dimVar(), qpPlanesFixed_.dimCstr(),
                    Eigen::lssol::eType::QP2);
@@ -40,7 +40,7 @@ void AlternateQPSolver::formAndSolveQPPlanesFixed(RefVec x)
 
 void AlternateQPSolver::formAndSolveLPBoxesFixed(RefVec x)
 {
-  qpBoxesFixed_.formQP(x.tail(pb_.dimPlans()));
+  qpBoxesFixed_.formQP(x.head(pb_.dimBoxes()), x.tail(pb_.dimPlans()));
   LPSolver_.solve(qpBoxesFixed_.lVar(), qpBoxesFixed_.uVar(), qpBoxesFixed_.c(),
                   qpBoxesFixed_.C(), qpBoxesFixed_.l(), qpBoxesFixed_.u());
   if (!(LPSolver_.inform() == 0 || LPSolver_.inform() == 1))
@@ -67,6 +67,7 @@ void AlternateQPSolver::solve()
     formAndSolveLPBoxesFixed(res_);
     std::cout << "res_.transpose(): " << res_.transpose() << std::endl;
     pb_.normalizeNormals(res_);
+    nIter++;
   }
 }
 
