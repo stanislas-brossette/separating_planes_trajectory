@@ -50,6 +50,7 @@ class TrajectoryProblem
   const Index& dimDistances() const { return dimDistances_; }
   const Index& dimVar() const { return dimVar_; }
   const size_t& maxIter() const { return maxIter_; }
+  const double& securityDistance() const { return securityDistance_; }
   const CostDistance& costFct() const { return costFct_; };
   Eigen::VectorXd findInitPoint() const;
 
@@ -118,6 +119,8 @@ class TrajectoryProblem
   size_t nMobilePlanCstr_;
   size_t nFixedPlanCstr_;
   size_t numberOfCstr_;
+
+  double securityDistance_;
 
   size_t maxIter_;
 

@@ -39,7 +39,7 @@ void QPBoxesFixed::formQP(ConstRefVec xBoxes, ConstRefVec xPreviousPlanes)
   addRelaxationTerm(10);
   long cstrIndexBegin = 0;
 
-  l_.setZero();
+  l_.setConstant(pb_.securityDistance());
 
   for (size_t iPlan = 0; iPlan < pb_.nMobilePlanCstr(); ++iPlan)
   {

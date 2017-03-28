@@ -21,6 +21,13 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
       finalBoxAbovePlanFct_(finalBox_),
       costFct_(static_cast<long>(nBoxes_), initPos_, finalPos_)
 {
+  if (config_.has("securityDistance"))
+  {
+    securityDistance_ = config_["securityDistance"].asDouble();
+  }
+  else
+    securityDistance_ = 0;
+
   if (config_.has("obstacles"))
   {
     obstacles_ = config_["obstacles"].asVecBox();

@@ -54,13 +54,15 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
       PlanBetweenBoxAndObstacle::fillLinCstr(
           pb_.getBox(iBox0Above), pb_.obstacles().at(iBoxBelow), planD, planN,
           l_.segment(cstrIndexBegin, 1),
-          C_.block(cstrIndexBegin, box0IndexBegin, 1, 3));
+          C_.block(cstrIndexBegin, box0IndexBegin, 1, 3),
+          pb_.securityDistance());
     }
     else
     {
       PlanBetweenBoxAndObstacle::fillLinCstr(
           pb_.getBox(iBox0Above), pb_.obstacles().at(iBoxBelow), planD, planN,
-          l_.segment(cstrIndexBegin, 1), placeholderMatrix);
+          l_.segment(cstrIndexBegin, 1), placeholderMatrix,
+          pb_.securityDistance());
     }
     cstrIndexBegin += 1;
 
@@ -69,13 +71,15 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
       PlanBetweenBoxAndObstacle::fillLinCstr(
           pb_.getBox(iBox1Above), pb_.obstacles().at(iBoxBelow), planD, planN,
           l_.segment(cstrIndexBegin, 1),
-          C_.block(cstrIndexBegin, box1IndexBegin, 1, 3));
+          C_.block(cstrIndexBegin, box1IndexBegin, 1, 3),
+          pb_.securityDistance());
     }
     else
     {
       PlanBetweenBoxAndObstacle::fillLinCstr(
           pb_.getBox(iBox1Above), pb_.obstacles().at(iBoxBelow), planD, planN,
-          l_.segment(cstrIndexBegin, 1), placeholderMatrix);
+          l_.segment(cstrIndexBegin, 1), placeholderMatrix,
+          pb_.securityDistance());
     }
     cstrIndexBegin += 1;
   }

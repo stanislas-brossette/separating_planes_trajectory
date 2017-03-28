@@ -13,7 +13,7 @@ namespace feettrajectory
     virtual ~PlanBetweenBoxAndObstacle ();
     static void fillLinCstr(const Box& box, const Box& obstacle,
                             const double& planD, const Eigen::Vector3d& planN,
-                            RefVec lb, RefMat C);
+                            RefVec lb, RefMat C, double securityDistance = 0);
 
   private:
     /* data */

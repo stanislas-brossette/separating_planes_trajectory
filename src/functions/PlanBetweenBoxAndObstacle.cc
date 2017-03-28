@@ -5,7 +5,8 @@ namespace feettrajectory
 void PlanBetweenBoxAndObstacle::fillLinCstr(const Box& box, const Box& obstacle,
                                             const double& planD,
                                             const Eigen::Vector3d& planN,
-                                            RefVec lb, RefMat C)
+                                            RefVec lb, RefMat C,
+                                            double securityDistance)
 {
   C << planN.transpose();
   const double inf(std::numeric_limits<double>::infinity());
@@ -26,9 +27,9 @@ void PlanBetweenBoxAndObstacle::fillLinCstr(const Box& box, const Box& obstacle,
   }
 
   if (!box.fixed())
-    lb << maxObs + planN.dot(obstacle.center()) - minBox;
+    lb << maxObs + planN.dot(obstacle.center()) - minBox + 2 * securityDistance;
   else
     lb << maxObs + planN.dot(obstacle.center()) - minBox -
-              planN.dot(box.center());
+              planN.dot(box.center()) + 2 * securityDistance;
 }
 } /* feettrajectory */
