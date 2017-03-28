@@ -158,8 +158,8 @@ class MyModel(HasTraits):
 
     plot = Instance(PipelineBase)
 
-    @on_trait_change('iter,scene.activated')
-    def update_plot(self):
+    @on_trait_change('scene.activated')
+    def create_plot(self):
         iterBoxes = self.mobileBoxes[self.iter]
         iterPlanes = self.planes[self.iter]
         if self.plot is None:
@@ -178,13 +178,16 @@ class MyModel(HasTraits):
             # Separating Planes
             for i in range(0,len(iterPlanes),1):
                 self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
-            self.scene.mlab.view(azimuth=100, elevation=50, distance=4, focalpoint=[0,0,0.5],
-     roll=None, reset_roll=True, figure=None)
-        else:
-            for i in range(0,len(iterBoxes),1):
-                self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)
-            for i in range(0,len(iterPlanes),1):
-                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
+            self.scene.mlab.view(azimuth=100, elevation=50, distance=4, focalpoint=[0,0,0.5], roll=None, reset_roll=True, figure=None)
+
+    @on_trait_change('iter')
+    def update_plot(self):
+        iterBoxes = self.mobileBoxes[self.iter]
+        iterPlanes = self.planes[self.iter]
+        for i in range(0,len(iterBoxes),1):
+            self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)
+        for i in range(0,len(iterPlanes),1):
+            self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
 
 
     # The layout of the dialog created
