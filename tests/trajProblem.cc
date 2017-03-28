@@ -37,6 +37,13 @@ int main(int argc, char *argv[])
   else
     initVec = myProb.findInitPoint();
 
+  if (myProb.config().has("initialGuessRandomFactor"))
+  {
+    initVec = initVec +
+              myProb.config()["initialGuessRandomFactor"] *
+                  Eigen::VectorXd::Random(myProb.dimVar());
+  }
+
   myProb.normalizeNormals(initVec);
 
   altQP.init(initVec);

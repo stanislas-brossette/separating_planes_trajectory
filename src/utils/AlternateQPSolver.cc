@@ -71,7 +71,7 @@ void AlternateQPSolver::solve()
   Eigen::VectorXd resFixedBoxes(qpBoxesFixed_.dimVar());
 
   int nIter = 1;
-  while (nIter < 10)
+  while (nIter < maxIter_)
   {
     formAndSolveLPBoxesFixed(res_);
     // std::cout << "res_: \n" << res_.transpose().format(fmt::custom) <<
@@ -79,24 +79,12 @@ void AlternateQPSolver::solve()
     pb_.normalizeNormals(res_);
     // std::cout << "normalized res_: \n" <<
     // res_.transpose().format(fmt::custom) << std::endl;
-    resHistory_[nIter] << res_;
-    nIter++;
-  }
-  while (nIter < maxIter_)
-  {
-    // std::cout << "Solving QP planes fixed" << std::endl;
-    formAndSolveQPPlanesFixed(res_);
-    // std::cout << "res_: \n" << res_.transpose() << std::endl;
     resHistory_[nIter] << res_;
     nIter++;
 
-    // std::cout << "Solving LP boxes fixed" << std::endl;
-    formAndSolveLPBoxesFixed(res_);
-    // std::cout << "res_: \n" << res_.transpose().format(fmt::custom) <<
-    // std::endl;
-    pb_.normalizeNormals(res_);
-    // std::cout << "normalized res_: \n" <<
-    // res_.transpose().format(fmt::custom) << std::endl;
+    // std::cout << "Solving QP planes fixed" << std::endl;
+    formAndSolveQPPlanesFixed(res_);
+    // std::cout << "res_: \n" << res_.transpose() << std::endl;
     resHistory_[nIter] << res_;
     nIter++;
   }

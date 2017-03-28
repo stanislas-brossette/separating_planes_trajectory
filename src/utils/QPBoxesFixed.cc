@@ -98,7 +98,7 @@ void QPBoxesFixed::formQP(ConstRefVec xBoxes, ConstRefVec xPreviousPlanes)
     C_.block(cstrIndexBegin, normalIndexBegin, 1, 3)
         << xPreviousPlanes.segment(normalIndexBegin, 3).transpose();
     C_(cstrIndexBegin, C_.cols() - 1) = 0;
-    l_(cstrIndexBegin) = 0.8;
+    l_(cstrIndexBegin) = 0.5;
     u_(cstrIndexBegin) = 1.0;
     cstrIndexBegin++;
   }
