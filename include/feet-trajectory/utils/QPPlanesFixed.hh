@@ -15,6 +15,7 @@ class QPPlanesFixed : public QP
   virtual ~QPPlanesFixed();
   void addRelaxationTerm(const double& alpha);
   void formQP(ConstRefVec planVariables);
+  void updatePlanD(RefVec planVariables);
 
  private:
   const TrajectoryProblem& pb_;
