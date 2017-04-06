@@ -1,38 +1,122 @@
-#Solver
-maxIter: 10
+VERBOSE: 0
+VERBOSE_QP: false
+VERBOSE_SOC: false
+displayFilter: false
+epsilon_D: 1e-2
+epsilon_P: 1e-2
+finiteDiffCheck: false
+hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
+logLevel: "ONLY_X"
+logDirectory: "logs/PGsolver/"
+maxIter: 50
+regularizationValMin: 1e-8
+resetHessianAfterRestoration: false
+resetHessianBeforeRestoration: false
+warmStart: true
+rho0: 1
+rhoMax: 10
+rhoMin: 1e-8
+updatePrevDiffLagWithMostRecentLambda: true
+RestQP:
+  feasTol: 1e-6
+RestFP:
+  feasTol: 1e-6
+QP:
+  feasTol: 1e-6
+FP:
+  feasTol: 1e-6
 
 #logs
 logName: "logs/singleObstacle.log"
 
 #Boxes
-nBoxes: 3
-BoxSize: [0.1, 0.1, 0.1]
+nBoxes: 10
+BoxSize: [0.2, 0.1, 0.05]
 
 #Obstacles
 obstacles:
   - {size: [1.0, 1.0, 1.0], center: [0.0, 0.0, 0.0]}
 securityDistance: 0.01
 
+maxStepHeight: 0.5
+
 #ground
 fixedPlanes:
   - { normal: [0,0,1], d: -1.0}
 
 #initial and final positions
-initPos: [-1.0, 0., 0.]
-finalPos: [1.0, 0., 0.]
+initPos: [-1.0, 0.1, -0.2]
+finalPos: [1.0, 0.054, 0.1]
 
 plotResult: true
 
-#Initial Guess
-x0: [-1., 0., 1.,
-     0., 0., 1.,
-     1., 0., 1.,
-     0.6,
-     -1., 0., 0.,
-     0.6,
-     0., 0., 1.,
-     0.6,
-     0., 0., 1.,
-     0.6,
-     1., 0., 0.,]
-initialGuessRandomFactor: 0.01
+#######################################################################
+#                      Successful initialization                      #
+#######################################################################
+#x0: [-1., 0., 1.,
+     #0., 0., 1.,
+     #1., 0., 1.,
+     #0.6,
+     #-1., 0., 0.,
+     #0.6,
+     #0., 0., 1.,
+     #0.6,
+     #0., 0., 1.,
+     #0.6,
+     #1., 0., 0.,]
+#initialGuessRandomFactor: 0.01
+
+
+#######################################################################
+#                      Stationary initialization                      #
+#######################################################################
+#x0: [-0.68469482360289,
+   #1.3495707289726e-16,
+      #0.52600911531019,
+     #-0.24283506022962,
+   #1.2567305597525e-16,
+      #0.67389626554023,
+       #0.2483931610012,
+   #8.3782037316836e-17,
+      #0.67427949083083,
+      #0.68807102310987,
+   #4.1891018658418e-17,
+      #0.52392015394353,
+                   #0.5,
+                    #-1,
+    #7.149423481304e-17,
+   #3.3337218352629e-17,
+      #0.63284172778148,
+     #-0.31738753526131,
+   #2.0962890806193e-16,
+      #0.94829592030165,
+                   #0.5,
+  #-6.1468770983261e-17,
+   #1.6860515298413e-17,
+                     #1,
+      #0.63488984815563,
+      #0.32357829888556,
+   #8.4922997161156e-17,
+      #0.94620139742569,
+                   #0.5,
+                     #1,
+  #-4.1696682746067e-17,
+  #-3.9162082923528e-17]
+#initialGuessRandomFactor: 0.0
+
+#######################################################################
+#                         Failing initialization                      #
+#######################################################################
+#x0: [-0.49, 0., 0.49,
+     #0., 0., 0.49,
+     #0.49, 0., 0.49,
+     #0.6,
+     #-0.5, 0.5, 0.,
+     #0.6,
+     #0.5, 0.5, 0.,
+     #0.6,
+     #0., 0., 1.,
+     #0.6,
+     #1., 0., 0.,]
+#initialGuessRandomFactor: 0.01

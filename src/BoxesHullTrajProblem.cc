@@ -38,6 +38,10 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
       initBoxAbovePlanFct_(initBox_),
       finalBoxAbovePlanFct_(finalBox_)
 {
+  if (config_.has("securityDistance"))
+  {
+    securityDistance_ = config_["securityDistance"].asDouble();
+  }
   if (config_.has("obstacles")) obstacles_ = config_["obstacles"].asVecBox();
 
   if (config_.has("fixedPlanes"))
@@ -442,15 +446,15 @@ void BoxesHullTrajProblem::getNonLinCstrLB(RefVec out, size_t i) const
     // threshold_,
     // threshold_, threshold_, threshold_;
     // else
-    boxAbovePlanFcts_[iBox0AboveSize_t].LB(out.head(8));
+    boxAbovePlanFcts_[iBox0AboveSize_t].LB(out.head(8), securityDistance_);
 
     // if (iBox1Above == nBoxes_)
     // out.segment(8, 8) << threshold_, threshold_, threshold_, threshold_,
     // threshold_, threshold_, threshold_, threshold_;
     // else
-    boxAbovePlanFcts_[iBox1AboveSize_t].LB(out.segment(8, 8));
+    boxAbovePlanFcts_[iBox1AboveSize_t].LB(out.segment(8, 8), securityDistance_);
 
-    boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8));
+    boxAbovePlanFcts_[iBoxBelow].LB(out.tail(8), securityDistance_);
   }
 }
 void BoxesHullTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const

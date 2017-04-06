@@ -51,7 +51,7 @@ class BoxAbovePlan
                   const Eigen::Ref<const Eigen::Vector4d> quat, const double& d,
                   const Eigen::Ref<const Eigen::Vector3d> normal,
                   const long& index) const;
-  void LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
+  void LB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res, const double& securityDistance = 0) const;
   void UB(Eigen::Ref<Eigen::Matrix<double, 8, 1>> res) const;
   const Box& box() const { return box_; };
   long dim() const { return 8; }

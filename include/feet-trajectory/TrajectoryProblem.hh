@@ -121,6 +121,7 @@ class TrajectoryProblem
   size_t numberOfCstr_;
 
   double securityDistance_;
+  double maxStepHeight_;
 
   size_t maxIter_;
 

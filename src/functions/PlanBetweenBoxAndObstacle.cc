@@ -34,7 +34,8 @@ void PlanBetweenBoxAndObstacle::fillLinCstr(const Box& box, const Box& obstacle,
 }
 
 void PlanBetweenBoxAndObstacle::updatePlanD(const Box& obstacle, double& planD,
-                                            const Eigen::Vector3d& planN)
+                                            const Eigen::Vector3d& planN,
+                                            const double& securityDistance)
 {
   const double inf(std::numeric_limits<double>::infinity());
   double maxObs = -inf;
@@ -44,6 +45,6 @@ void PlanBetweenBoxAndObstacle::updatePlanD(const Box& obstacle, double& planD,
     val = obstacle.vertex(i).dot(planN);
     if (val > maxObs) maxObs = val;
   }
-  planD = maxObs + planN.dot(obstacle.center());
+  planD = maxObs + securityDistance + planN.dot(obstacle.center());
 }
 } /* feettrajectory */

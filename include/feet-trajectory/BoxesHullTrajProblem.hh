@@ -70,6 +70,7 @@ class BoxesHullTrajProblem : public pgs::Problem
   const Eigen::Vector3d& finalPos() const { return finalPos_; }
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
   const std::vector<std::string> cstrNames() const { return cstrNames_; };
+  const double& securityDistance() const { return securityDistance_; }
 
  private:
   ProblemConfig config_;
@@ -88,6 +89,8 @@ class BoxesHullTrajProblem : public pgs::Problem
   size_t nFixedPlanes_;
   size_t nMobilePlanCstr_;
   size_t nFixedPlanCstr_;
+
+  double securityDistance_;
 
   //double threshold_; //half of the min dimension of the box
 

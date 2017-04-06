@@ -28,6 +28,13 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
   else
     securityDistance_ = 0;
 
+  if (config_.has("maxStepHeight"))
+  {
+    maxStepHeight_ = config_["maxStepHeight"].asDouble();
+  }
+  else
+    maxStepHeight_ = 0;
+
   if (config_.has("obstacles"))
   {
     obstacles_ = config_["obstacles"].asVecBox();
@@ -129,12 +136,34 @@ std::ostream& operator<<(std::ostream& o, const TrajectoryProblem& f)
 Eigen::VectorXd TrajectoryProblem::findInitPoint() const
 {
   Eigen::VectorXd xInit(dimVar());
-  xInit.setRandom();
-  for (int i = 0; i < nBoxes(); i++)
+  xInit.setZero();
+  double pi = 3.1415926535897;
+  // First compute the initial guess for the foot trajectory
+  for (size_t i = 0; i < nBoxes_; i++)
   {
-    xInit.segment<3>(3 * i) =
-        initPos_ + (i + 1) * (finalPos_ - initPos_) / (nBoxes_ + 1);
+    xInit.segment(3 * i, 3) =
+        initPos_ +
+        (double)(i + 1) * (finalPos_ - initPos_) / (double)(nBoxes_ + 1);
+    xInit(3 * i + 2) +=
+        maxStepHeight_ * std::sin((double)(i + 1) / (double)(nBoxes_ + 1) * pi);
   }
+
+  for (size_t i = 0; i < plans_.size(); i++)
+  {
+    Eigen::Vector3d box0Above(
+        getBoxPositionFromX(plans_[i].box0Above(), xInit));
+    Eigen::Vector3d box1Above(
+        getBoxPositionFromX(plans_[i].box1Above(), xInit));
+    Eigen::Vector3d boxBelow(obstacles_[plans_[i].boxBelow()].center());
+    Eigen::Vector3d n, center;
+    n = (box1Above + box0Above) / 2.0 - boxBelow;
+    center = boxBelow + n / 2.0;
+    n.normalize();
+    double d = center.dot(n);
+    xInit.segment(dimBoxes_ + 4 * i + 1, 3) << n;
+    xInit(dimBoxes_ + 4 * i) = d;
+  }
+
   return xInit;
 }
 
@@ -172,7 +201,12 @@ Eigen::VectorXd TrajectoryProblem::getPlansDistancesFromX(
 Eigen::Vector3d TrajectoryProblem::getBoxPositionFromX(
     size_t i, const Eigen::VectorXd& x) const
 {
-  return x.segment(3 * i, 3);
+  if (i == -1)
+    return initPos_;
+  else if (i == nBoxes_)
+    return finalPos_;
+  else
+    return x.segment(3 * i, 3);
 }
 
 Eigen::Vector3d TrajectoryProblem::getPlanNormalFromX(

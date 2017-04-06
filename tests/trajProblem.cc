@@ -44,11 +44,13 @@ int main(int argc, char *argv[])
                   Eigen::VectorXd::Random(myProb.dimVar());
   }
 
+  //initVec = Eigen::VectorXd::Random(myProb.dimVar());
+
   myProb.normalizeNormals(initVec);
 
   altQP.init(initVec);
-  std::cout << "qpPlanesFixed: " << altQP.qpPlanesFixed() << std::endl;
-  std::cout << "qpBoxesFixed: " << altQP.qpBoxesFixed() << std::endl;
+  //std::cout << "qpPlanesFixed: " << altQP.qpPlanesFixed() << std::endl;
+  //std::cout << "qpBoxesFixed: " << altQP.qpBoxesFixed() << std::endl;
 
   altQP.solve();
   altQP.logAllX("logs/altQP/");

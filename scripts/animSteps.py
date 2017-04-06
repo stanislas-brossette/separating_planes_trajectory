@@ -63,8 +63,8 @@ def plotPlane(triangleMesh, quiver, p, initBox, boxes, finalBox, obstacles, size
 
     c = d*nVec #center of the plane
 
-    center = o + (b-o)*(np.dot(c-o,nVec)/np.dot(b-o,nVec))
-    # center = c
+    # center = o + (b-o)*(np.dot(c-o,nVec)/np.dot(b-o,nVec))
+    center = c
 
     if (nVec[1] == 0 and nVec[2] == 0):
         tVec= np.array([0, nVec[0], 0])
@@ -118,7 +118,17 @@ def plotFixedPlane(triangleMesh, quiver, p, sizePlane, col, alpha):
         triangleMesh.mlab_source.set(x=x,y=y,z=z)
         quiver.mlab_source.set(x=center[0], y=center[1], z=center[2], u=nVec[0], v=nVec[1], w=nVec[2])
     return triangleMesh, quiver
-    
+
+def colorIndex(i):
+    if i == 0:
+        return (1,0,0)
+    elif i == 1:
+        return (0,1,0)
+    elif i == 2:
+        return (0,0,1)
+    else:
+        return (0,1,1)
+
 
 class MyModel(HasTraits):
     print 'reading file ', str(sys.argv[1])
@@ -165,7 +175,7 @@ class MyModel(HasTraits):
         if self.plot is None:
             # Initial and final
             self.initBoxPlot = plotBox(self.initBoxPlot, self.initBox, (1, 1, 1), 1)
-            self.finalBoxPlot = plotBox(self.finalBoxPlot, self.finalBox, (1, 1, 1), 1)
+            self.finalBoxPlot = plotBox(self.finalBoxPlot, self.finalBox, (0.1, 0.1, 0.1), 1)
             # Fixed Planes
             for i in range(0,len(self.fixedPlanes),1):
                 self.fixedPlanesPlot[i], self.fixedPlanesQuiver[i] = plotFixedPlane(self.fixedPlanesPlot[i], self.fixedPlanesQuiver[i], self.fixedPlanes[i], 2.0, (1, 1, 0), 1)
@@ -174,10 +184,10 @@ class MyModel(HasTraits):
                 self.obstacleBoxesPlot[i] = plotBox(self.obstacleBoxesPlot[i], self.obstacles[i], (1, 0, 0), 0.6)
             # Mobile Boxes
             for i in range(0,len(iterBoxes),1):
-                self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)
+                self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], colorIndex(i), 1)
             # Separating Planes
             for i in range(0,len(iterPlanes),1):
-                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
+                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i), 0.4)
             self.scene.mlab.view(azimuth=100, elevation=50, distance=4, focalpoint=[0,0,0.5], roll=None, reset_roll=True, figure=None)
 
     @on_trait_change('iter')
@@ -185,9 +195,9 @@ class MyModel(HasTraits):
         iterBoxes = self.mobileBoxes[self.iter]
         iterPlanes = self.planes[self.iter]
         for i in range(0,len(iterBoxes),1):
-            self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], (0, 0, 1), 1)
+            self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], colorIndex(i), 1)
         for i in range(0,len(iterPlanes),1):
-            self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, (0, 1, 0), 0.4)
+            self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i), 0.4)
 
 
     # The layout of the dialog created

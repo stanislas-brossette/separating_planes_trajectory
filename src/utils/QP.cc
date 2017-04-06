@@ -32,18 +32,18 @@ void QP::setDimensions(const Index& dimVar, const Index& dimCstr)
 
 QP::~QP() {}
 
-std::ostream& QP::print(std::ostream& o) const
+std::ostream& QP::print(std::ostream& o, const Eigen::IOFormat& fmt) const
 {
   o << "QP:\n";
   o << "dimVar_:" << dimVar_ << "\n";
   o << "dimCstr_:" << dimCstr_ << "\n";
-  o << "A_ quadratic cost:\n" << A_ << "\n";
-  o << "c_ linear cost:\n" << c_.transpose() << "\n";
-  o << "C_ constraint:\n" << C_ << "\n";
-  o << "lVar_ lower bound on variables:\n" << lVar_.transpose() << "\n";
-  o << "uVar_ upper bound on variables:\n" << uVar_.transpose() << std::endl;
-  o << "l_ lower bound on constraints:\n" << l_.transpose() << "\n";
-  o << "u_ upper bound on constraints:\n" << u_.transpose() << std::endl;
+  o << "A_ quadratic cost:\n" << A_.format(fmt) << "\n";
+  o << "c_ linear cost:\n" << c_.transpose().format(fmt) << "\n";
+  o << "C_ constraint:\n" << C_.format(fmt) << "\n";
+  o << "lVar_ lower bound on variables:\n" << lVar_.transpose().format(fmt) << "\n";
+  o << "uVar_ upper bound on variables:\n" << uVar_.transpose().format(fmt) << std::endl;
+  o << "l_ lower bound on constraints:\n" << l_.transpose().format(fmt) << "\n";
+  o << "u_ upper bound on constraints:\n" << u_.transpose().format(fmt) << std::endl;
   return o;
 }
 

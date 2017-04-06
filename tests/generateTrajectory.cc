@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
   std::cout << "v0: " << v0.format(HeavyFmt) << std::endl;
 
-  pgs::utils::finiteDiffCheck(myProb);
+  //pgs::utils::finiteDiffCheck(myProb);
 
   myProb.M().forceOnM(v0, v0);
   mnf::Point x0 = myProb.M().createPoint(v0);

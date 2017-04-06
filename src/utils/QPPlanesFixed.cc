@@ -92,9 +92,9 @@ void QPPlanesFixed::updatePlanD(RefVec xPlanes)
   for (size_t iPlan = 0; iPlan < pb_.nMobilePlanCstr(); ++iPlan)
   {
     const long iBoxBelow(pb_.plans().at(iPlan).boxBelow());
-    PlanBetweenBoxAndObstacle::updatePlanD(pb_.obstacles().at(iBoxBelow),
-                                           xPlanes(4 * iPlan),
-                                           xPlanes.segment(4 * iPlan + 1, 3));
+    PlanBetweenBoxAndObstacle::updatePlanD(
+        pb_.obstacles().at(iBoxBelow), xPlanes(4 * iPlan),
+        xPlanes.segment(4 * iPlan + 1, 3), pb_.securityDistance());
   }
 }
 

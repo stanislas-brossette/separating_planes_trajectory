@@ -8,6 +8,7 @@ AlternateQPSolver::AlternateQPSolver(const TrajectoryProblem& pb,
     : pb_(pb),
       qpPlanesFixed_(pb_),
       qpBoxesFixed_(pb_),
+      qpBoxesFixedIndividual_(pb_),
       res_(pb_.dimVar()),
       maxIter_(maxIter)
 {
@@ -30,6 +31,7 @@ void AlternateQPSolver::init(const Eigen::VectorXd& xInit)
   QPSolver_.resize(qpPlanesFixed_.dimVar(), qpPlanesFixed_.dimCstr(),
                    Eigen::lssol::eType::QP2);
   LPSolver_.resize(qpBoxesFixed_.dimVar(), qpBoxesFixed_.dimCstr());
+  LPSolverIndiv_.resize(5, 25);
 }
 
 void AlternateQPSolver::formAndSolveQPPlanesFixed(RefVec x)
@@ -60,10 +62,33 @@ void AlternateQPSolver::formAndSolveLPBoxesFixed(RefVec x)
     LPSolver_.print_inform();
     std::cerr << "LP solver FAILED!!! Damnit" << std::endl;
   }
-  // std::cout << "LPSolver_.result(): \n" <<
-  // LPSolver_.result().transpose().format(fmt::custom)
-  //<< std::endl;
-  x.tail(pb_.dimPlans()) << LPSolver_.result().head(pb_.dimPlans());
+  //std::cout << "LPSolver_.result(): \n"
+            //<< LPSolver_.result().transpose().format(fmt::custom) << std::endl;
+  //x.tail(pb_.dimPlans()) << LPSolver_.result().head(pb_.dimPlans());
+}
+
+void AlternateQPSolver::formAndSolveIndividualLPBoxesFixed(RefVec x)
+{
+  for (size_t iPlan = 0; iPlan < pb_.nMobilePlanCstr(); ++iPlan)
+  {
+    qpBoxesFixedIndividual_.formQP(iPlan, x.head(pb_.dimBoxes()),
+                                   x.tail(pb_.dimPlans()));
+    //std::cout << "qpBoxesFixedIndividual_: " << qpBoxesFixedIndividual_
+              //<< std::endl;
+    LPSolverIndiv_.solve(
+        qpBoxesFixedIndividual_.lVar(), qpBoxesFixedIndividual_.uVar(),
+        qpBoxesFixedIndividual_.c(), qpBoxesFixedIndividual_.C(),
+        qpBoxesFixedIndividual_.l(), qpBoxesFixedIndividual_.u());
+    if (!(LPSolverIndiv_.inform() == 0 || LPSolverIndiv_.inform() == 1))
+    {
+      LPSolverIndiv_.print_inform();
+      std::cerr << "LP solver FAILED!!! Damnit" << std::endl;
+    }
+    //std::cout << "LPSolverIndiv_.result(): \n"
+              //<< LPSolverIndiv_.result().transpose().format(fmt::custom)
+              //<< std::endl;
+    x.segment(pb_.dimBoxes() + 4 * iPlan, 4) << LPSolverIndiv_.result().head(4);
+  }
 }
 
 void AlternateQPSolver::solve()
@@ -74,7 +99,11 @@ void AlternateQPSolver::solve()
   int nIter = 1;
   while (nIter < maxIter_)
   {
-    formAndSolveLPBoxesFixed(res_);
+    formAndSolveIndividualLPBoxesFixed(res_);
+    //{
+      //Eigen::VectorXd copyRes(res_);
+      //formAndSolveLPBoxesFixed(copyRes);
+    //}
     // std::cout << "res_: \n" << res_.transpose().format(fmt::custom) <<
     // std::endl;
     pb_.normalizeNormals(res_);

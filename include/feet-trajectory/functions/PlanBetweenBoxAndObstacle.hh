@@ -18,7 +18,8 @@ class PlanBetweenBoxAndObstacle
                           const double& planD, const Eigen::Vector3d& planN,
                           RefVec lb, RefMat C, double securityDistance = 0);
   static void updatePlanD(const Box& obstacle, double& planD,
-                          const Eigen::Vector3d& planN);
+                          const Eigen::Vector3d& planN,
+                          const double& securityDistance);
 
  private:
   /* data */

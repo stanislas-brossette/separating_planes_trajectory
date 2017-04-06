@@ -28,7 +28,7 @@ class QP
   /// \brief Print method.
   /// \param o output stream.
   /// \return output stream.
-  std::ostream& print (std::ostream& o) const;
+  std::ostream& print (std::ostream& o, const Eigen::IOFormat& fmt = fmt::custom) const;
 
  protected:
   Index dimVar_;           // Size variables
