@@ -20,7 +20,7 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
 {
   pb_.costFct().fillQuadCost(A_.topLeftCorner(pb_.dimBoxes(), pb_.dimBoxes()),
                              c_.head(pb_.dimBoxes()));
-  A_.bottomRightCorner(1, 1) << -1;
+  A_.bottomRightCorner(1, 1) << 1;
 
   long cstrIndexBegin = 0;
   for (size_t i = 0; i < pb_.boxAboveFixedPlanFcts().size(); ++i)
