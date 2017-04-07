@@ -143,7 +143,7 @@ void printAllIterations(const std::string& fileName,
           << "}\n";
 
   // Obstacles
-  logFile << "Obstacles:\n";
+  if (pb.nObstacles() > 0) logFile << "Obstacles:\n";
   for (size_t i = 0; i < pb.nObstacles(); i++)
   {
     logFile << "- {size: "
@@ -153,7 +153,7 @@ void printAllIterations(const std::string& fileName,
             << std::endl;
   }
   // Fixed Planes
-  logFile << "FixedPlanes:\n";
+  if (pb.nFixedPlanes() > 0) logFile << "FixedPlanes:\n";
   for (size_t i = 0; i < pb.nFixedPlanes(); i++)
   {
     logFile << "- { d: " << pb.fixedPlanes()[i].d() << ", normal: "
