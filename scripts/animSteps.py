@@ -165,9 +165,9 @@ class MyModel(HasTraits):
     fixedPlanesQuiver = [None]*nFixedPlanes
     obstacleBoxesPlot = [None]*nObstacles
 
-    mobileBoxesPlot = [None]*len(mobileBoxes)
-    mobilePlanesPlot = [None]*len(planes)
-    mobilePlanesQuiver = [None]*len(planes)
+    mobileBoxesPlot = [None]*len(mobileBoxes[0])
+    mobilePlanesPlot = [None]*len(planes[0])
+    mobilePlanesQuiver = [None]*len(planes[0])
 
     # When the scene is activated, or when the parameters are changed, we
     # update the plot.
