@@ -17,6 +17,8 @@ void QPBoxesFixedIndividual::addRelaxationTerm(const double& alpha)
   c_.tail(1) << alpha * 1;
   C_.col(4).setConstant(1);
   //lVar_.tail(1) << 0;
+  lVar_.segment(1,3).setConstant(-1);
+  uVar_.segment(1,3).setConstant(1);
 }
 
 Eigen::Vector3d QPBoxesFixedIndividual::getBoxPos(Index iBox, ConstRefVec xBoxes)

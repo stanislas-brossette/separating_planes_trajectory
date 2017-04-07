@@ -73,8 +73,8 @@ void AlternateQPSolver::formAndSolveIndividualLPBoxesFixed(RefVec x)
   {
     qpBoxesFixedIndividual_.formQP(iPlan, x.head(pb_.dimBoxes()),
                                    x.tail(pb_.dimPlans()));
-    //std::cout << "qpBoxesFixedIndividual_: " << qpBoxesFixedIndividual_
-              //<< std::endl;
+    //std::cout << "qpBoxesFixedIndividual_ for plan " << iPlan << ": ";
+    //qpBoxesFixedIndividual_.print(std::cout, fmt::matlab);
     LPSolverIndiv_.solve(
         qpBoxesFixedIndividual_.lVar(), qpBoxesFixedIndividual_.uVar(),
         qpBoxesFixedIndividual_.c(), qpBoxesFixedIndividual_.C(),

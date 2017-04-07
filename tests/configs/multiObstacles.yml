@@ -9,7 +9,7 @@ hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCH
 hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 logLevel: "ONLY_X"
 logDirectory: "logs/multiObstacles/"
-maxIter: 200
+maxIter: 50
 regularizationValMin: 1e-8
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
@@ -35,12 +35,13 @@ nBoxes: 9
 BoxSize: [0.2, 0.1, 0.05]
 
 maxStepHeight: 0.5
+initialGuessRandomFactor: 0.1
 
 #Obstacles
 obstacles:
   - {size: [0.3, 1.1, 0.3], center: [0.5, 0.0, 0.15]}
   - {size: [0.2, 0.5, 0.8], center: [0.5, 0.1, 0.4]}
-  - {size: [0.3, 1.1, 0.7], center: [0.5, 0.0, 1.05]}
+  - {size: [0.3, 1.1, 0.7], center: [0.5, 0.0, .705]}
 
 #ground
 fixedPlanes:
@@ -48,8 +49,8 @@ fixedPlanes:
   - { normal: [0,1,0], d: -0.6}
 
 #initial and final positions
-initPos: [0, 0, 0.025]
-finalPos: [1.0, 0.1, 0.14]
+initPos: [0, -0.3, 0.025]
+finalPos: [1.0, 0.3, 0.14]
 
 plotResult: true
 

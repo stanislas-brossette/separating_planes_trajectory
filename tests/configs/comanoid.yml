@@ -9,7 +9,7 @@ hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCH
 hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 logLevel: "ONLY_X"
 logDirectory: "logs/comanoid/"
-maxIter: 500
+maxIter: 20
 regularizationValMin: 1e-8
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
@@ -33,14 +33,17 @@ logName: "logs/comanoid.log"
 plotResult: true
 
 #Boxes
-nBoxes: 6
+nBoxes: 8
 BoxSize: [0.2, 0.1, 0.05]
+
+maxStepHeight: 0.5
 
 #Obstacles
 obstacles:
   - {size: [0.3, 1.0, 0.04], center: [0.3, 0.0, 0.2]}
   - {size: [0.3, 1.0, 0.04], center: [0.6, 0.0, 0.4]}
   - {size: [0.3, 1.0, 0.04], center: [0.9, 0.0, 0.6]}
+securityDistance: 0.01
 
 #ground
 fixedPlanes:
@@ -51,12 +54,12 @@ fixedPlanes:
 #INITIAL AND FINAL POSITIONS
 
 #Step 1
-initPos: [-0.1, 0.3, 0.025]
-finalPos: [0.3, 0.3, 0.25]
+#initPos: [-0.1, 0.3, 0.025]
+#finalPos: [0.3, 0.3, 0.25]
 
 #Step 2
-#initPos: [0.3, -0.3, 0.25]
-#finalPos: [0.6, -0.3, 0.45]
+initPos: [0.3, -0.3, 0.25]
+finalPos: [0.6, -0.3, 0.45]
 
 #Step 3
 #initPos: [0.6, 0.3, 0.45]
