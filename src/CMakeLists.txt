@@ -14,7 +14,7 @@ SET(SOURCES
   utils/QPPlanesFixed.cc
   utils/QPBoxesFixed.cc
   utils/QPBoxesFixedIndividual.cc
-  utils/TripleIntegrator.cc
+  utils/MpcCondense.cc
   functions/BoxAbovePlan.cc
   functions/BoxAboveFixedPlan.cc
   functions/CostDistance.cc
@@ -35,7 +35,7 @@ SET(HEADERS
   ../include/feet-trajectory/utils/QPPlanesFixed.hh
   ../include/feet-trajectory/utils/QPBoxesFixed.hh
   ../include/feet-trajectory/utils/QPBoxesFixedIndividual.hh
-  ../include/feet-trajectory/utils/TripleIntegrator.hh
+  ../include/feet-trajectory/utils/MpcCondense.hh
   ../include/feet-trajectory/functions/BoxAbovePlan.hh
   ../include/feet-trajectory/functions/BoxAboveFixedPlan.hh
   ../include/feet-trajectory/functions/CostDistance.hh

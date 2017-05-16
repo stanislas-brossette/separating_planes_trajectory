@@ -1,8 +1,8 @@
-#include <feet-trajectory/utils/TripleIntegrator.hh>
+#include <feet-trajectory/utils/MpcCondense.hh>
 
 namespace feettrajectory
 {
-TripleIntegrator::TripleIntegrator(const Eigen::MatrixXd& A,
+MpcCondense::MpcCondense(const Eigen::MatrixXd& A,
                                    const Eigen::MatrixXd& B, const size_t& n)
     : Ux_(n * A.rows(), A.cols()), Uu_(n * B.rows(), n * B.cols())
 {
@@ -26,9 +26,9 @@ TripleIntegrator::TripleIntegrator(const Eigen::MatrixXd& A,
   }
 }
 
-TripleIntegrator::~TripleIntegrator() {}
+MpcCondense::~MpcCondense() {}
 
-const Eigen::MatrixXd& TripleIntegrator::Ux() const { return Ux_; }
-const Eigen::MatrixXd& TripleIntegrator::Uu() const { return Uu_; }
+const Eigen::MatrixXd& MpcCondense::Ux() const { return Ux_; }
+const Eigen::MatrixXd& MpcCondense::Uu() const { return Uu_; }
 
 } /* feettrajectory */

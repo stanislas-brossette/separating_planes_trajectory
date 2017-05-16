@@ -4,7 +4,7 @@
 
 #include <Eigen/Core>
 
-#include <feet-trajectory/utils/TripleIntegrator.hh>
+#include <feet-trajectory/utils/MpcCondense.hh>
 
 using namespace feettrajectory;
 // int main(void)
@@ -13,14 +13,14 @@ using namespace feettrajectory;
 // return 0;
 //}
 
-BOOST_AUTO_TEST_CASE(testTripleIntegrator)
+BOOST_AUTO_TEST_CASE(testMpcCondense)
 {
   Eigen::Matrix3d A;
   Eigen::Vector3d B;
   double T(3);
   A << 1, T, T* T / 2, 0, 1, T, 0, 0, 1;
   B << T* T* T / 6., T* T / 2., T;
-  TripleIntegrator tig(A, B, 3);
+  MpcCondense tig(A, B, 3);
 
   Eigen::Matrix<double, 9, 3> expUx;
   Eigen::Matrix<double, 9, 3> expUu;

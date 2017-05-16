@@ -5,7 +5,7 @@
 namespace feettrajectory
 {
 /// @brief Utility class to handle a triple integrator
-class TripleIntegrator
+class MpcCondense
 {
  public:
   /// @brief Constructor of the triple integrator
@@ -15,9 +15,9 @@ class TripleIntegrator
   /// @param B Matrix multiplying the control (u_k) in the discrete description
   /// of the system
   /// @param n number of intervals
-  TripleIntegrator(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B,
+  MpcCondense(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B,
                    const size_t& n);
-  virtual ~TripleIntegrator();
+  virtual ~MpcCondense();
   const Eigen::MatrixXd& Ux() const;
   const Eigen::MatrixXd& Uu() const;
 
