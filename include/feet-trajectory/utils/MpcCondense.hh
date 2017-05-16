@@ -4,6 +4,10 @@
 
 namespace feettrajectory
 {
+void mpcCondense(Eigen::MatrixXd& Ux, Eigen::MatrixXd& Uu,
+                 const Eigen::MatrixXd& A, const Eigen::MatrixXd& B,
+                 const size_t& n);
+
 /// @brief Utility class to handle a triple integrator
 class MpcCondense
 {

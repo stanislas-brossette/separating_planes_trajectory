@@ -43,5 +43,5 @@ ADD_SCENARIO("generateTrajectoryAltQP")
 ADD_SCENARIO("trajProblem")
 ADD_SCENARIO("compareResolutionMethods")
 
-#ADD_TEST("testMpcCondense")
 ADD_FEET_TRAJECTORY_TEST("testMpcCondense")
+ADD_FEET_TRAJECTORY_TEST("testJerk3DIntegrator")
