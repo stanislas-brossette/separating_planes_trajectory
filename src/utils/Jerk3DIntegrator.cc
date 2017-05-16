@@ -3,6 +3,14 @@
 
 namespace feettrajectory
 {
+void printMat(Eigen::MatrixXd M, std::string Mname)
+{
+  Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols,
+                               ", ", ", ", "", "", " << ", ";");
+  std::cout << Mname << ".resize(" << M.rows() << ", " << M.cols() << ");"
+            << std::endl;
+  std::cout << Mname << M.format(CommaInitFmt) << std::endl;
+}
 Jerk3DIntegrator::Jerk3DIntegrator(const double& T, const unsigned long& nIter)
     : T_(T), nIter_(nIter)
 {

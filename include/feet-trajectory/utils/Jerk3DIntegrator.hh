@@ -15,6 +15,13 @@ class Jerk3DIntegrator
   void getPos(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
   void getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
   void getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
+
+  const Eigen::MatrixXd& Ux() const { return Ux_; }
+  const Eigen::MatrixXd& Uu() const { return Uu_; }
+  const Eigen::MatrixXd& SelPos() const { return SelPos_; }
+  const Eigen::MatrixXd& SelVel() const { return SelVel_; }
+  const Eigen::MatrixXd& SelAcc() const { return SelAcc_; }
+
  private:
   double T_;  // time step between iterates
   unsigned long nIter_;  // number of iterates
