@@ -11,6 +11,7 @@ void printMat(Eigen::MatrixXd M, std::string Mname)
             << std::endl;
   std::cout << Mname << M.format(CommaInitFmt) << std::endl;
 }
+
 Jerk3DIntegrator::Jerk3DIntegrator(const double& T, const unsigned long& nIter)
     : T_(T), nIter_(nIter)
 {
@@ -19,9 +20,9 @@ Jerk3DIntegrator::Jerk3DIntegrator(const double& T, const unsigned long& nIter)
   A_.block(0, 0, 3, 3) = I3;
   A_.block(3, 3, 3, 3) = I3;
   A_.block(6, 6, 3, 3) = I3;
-  A_.block(3, 0, 3, 3) = T_ * I3;
-  A_.block(6, 3, 3, 3) = T_ * I3;
-  A_.block(6, 0, 3, 3) = 0.5 * T_ * T_ * I3;
+  A_.block(0, 3, 3, 3) = T_ * I3;
+  A_.block(3, 6, 3, 3) = T_ * I3;
+  A_.block(0, 6, 3, 3) = 0.5 * T_ * T_ * I3;
 
   B_.setZero();
   B_.topRows(3) = (1. / 6.) * T_ * T_ * T_ * I3;
@@ -49,22 +50,22 @@ Jerk3DIntegrator::Jerk3DIntegrator(const double& T, const unsigned long& nIter)
 Jerk3DIntegrator::~Jerk3DIntegrator(){};
 
 void Jerk3DIntegrator::getState(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                                const Eigen::Vector3d& X0)
+                                const Eigen::VectorXd& X0)
 {
   res = Ux_ * X0 + Uu_ * U;
 }
 void Jerk3DIntegrator::getPos(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                              const Eigen::Vector3d& X0)
+                              const Eigen::VectorXd& X0)
 {
   res = SelPos_ * (Ux_ * X0 + Uu_ * U);
 }
 void Jerk3DIntegrator::getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                              const Eigen::Vector3d& X0)
+                              const Eigen::VectorXd& X0)
 {
   res = SelVel_ * (Ux_ * X0 + Uu_ * U);
 }
 void Jerk3DIntegrator::getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                              const Eigen::Vector3d& X0)
+                              const Eigen::VectorXd& X0)
 {
   res = SelAcc_ * (Ux_ * X0 + Uu_ * U);
 }

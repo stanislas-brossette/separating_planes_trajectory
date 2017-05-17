@@ -11,10 +11,10 @@ class Jerk3DIntegrator
  public:
   Jerk3DIntegrator(const double& T, const unsigned long& nIter);
   virtual ~Jerk3DIntegrator();
-  void getState(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
-  void getPos(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
-  void getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
-  void getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::Vector3d& X0);
+  void getState(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+  void getPos(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+  void getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+  void getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
 
   const Eigen::MatrixXd& Ux() const { return Ux_; }
   const Eigen::MatrixXd& Uu() const { return Uu_; }
