@@ -26,9 +26,7 @@ Eigen::Vector3d QPBoxesFixedIndividual::getBoxPos(Index iBox, ConstRefVec xBoxes
   Eigen::Vector3d boxPos;
   if (iBox == -1)
     boxPos = pb_.initPos();
-  else if (iBox == pb_.nBoxes())
-    boxPos = pb_.finalPos();
-  else if (iBox > -1 && iBox < pb_.nBoxes())
+  else if (iBox > -1)
     boxPos = xBoxes.segment(3 * iBox, 3);
   else
     std::cerr << "No box with index " << iBox << std::endl;

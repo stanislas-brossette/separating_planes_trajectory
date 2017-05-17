@@ -16,9 +16,7 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
       nBoxes_(config_["nBoxes"].asSize_t()),
       maxIter_(config_["maxIter"].asSize_t()),
       initBox_(-1, boxSize_, initPos_, true),
-      finalBox_(static_cast<int>(nBoxes_), boxSize_, finalPos_, true),
       initBoxAbovePlanFct_(initBox_),
-      finalBoxAbovePlanFct_(finalBox_),
       costFct_(static_cast<long>(nBoxes_), initPos_, finalPos_)
 {
   if (config_.has("securityDistance"))
@@ -49,9 +47,9 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
 
   nObstacles_ = obstacles_.size();
   nFixedPlanes_ = fixedPlanes_.size();
-  nPlans_ = (nBoxes_ + 1) * nObstacles_;
+  nPlans_ = nBoxes_ * nObstacles_;
 
-  nMobilePlanCstr_ = nObstacles_ * (nBoxes_ + 1);
+  nMobilePlanCstr_ = nObstacles_ * nBoxes_;
   nFixedPlanCstr_ = nFixedPlanes_ * nBoxes_;
   numberOfCstr_ = 3 * nMobilePlanCstr_ + nFixedPlanCstr_;
 
@@ -85,7 +83,9 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
     obstacleAbovePlanFcts_.push_back(BoxAbovePlan(o));
   }
 
-  for (int i = -1; i < static_cast<int>(nBoxes_); ++i)
+  fixedBoxPositionFcts_.push_back(FixedBoxPosition(boxes_.back(), finalPos_));
+
+  for (int i = -1; i < static_cast<int>(nBoxes_-1); ++i)
   {
     for (int j = 0; j < static_cast<int>(nObstacles_); ++j)
     {
@@ -143,9 +143,9 @@ Eigen::VectorXd TrajectoryProblem::findInitPoint() const
   {
     xInit.segment(3 * i, 3) =
         initPos_ +
-        (double)(i + 1) * (finalPos_ - initPos_) / (double)(nBoxes_ + 1);
+        (double)(i + 1) * (finalPos_ - initPos_) / (double)(nBoxes_);
     xInit(3 * i + 2) +=
-        maxStepHeight_ * std::sin((double)(i + 1) / (double)(nBoxes_ + 1) * pi);
+        maxStepHeight_ * std::sin((double)(i + 1) / (double)(nBoxes_) * pi);
   }
 
   for (size_t i = 0; i < plans_.size(); i++)
@@ -203,8 +203,6 @@ Eigen::Vector3d TrajectoryProblem::getBoxPositionFromX(
 {
   if (i == -1)
     return initPos_;
-  else if (i == nBoxes_)
-    return finalPos_;
   else
     return x.segment(3 * i, 3);
 }

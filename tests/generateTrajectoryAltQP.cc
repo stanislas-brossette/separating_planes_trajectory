@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
   }
   else
   {
-    std::cout << "Loading default file \"trajProblem.yml\"" << std::endl;
+    std::cout << "Loading default file \"singleObstacle.yml\"" << std::endl;
     ymlPath = std::string(CONFIGS_DATA_DIR) + "/singleObstacle.yml";
   }
   TrajectoryProblem myProb(ymlPath);

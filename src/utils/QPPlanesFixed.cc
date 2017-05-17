@@ -5,7 +5,7 @@ namespace feettrajectory
 QPPlanesFixed::QPPlanesFixed(const TrajectoryProblem& pb) : pb_(pb)
 {
   setDimensions(pb_.dimBoxes() + 1,
-                pb_.nFixedPlanes() * pb_.nBoxes() + 2 * pb_.nPlans());
+                pb_.nFixedPlanes() * pb_.nBoxes() + 2 * pb_.nPlans() + 3);
 }
 QPPlanesFixed::~QPPlanesFixed() {}
 
@@ -83,6 +83,11 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
     }
     cstrIndexBegin += 1;
   }
+
+  Index finalBoxIndex = 3 * (pb_.nBoxes() - 1);
+  FixedBoxPosition::fillLinCstr(pb_.finalPos(), l_.segment(cstrIndexBegin, 3),
+                                C_.block(cstrIndexBegin, finalBoxIndex, 3, 3),
+                                u_.segment(cstrIndexBegin, 3));
 
   addRelaxationTerm(10);
 }

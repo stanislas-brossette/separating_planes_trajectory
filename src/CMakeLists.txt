@@ -20,6 +20,7 @@ SET(SOURCES
   functions/BoxAboveFixedPlan.cc
   functions/CostDistance.cc
   functions/PlanBetweenBoxAndObstacle.cc
+  functions/FixedBoxPosition.cc
   )
 SET(HEADERS
   ../include/feet-trajectory/utils/AlternateQPSolver.hh
@@ -42,6 +43,7 @@ SET(HEADERS
   ../include/feet-trajectory/functions/BoxAboveFixedPlan.hh
   ../include/feet-trajectory/functions/CostDistance.hh
   ../include/feet-trajectory/functions/PlanBetweenBoxAndObstacle.hh
+  ../include/feet-trajectory/functions/FixedBoxPosition.hh
   ../include/feet-trajectory/BoxTrajProblem.hh
   ../include/feet-trajectory/BoxesHullTrajProblem.hh
   ../include/feet-trajectory/TrajectoryProblem.hh

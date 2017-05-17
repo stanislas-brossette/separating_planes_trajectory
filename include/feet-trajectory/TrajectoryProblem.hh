@@ -10,6 +10,7 @@
 #include <feet-trajectory/functions/BoxAbovePlan.hh>
 #include <feet-trajectory/functions/BoxAboveFixedPlan.hh>
 #include <feet-trajectory/functions/CostDistance.hh>
+#include <feet-trajectory/functions/FixedBoxPosition.hh>
 
 namespace feettrajectory
 {
@@ -30,7 +31,6 @@ class TrajectoryProblem
   const size_t& nMobilePlanCstr() const { return nMobilePlanCstr_; }
   const size_t& numberOfCstr() const { return numberOfCstr_; }
   const Box& initBox() const { return initBox_; }
-  const Box& finalBox() const { return finalBox_; }
   const std::vector<Box>& boxes() const { return boxes_; }
   const std::vector<Box>& obstacles() const { return obstacles_; }
   const std::vector<FixedPlan>& fixedPlanes() const { return fixedPlanes_; }
@@ -58,9 +58,7 @@ class TrajectoryProblem
   {
     if (i == -1)
       return initBox_;
-    else if (i == nBoxes_)
-      return finalBox_;
-    else if (i > -1 && i < nBoxes_)
+    else if (i > -1)
       return boxes().at(i);
     else
       std::cerr << "No box with index " << i << std::endl;
@@ -73,10 +71,6 @@ class TrajectoryProblem
   const BoxAbovePlan& initBoxAbovePlanFct() const
   {
     return initBoxAbovePlanFct_;
-  }
-  const BoxAbovePlan& finalBoxAbovePlanFct() const
-  {
-    return finalBoxAbovePlanFct_;
   }
   const std::vector<BoxAbovePlan>& boxAbovePlanFcts() const
   {
@@ -128,8 +122,8 @@ class TrajectoryProblem
   Index dimBox_, dimPlan_, dimNormal_, dimDistance_;
   Index dimBoxes_, dimPlans_, dimNormals_, dimDistances_, dimVar_;
 
-  Box initBox_, finalBox_;
-  BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;
+  Box initBox_;
+  BoxAbovePlan initBoxAbovePlanFct_;
 
   std::vector<Box> boxes_;
   std::vector<PlanForHull> plans_;
@@ -137,6 +131,7 @@ class TrajectoryProblem
   std::vector<BoxAboveFixedPlan> boxAboveFixedPlanFcts_;
   std::vector<BoxAbovePlan> boxAbovePlanFcts_;
   std::vector<BoxAbovePlan> obstacleAbovePlanFcts_;
+  std::vector<FixedBoxPosition> fixedBoxPositionFcts_;
   std::vector<std::string> cstrNames_;
 };
 

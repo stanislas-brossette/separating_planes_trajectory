@@ -1,4 +1,3 @@
-
 #include <feet-trajectory/functions/PlanBetweenBoxAndObstacle.hh>
 namespace feettrajectory
 {

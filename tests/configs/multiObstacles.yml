@@ -34,7 +34,7 @@ logName: "logs/multiObstacles.log"
 nBoxes: 9
 BoxSize: [0.2, 0.1, 0.05]
 
-maxStepHeight: 0.5
+maxStepHeight: 0.4
 initialGuessRandomFactor: 0.1
 
 #Obstacles
