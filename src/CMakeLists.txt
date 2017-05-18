@@ -5,6 +5,7 @@ SET(SOURCES
   BoxesHullTrajProblem.cc
   TrajectoryProblem.cc
   utils/AlternateQPSolver.cc
+  utils/AlternateQPSolverJerk.cc
   utils/Box.cc
   utils/IndexManager.cc
   utils/ProblemConfig.cc
@@ -24,6 +25,7 @@ SET(SOURCES
   )
 SET(HEADERS
   ../include/feet-trajectory/utils/AlternateQPSolver.hh
+  ../include/feet-trajectory/utils/AlternateQPSolverJerk.hh
   ../include/feet-trajectory/utils/Box.hh
   ../include/feet-trajectory/utils/defs.hh
   ../include/feet-trajectory/utils/FixedPlan.hh

@@ -18,13 +18,25 @@ class Jerk3DIntegrator
   void getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
   void getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
 
+  Eigen::VectorXd getState(const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+  Eigen::VectorXd getPos(const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+  Eigen::VectorXd getVel(const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+  Eigen::VectorXd getAcc(const Eigen::VectorXd& U, const Eigen::VectorXd& X0);
+
   const Eigen::MatrixXd& Ux() const { return Ux_; }
   const Eigen::MatrixXd& Uu() const { return Uu_; }
   const Eigen::MatrixXd& SelPos() const { return SelPos_; }
   const Eigen::MatrixXd& SelVel() const { return SelVel_; }
   const Eigen::MatrixXd& SelAcc() const { return SelAcc_; }
 
-  void jerkFromPos(RefVec jerk, ConstRefVec pos, ConstRefVec x0) const;
+  /// @brief Computes a jerk that minimizes: || Ux.X0 + Uu.jerk - pos ||^2 + damping*jerk^2
+  ///
+  /// @param jerk result jerk
+  /// @param pos desired position
+  /// @param x0 initial state
+  /// @param damping damping factor
+  void jerkFromPos(RefVec jerk, ConstRefVec pos, ConstRefVec x0,
+                   const double& damping = 0) const;
 
  private:
   double T_;  // time step between iterates

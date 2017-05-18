@@ -1,5 +1,6 @@
 #include <feet-trajectory/utils/Jerk3DIntegrator.hh>
 #include <feet-trajectory/utils/MpcCondense.hh>
+#include <Eigen/SVD>
 
 namespace feettrajectory
 {
@@ -69,15 +70,58 @@ void Jerk3DIntegrator::getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U,
 {
   res = SelAcc_ * (Ux_ * X0 + Uu_ * U);
 }
+Eigen::VectorXd Jerk3DIntegrator::getPos(const Eigen::VectorXd& U,
+                                const Eigen::VectorXd& X0)
+{
+  Eigen::VectorXd res(U.size());
+  getPos(res, U, X0);
+  return res;
+}
+Eigen::VectorXd Jerk3DIntegrator::getVel(const Eigen::VectorXd& U,
+                                const Eigen::VectorXd& X0)
+{
+  Eigen::VectorXd res(U.size());
+  getVel(res, U, X0);
+  return res;
+}
+Eigen::VectorXd Jerk3DIntegrator::getAcc(const Eigen::VectorXd& U,
+                                const Eigen::VectorXd& X0)
+{
+  Eigen::VectorXd res(U.size());
+  getAcc(res, U, X0);
+  return res;
+}
+Eigen::VectorXd Jerk3DIntegrator::getState(const Eigen::VectorXd& U,
+                                const Eigen::VectorXd& X0)
+{
+  Eigen::VectorXd res(U.size());
+  getState(res, U, X0);
+  return res;
+}
 
 void Jerk3DIntegrator::jerkFromPos(RefVec jerk, ConstRefVec pos,
-                                   ConstRefVec X0) const
+                                   ConstRefVec X0, const double& damping) const
 {
   Eigen::MatrixXd A;
   Eigen::VectorXd b;
   A = SelPos_*Uu_;
   b = pos - SelPos_ * Ux_ * X0;
-  jerk = A.colPivHouseholderQr().solve(b);
+  if (damping == 0)
+    jerk = A.colPivHouseholderQr().solve(b);
+  else
+  {
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(
+        A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    long nSingularValues = svd.singularValues().size();
+    Eigen::VectorXd invS(nSingularValues);
+    for (long i = 0; i < nSingularValues; i++)
+    {
+      invS(i) =
+          1 / (svd.singularValues()(i) * svd.singularValues()(i) + damping);
+    }
+    jerk = svd.matrixV() * Eigen::DiagonalMatrix<double, Eigen::Dynamic>(invS) *
+           svd.matrixV().transpose() * A.transpose() * b;
+  }
 }
 
 } /* feettrajectory */

@@ -67,10 +67,11 @@ BOOST_AUTO_TEST_CASE(testJerkFromPos)
   pos.segment(9,3).setConstant(4);
   pos.segment(12,3).setConstant(5);
 
-  integ.jerkFromPos(u, pos, x0);
+  integ.jerkFromPos(u, pos, x0, 0.001);
 
   Eigen::VectorXd expU(n*3);
-  expU << 6, 6, 6, -30, -30, -30, 114, 114, 114, -426, -426, -426, 1590, 1590,
-      1590;
-  BOOST_CHECK(expU.isApprox(u));
+  expU << 2.44816, 2.44816, 2.44816, -4.46522, -4.46522, -4.46522, 2.71436,
+      2.71436, 2.71436, -0.777409, -0.777409, -0.777409, -0.246709, -0.246709,
+      -0.246709;
+  BOOST_CHECK(expU.isApprox(u, 1e-3));
 }

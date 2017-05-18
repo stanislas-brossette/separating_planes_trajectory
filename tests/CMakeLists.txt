@@ -40,6 +40,7 @@ endmacro(ADD_FEET_TRAJECTORY_TEST)
 #ADD_SCENARIO("testBoxAbovePlanCstr")
 ADD_SCENARIO("generateTrajectoryPGSolver")
 ADD_SCENARIO("generateTrajectoryAltQP")
+ADD_SCENARIO("generateTrajectoryAltQPJerk")
 ADD_SCENARIO("trajProblem")
 ADD_SCENARIO("compareResolutionMethods")
 
