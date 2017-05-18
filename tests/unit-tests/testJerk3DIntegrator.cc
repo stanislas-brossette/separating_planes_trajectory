@@ -51,3 +51,26 @@ BOOST_AUTO_TEST_CASE(testPosVelAcc)
   BOOST_CHECK(expAcc.isApprox(acc));
 
 }
+
+
+BOOST_AUTO_TEST_CASE(testJerkFromPos)
+{
+  unsigned long n = 5;
+  Jerk3DIntegrator integ(1, n);
+
+  Eigen::VectorXd x0(9), u(n*3), pos(n*3), vel(n*3), acc(n*3);
+  x0.setConstant(0);
+
+  pos.segment(0,3).setConstant(1);
+  pos.segment(3,3).setConstant(2);
+  pos.segment(6,3).setConstant(3);
+  pos.segment(9,3).setConstant(4);
+  pos.segment(12,3).setConstant(5);
+
+  integ.jerkFromPos(u, pos, x0);
+
+  Eigen::VectorXd expU(n*3);
+  expU << 6, 6, 6, -30, -30, -30, 114, 114, 114, -426, -426, -426, 1590, 1590,
+      1590;
+  BOOST_CHECK(expU.isApprox(u));
+}

@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <Eigen/Core>
+#include <Eigen/Dense>
+#include <feet-trajectory/utils/defs.hh>
 
 namespace feettrajectory
 {
@@ -21,6 +23,8 @@ class Jerk3DIntegrator
   const Eigen::MatrixXd& SelPos() const { return SelPos_; }
   const Eigen::MatrixXd& SelVel() const { return SelVel_; }
   const Eigen::MatrixXd& SelAcc() const { return SelAcc_; }
+
+  void jerkFromPos(RefVec jerk, ConstRefVec pos, ConstRefVec x0) const;
 
  private:
   double T_;  // time step between iterates

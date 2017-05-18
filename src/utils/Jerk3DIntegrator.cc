@@ -70,4 +70,14 @@ void Jerk3DIntegrator::getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U,
   res = SelAcc_ * (Ux_ * X0 + Uu_ * U);
 }
 
+void Jerk3DIntegrator::jerkFromPos(RefVec jerk, ConstRefVec pos,
+                                   ConstRefVec X0) const
+{
+  Eigen::MatrixXd A;
+  Eigen::VectorXd b;
+  A = SelPos_*Uu_;
+  b = pos - SelPos_ * Ux_ * X0;
+  jerk = A.colPivHouseholderQr().solve(b);
+}
+
 } /* feettrajectory */
