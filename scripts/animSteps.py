@@ -13,6 +13,13 @@ from mayavi.core.api import PipelineBase
 from mayavi.core.ui.api import MayaviScene, SceneEditor, \
                 MlabSceneModel
 
+def lenWithNone(l):
+    if l is None:
+        return 0
+    else:
+        return len(l)
+
+
 def plotBox(triangleMesh, box, col, alpha):
     c = box['position']
     s = box['size']
@@ -48,13 +55,13 @@ def plotPlane(triangleMesh, quiver, p, initBox, boxes, finalBox, obstacles, size
     if 'boxAbove' in p:
         b = np.array(map(float,boxes[p['boxAbove']]['position'])) #center of the box
     elif 'box0Above' in p and 'box1Above' in p:
-        if p['box0Above'] == -1 and p['box1Above'] != len(boxes):
+        if p['box0Above'] == -1 and p['box1Above'] != lenWithNone(boxes):
             b0 = np.array(map(float,initBox['position']))
             b1 = np.array(map(float,boxes[p['box1Above']]['position'])) #center of the box
-        elif p['box0Above'] != -1 and p['box1Above'] == len(boxes):
+        elif p['box0Above'] != -1 and p['box1Above'] == lenWithNone(boxes):
             b0 = np.array(map(float,boxes[p['box0Above']]['position'])) #center of the box
             b1 = np.array(map(float,finalBox['position']))
-        elif p['box0Above'] != -1 and p['box1Above'] != len(boxes):
+        elif p['box0Above'] != -1 and p['box1Above'] != lenWithNone(boxes):
             b0 = np.array(map(float,boxes[p['box0Above']]['position'])) #center of the box
             b1 = np.array(map(float,boxes[p['box1Above']]['position'])) #center of the box
         else:
@@ -153,10 +160,10 @@ class MyModel(HasTraits):
 
     nFixedPlanes = 0
     if fixedPlanes is not None:
-        nFixedPlanes = len(fixedPlanes)
+        nFixedPlanes = lenWithNone(fixedPlanes)
     nObstacles = 0
     if obstacles is not None:
-        nObstacles = len(obstacles)
+        nObstacles = lenWithNone(obstacles)
 
 
     initBoxPlot = None
@@ -165,9 +172,9 @@ class MyModel(HasTraits):
     fixedPlanesQuiver = [None]*nFixedPlanes
     obstacleBoxesPlot = [None]*nObstacles
 
-    mobileBoxesPlot = [None]*len(mobileBoxes[0])
-    mobilePlanesPlot = [None]*len(planes[0])
-    mobilePlanesQuiver = [None]*len(planes[0])
+    mobileBoxesPlot = [None]*lenWithNone(mobileBoxes[0])
+    mobilePlanesPlot = [None]*lenWithNone(planes[0])
+    mobilePlanesQuiver = [None]*lenWithNone(planes[0])
 
     # When the scene is activated, or when the parameters are changed, we
     # update the plot.
@@ -191,10 +198,10 @@ class MyModel(HasTraits):
             for i in range(0,self.nObstacles,1):
                 self.obstacleBoxesPlot[i] = plotBox(self.obstacleBoxesPlot[i], self.obstacles[i], (1, 0, 0), 0.6)
             # Mobile Boxes
-            for i in range(0,len(iterBoxes),1):
+            for i in range(0,lenWithNone(iterBoxes),1):
                 self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], colorIndex(i), 1)
             # Separating Planes
-            for i in range(0,len(iterPlanes),1):
+            for i in range(0,lenWithNone(iterPlanes),1):
                 self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i), 0.4)
             self.scene.mlab.view(azimuth=100, elevation=50, distance=4, focalpoint=[0,0,0.5], roll=None, reset_roll=True, figure=None)
 
@@ -202,9 +209,9 @@ class MyModel(HasTraits):
     def update_plot(self):
         iterBoxes = self.mobileBoxes[self.iter]
         iterPlanes = self.planes[self.iter]
-        for i in range(0,len(iterBoxes),1):
+        for i in range(0,lenWithNone(iterBoxes),1):
             self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], colorIndex(i), 1)
-        for i in range(0,len(iterPlanes),1):
+        for i in range(0,lenWithNone(iterPlanes),1):
             self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i), 0.4)
 
 

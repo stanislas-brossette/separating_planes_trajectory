@@ -34,6 +34,9 @@ logName: "logs/onlyFloor.log"
 nBoxes: 7
 BoxSize: [0.2, 0.1, 0.05]
 
+maxStepHeight: 0.4
+initialGuessRandomFactor: 0.1
+
 #Obstacles
 #obstacles:
   #- {size: [0.3, 1.1, 0.3], center: [0.5, 0.0, 0.15]}
