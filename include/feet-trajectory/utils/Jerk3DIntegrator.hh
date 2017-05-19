@@ -13,15 +13,15 @@ class Jerk3DIntegrator
  public:
   Jerk3DIntegrator(const double& T, const unsigned long& nIter);
   virtual ~Jerk3DIntegrator();
-  void getState(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
-  void getPos(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
-  void getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
-  void getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
+  void getState(RefVec res, ConstRefVec U, ConstRefVec X0) const;
+  void getPos(RefVec res, ConstRefVec U, ConstRefVec X0) const;
+  void getVel(RefVec res, ConstRefVec U, ConstRefVec X0) const;
+  void getAcc(RefVec res, ConstRefVec U, ConstRefVec X0) const;
 
-  Eigen::VectorXd getState(const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
-  Eigen::VectorXd getPos(const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
-  Eigen::VectorXd getVel(const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
-  Eigen::VectorXd getAcc(const Eigen::VectorXd& U, const Eigen::VectorXd& X0) const;
+  Eigen::VectorXd getState(ConstRefVec U, ConstRefVec X0) const;
+  Eigen::VectorXd getPos(ConstRefVec U, ConstRefVec X0) const;
+  Eigen::VectorXd getVel(ConstRefVec U, ConstRefVec X0) const;
+  Eigen::VectorXd getAcc(ConstRefVec U, ConstRefVec X0) const;
 
   const Eigen::MatrixXd& Ux() const { return Ux_; }
   const Eigen::MatrixXd& Uu() const { return Uu_; }

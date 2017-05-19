@@ -4,8 +4,12 @@ namespace feettrajectory
 {
 QPPlanesFixed::QPPlanesFixed(const TrajectoryProblem& pb) : pb_(pb)
 {
+  // The problem's variables are the boxes variables plus the relaxation term
+  // The problem's constraint are one per pair fixed plan-box
+  // plus one of dimension 2 per pair of successive mobile boxes, minus one for the first pais because the first box is fixed
+  // plus one of dimension 3 to lock the position of the final box
   setDimensions(pb_.dimBoxes() + 1,
-                pb_.nFixedPlanes() * pb_.nBoxes() + 2 * pb_.nPlans() + 3);
+                pb_.nFixedPlanes() * pb_.nBoxes() + 2 * pb_.nPlans() - 1 + 3);
 }
 QPPlanesFixed::~QPPlanesFixed() {}
 
@@ -18,6 +22,7 @@ void QPPlanesFixed::addRelaxationTerm(const double& alpha)
 
 void QPPlanesFixed::formQP(ConstRefVec xPlanes)
 {
+  reset();
   pb_.costFct().fillQuadCost(A_.topLeftCorner(pb_.dimBoxes(), pb_.dimBoxes()),
                              c_.head(pb_.dimBoxes()));
   A_.bottomRightCorner(1, 1) << 1;
@@ -30,7 +35,6 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
         l_(cstrIndexBegin), C_.block(cstrIndexBegin, boxIndexBegin, 1, 3));
     cstrIndexBegin += 1;
   }
-
   for (size_t iPlan = 0; iPlan < pb_.nMobilePlanCstr(); ++iPlan)
   {
     const long iBox0Above(pb_.plans().at(iPlan).box0Above());
@@ -39,7 +43,6 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
     const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
     const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
     const size_t iBoxBelowSize_t(static_cast<size_t>(iBoxBelow));
-
     Eigen::Vector3d planN;
     double planD(xPlanes(4 * iPlan));
     planN << xPlanes.segment(4 * iPlan + 1, 3);
@@ -56,16 +59,8 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
           l_.segment(cstrIndexBegin, 1),
           C_.block(cstrIndexBegin, box0IndexBegin, 1, 3),
           pb_.securityDistance());
+      cstrIndexBegin += 1;
     }
-    else
-    {
-      PlanBetweenBoxAndObstacle::fillLinCstr(
-          pb_.getBox(iBox0Above), pb_.obstacles().at(iBoxBelow), planD, planN,
-          l_.segment(cstrIndexBegin, 1), placeholderMatrix,
-          pb_.securityDistance());
-    }
-    cstrIndexBegin += 1;
-
     if (!pb_.getBox(iBox1Above).fixed())
     {
       PlanBetweenBoxAndObstacle::fillLinCstr(
@@ -73,15 +68,8 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
           l_.segment(cstrIndexBegin, 1),
           C_.block(cstrIndexBegin, box1IndexBegin, 1, 3),
           pb_.securityDistance());
+      cstrIndexBegin += 1;
     }
-    else
-    {
-      PlanBetweenBoxAndObstacle::fillLinCstr(
-          pb_.getBox(iBox1Above), pb_.obstacles().at(iBoxBelow), planD, planN,
-          l_.segment(cstrIndexBegin, 1), placeholderMatrix,
-          pb_.securityDistance());
-    }
-    cstrIndexBegin += 1;
   }
 
   Index finalBoxIndex = 3 * (pb_.nBoxes() - 1);
@@ -89,7 +77,8 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
                                 C_.block(cstrIndexBegin, finalBoxIndex, 3, 3),
                                 u_.segment(cstrIndexBegin, 3));
 
-  addRelaxationTerm(10);
+
+  addRelaxationTerm(1000);
 }
 
 void QPPlanesFixed::updatePlanD(RefVec xPlanes)

@@ -41,31 +41,40 @@ void AlternateQPSolverJerk::init(const Eigen::VectorXd& xInit)
 
 void AlternateQPSolverJerk::formAndSolveQPPlanesFixed(RefVec x)
 {
+  auto dimBoxes = pb_.dimBoxes();
+
   qpPlanesFixed_.formQP(x.tail(pb_.dimPlans()));
   qpPlanesFixed_.updatePlanD(x.tail(pb_.dimPlans()));
-  // TODO: Modify qp on pos to qp on jerk
 
-  Eigen::MatrixXd Acopy(qpPlanesFixed_.A());
-  Acopy.block(0, 0, pb_.dimBoxes(), pb_.dimBoxes()).setIdentity();
+  Eigen::MatrixXd AJerk(qpPlanesFixed_.A());
   Eigen::MatrixXd CJerk(qpPlanesFixed_.C());
   Eigen::VectorXd lJerk(qpPlanesFixed_.l());
   Eigen::VectorXd uJerk(qpPlanesFixed_.u());
+  Eigen::VectorXd cJerk(qpPlanesFixed_.c());
 
-  CJerk.leftCols(pb_.dimBoxes()) = qpPlanesFixed_.C().leftCols(pb_.dimBoxes()) *
-                                   integ_.SelPos() * integ_.Uu();
+  Eigen::MatrixXd SposUu = integ_.SelPos()*integ_.Uu();
+  Eigen::MatrixXd SposUx = integ_.SelPos()*integ_.Ux();
 
-  lJerk.head(qpPlanesFixed_.dimCstr()) =
-      qpPlanesFixed_.l().head(qpPlanesFixed_.dimCstr()) -
-      qpPlanesFixed_.C().leftCols(pb_.dimBoxes()) * integ_.SelPos() *
-          integ_.Ux() * state0_;
+  AJerk.block(0, 0, dimBoxes, dimBoxes) =
+      Eigen::MatrixXd::Identity(dimBoxes, dimBoxes) +
+      SposUu.transpose() * qpPlanesFixed_.A().block(0, 0, dimBoxes, dimBoxes) *
+          SposUu;
+  cJerk.head(dimBoxes) =
+      SposUu.transpose() * qpPlanesFixed_.c().head(dimBoxes) +
+      SposUu.transpose() * qpPlanesFixed_.A().block(0, 0, dimBoxes, dimBoxes) *
+          SposUx * state0_;
 
-  uJerk.head(qpPlanesFixed_.dimCstr()) =
-      qpPlanesFixed_.u().head(qpPlanesFixed_.dimCstr()) -
-      qpPlanesFixed_.C().leftCols(pb_.dimBoxes()) * integ_.SelPos() *
-          integ_.Ux() * state0_;
+  CJerk.leftCols(dimBoxes) =
+      qpPlanesFixed_.C().leftCols(dimBoxes) * SposUu;
 
-  QPSolver_.solve(qpPlanesFixed_.lVar(), qpPlanesFixed_.uVar(), Acopy,
-                  qpPlanesFixed_.c(), CJerk, lJerk, uJerk);
+  lJerk = qpPlanesFixed_.l() -
+          qpPlanesFixed_.C().leftCols(dimBoxes) * SposUx * state0_;
+
+  uJerk = qpPlanesFixed_.u() -
+          qpPlanesFixed_.C().leftCols(dimBoxes) * SposUx * state0_;
+
+  QPSolver_.solve(qpPlanesFixed_.lVar(), qpPlanesFixed_.uVar(), AJerk,
+                  cJerk, CJerk, lJerk, uJerk);
   if (!(QPSolver_.inform() == 0 || QPSolver_.inform() == 1))
   {
     QPSolver_.print_inform();
@@ -73,7 +82,7 @@ void AlternateQPSolverJerk::formAndSolveQPPlanesFixed(RefVec x)
   }
   // std::cout << "QPSolver_.result(): \n" << QPSolver_.result().transpose()
   //<< std::endl;
-  x.head(pb_.dimBoxes()) << QPSolver_.result().head(pb_.dimBoxes());
+  x.head(dimBoxes) << QPSolver_.result().head(dimBoxes);
 }
 
 void AlternateQPSolverJerk::formAndSolveLPBoxesFixed(RefVec x)

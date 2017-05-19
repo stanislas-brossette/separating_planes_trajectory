@@ -37,7 +37,7 @@ nBoxes: 5
 BoxSize: [0.2, 0.1, 0.05]
 
 maxStepHeight: 0.5
-initialGuessRandomFactor: 0.1
+initialGuessRandomFactor: 0.001
 
 #Obstacles
 obstacles:

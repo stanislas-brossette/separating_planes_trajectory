@@ -39,6 +39,7 @@ void AlternateQPSolver::formAndSolveQPPlanesFixed(RefVec x)
   qpPlanesFixed_.formQP(x.tail(pb_.dimPlans()));
   qpPlanesFixed_.updatePlanD(x.tail(pb_.dimPlans()));
   Eigen::MatrixXd Acopy(qpPlanesFixed_.A());
+
   QPSolver_.solve(qpPlanesFixed_.lVar(), qpPlanesFixed_.uVar(), Acopy,
                   qpPlanesFixed_.c(), qpPlanesFixed_.C(), qpPlanesFixed_.l(),
                   qpPlanesFixed_.u());

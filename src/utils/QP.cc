@@ -21,6 +21,13 @@ void QP::setDimensions(const Index& dimVar, const Index& dimCstr)
   uVar_.resize(dimVar_);
   l_.resize(dimCstr_);
   u_.resize(dimCstr_);
+  reset();
+}
+
+QP::~QP() {}
+
+void QP::reset()
+{
   A_.setZero();
   C_.setZero();
   c_.setZero();
@@ -29,8 +36,6 @@ void QP::setDimensions(const Index& dimVar, const Index& dimCstr)
   lVar_.setConstant(-std::numeric_limits<double>::infinity());
   uVar_.setConstant(std::numeric_limits<double>::infinity());
 }
-
-QP::~QP() {}
 
 std::ostream& QP::print(std::ostream& o, const Eigen::IOFormat& fmt) const
 {

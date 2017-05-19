@@ -14,6 +14,9 @@ class QP
   void setDimensions(const Index& dimVar, const Index& dimCstr);
   virtual ~QP();
 
+  //setZero on all the terms of the QP
+  void reset();
+
   const Index& dimVar() const { return dimVar_; }
   const Index& dimCstr() const { return dimCstr_; }
   const Eigen::MatrixXd& A() const { return A_; }
