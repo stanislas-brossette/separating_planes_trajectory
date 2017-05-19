@@ -51,60 +51,60 @@ Jerk3DIntegrator::Jerk3DIntegrator(const double& T, const unsigned long& nIter)
 Jerk3DIntegrator::~Jerk3DIntegrator(){};
 
 void Jerk3DIntegrator::getState(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                                const Eigen::VectorXd& X0)
+                                const Eigen::VectorXd& X0) const
 {
   res = Ux_ * X0 + Uu_ * U;
 }
 void Jerk3DIntegrator::getPos(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                              const Eigen::VectorXd& X0)
+                              const Eigen::VectorXd& X0) const
 {
   res = SelPos_ * (Ux_ * X0 + Uu_ * U);
 }
 void Jerk3DIntegrator::getVel(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                              const Eigen::VectorXd& X0)
+                              const Eigen::VectorXd& X0) const
 {
   res = SelVel_ * (Ux_ * X0 + Uu_ * U);
 }
 void Jerk3DIntegrator::getAcc(Eigen::VectorXd& res, const Eigen::VectorXd& U,
-                              const Eigen::VectorXd& X0)
+                              const Eigen::VectorXd& X0) const
 {
   res = SelAcc_ * (Ux_ * X0 + Uu_ * U);
 }
 Eigen::VectorXd Jerk3DIntegrator::getPos(const Eigen::VectorXd& U,
-                                const Eigen::VectorXd& X0)
+                                         const Eigen::VectorXd& X0) const
 {
   Eigen::VectorXd res(U.size());
   getPos(res, U, X0);
   return res;
 }
 Eigen::VectorXd Jerk3DIntegrator::getVel(const Eigen::VectorXd& U,
-                                const Eigen::VectorXd& X0)
+                                         const Eigen::VectorXd& X0) const
 {
   Eigen::VectorXd res(U.size());
   getVel(res, U, X0);
   return res;
 }
 Eigen::VectorXd Jerk3DIntegrator::getAcc(const Eigen::VectorXd& U,
-                                const Eigen::VectorXd& X0)
+                                         const Eigen::VectorXd& X0) const
 {
   Eigen::VectorXd res(U.size());
   getAcc(res, U, X0);
   return res;
 }
 Eigen::VectorXd Jerk3DIntegrator::getState(const Eigen::VectorXd& U,
-                                const Eigen::VectorXd& X0)
+                                           const Eigen::VectorXd& X0) const
 {
   Eigen::VectorXd res(U.size());
   getState(res, U, X0);
   return res;
 }
 
-void Jerk3DIntegrator::jerkFromPos(RefVec jerk, ConstRefVec pos,
-                                   ConstRefVec X0, const double& damping) const
+void Jerk3DIntegrator::jerkFromPos(RefVec jerk, ConstRefVec pos, ConstRefVec X0,
+                                   const double& damping) const
 {
   Eigen::MatrixXd A;
   Eigen::VectorXd b;
-  A = SelPos_*Uu_;
+  A = SelPos_ * Uu_;
   b = pos - SelPos_ * Ux_ * X0;
   if (damping == 0)
     jerk = A.colPivHouseholderQr().solve(b);

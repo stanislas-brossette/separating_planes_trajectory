@@ -20,7 +20,9 @@ namespace feettrajectory
 class AlternateQPSolverJerk
 {
  public:
-  AlternateQPSolverJerk(const TrajectoryProblem& pb, const size_t& maxIter, const Jerk3DIntegrator& integ);
+  AlternateQPSolverJerk(const TrajectoryProblem& pb, const size_t& maxIter,
+                        const Jerk3DIntegrator& integ,
+                        const Eigen::VectorXd& state0);
   virtual ~AlternateQPSolverJerk();
   void init(const Eigen::VectorXd& xInit);
   void solve();
@@ -36,6 +38,7 @@ class AlternateQPSolverJerk
  private:
   const TrajectoryProblem& pb_;
   const Jerk3DIntegrator& integ_;
+  Eigen::VectorXd state0_;
   QPPlanesFixed qpPlanesFixed_;
   QPBoxesFixed qpBoxesFixed_;
   QPBoxesFixedIndividual qpBoxesFixedIndividual_;

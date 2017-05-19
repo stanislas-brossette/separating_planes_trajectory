@@ -45,8 +45,9 @@ int main(int argc, char* argv[])
   Jerk3DIntegrator integ(0.3, myProb.nBoxes());
   Eigen::VectorXd state0(9);
   state0.setZero();
-  state0.segment(0,3) = myProb.initPos();
-  integ.jerkFromPos(initVec.head(myProb.dimBoxes()), initVec.head(myProb.dimBoxes()), state0, 1e-3);
+  state0.segment(0, 3) = myProb.initPos();
+  integ.jerkFromPos(initVec.head(myProb.dimBoxes()),
+                    initVec.head(myProb.dimBoxes()), state0, 1e-3);
 
   std::cout << "myProb: " << myProb << std::endl;
 
@@ -54,8 +55,8 @@ int main(int argc, char* argv[])
   myProb.normalizeNormals(initVec);
 
   // Instanciate the solver
-  AlternateQPSolverJerk altQP(myProb, myProb.maxIter(), integ);
- 
+  AlternateQPSolverJerk altQP(myProb, myProb.maxIter(), integ, state0);
+
   // Solve the problem
   altQP.init(initVec);
   altQP.solve();
