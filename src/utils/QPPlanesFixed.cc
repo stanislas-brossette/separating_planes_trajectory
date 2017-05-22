@@ -16,7 +16,7 @@ QPPlanesFixed::~QPPlanesFixed() {}
 void QPPlanesFixed::addRelaxationTerm(const double& alpha)
 {
   c_.tail(1) << alpha * 1;
-  C_.col(dimVar_ - 1).setConstant(1);
+  C_.col(dimVar_ - 1).head(C_.cols()-3).setConstant(1);
   lVar_.tail(1) << 0;
 }
 
