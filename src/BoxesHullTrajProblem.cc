@@ -33,25 +33,41 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
       finalPos_(config_["finalPos"].asVector3d()),
       boxSize_(config_["BoxSize"].asVector3d()),
       nBoxes_(config_["nBoxes"].asSize_t()),
-      initBox_(-1, boxSize_, initPos_),
-      finalBox_(static_cast<int>(nBoxes_), boxSize_, finalPos_),
+      initBox_(-1, boxSize_, initPos_, true),
       initBoxAbovePlanFct_(initBox_),
-      finalBoxAbovePlanFct_(finalBox_)
+      fixedFinalBox_(finalPos_)
 {
   if (config_.has("securityDistance"))
   {
     securityDistance_ = config_["securityDistance"].asDouble();
   }
-  if (config_.has("obstacles")) obstacles_ = config_["obstacles"].asVecBox();
+  else
+    securityDistance_ = 0;
+
+  if (config_.has("maxStepHeight"))
+  {
+    maxStepHeight_ = config_["maxStepHeight"].asDouble();
+  }
+  else
+    maxStepHeight_ = 0;
+
+  if (config_.has("obstacles"))
+  {
+    obstacles_ = config_["obstacles"].asVecBox();
+    for (size_t i = 0; i < obstacles_.size(); i++)
+    {
+      obstacles_[i].setFixed(true);
+    }
+  }
 
   if (config_.has("fixedPlanes"))
     fixedPlanes_ = config_["fixedPlanes"].asVecFixedPlan();
 
   nObstacles_ = obstacles_.size();
   nFixedPlanes_ = fixedPlanes_.size();
-  nPlans_ = (nBoxes_ + 1) * nObstacles_;
+  nPlans_ = nBoxes_ * nObstacles_;
 
-  nMobilePlanCstr_ = nObstacles_ * (nBoxes_ + 1);
+  nMobilePlanCstr_ = nObstacles_ * nBoxes_;
   nFixedPlanCstr_ = nFixedPlanes_ * nBoxes_;
 
   // threshold_ = -boxSize_.minCoeff() / 2;
@@ -62,6 +78,7 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
     boxes_.push_back(b);
     boxAbovePlanFcts_.push_back(BoxAbovePlan(b));
   }
+  fixedFinalBox_ = FixedBoxPosition(finalPos_);
 
   for (auto p : fixedPlanes_)
   {
@@ -76,7 +93,7 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
     obstacleAbovePlanFcts_.push_back(BoxAbovePlan(o));
   }
 
-  for (int i = -1; i < static_cast<int>(nBoxes_); ++i)
+  for (int i = 0; i < static_cast<int>(nBoxes_); ++i)
   {
     for (int j = 0; j < static_cast<int>(nObstacles_); ++j)
     {
@@ -111,7 +128,7 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
   outRepObjDiff_.resize(1, M.representationDim());
   outRepObjDiff_.setZero();
   outRep_.resize(
-      static_cast<Index>(24 * nMobilePlanCstr_ + 8 * nFixedPlanCstr_),
+      static_cast<Index>(24 * nMobilePlanCstr_ + 8 * nFixedPlanCstr_ + 3),
       M.representationDim());
   outRep_.setZero();
 }
@@ -120,24 +137,48 @@ BoxesHullTrajProblem::~BoxesHullTrajProblem() {}
 
 Eigen::VectorXd BoxesHullTrajProblem::findInitPoint()
 {
-  mnf::Point xRand = M().createRandomPoint();
-  // Eigen::Vector3d interBoxes;
-  // for (size_t i = 0; i < nBoxes_; ++i)
-  //{
-  // xRand(0)(i)[0][2] += 2 * static_cast<double>(i);
-  //}
-  // for (size_t i = 0; i < nPlans_; ++i)
-  //{
-  // size_t boxBelow = plans_[i].boxBelow();
-  // size_t boxAbove = plans_[i].boxAbove();
-  // Eigen::Vector3d boxBelowPos = xRand(0)(boxBelow)[0];
-  // Eigen::Vector3d boxAbovePos = xRand(0)(boxAbove)[0];
-  // interBoxes = boxAbovePos - boxBelowPos;
-  // interBoxes = interBoxes / interBoxes.norm();
-  // xRand(1)(i)[1] = interBoxes;
-  // xRand(1)(i)[0][0] = interBoxes.dot((boxAbovePos + boxBelowPos) / 2);
-  //}
-  return xRand.value();
+  Eigen::VectorXd xInit(M().representationDim());
+  xInit.setZero();
+  double pi = 3.1415926535897;
+  // First compute the initial guess for the foot trajectory
+  for (size_t i = 0; i < nBoxes_; i++)
+  {
+    xInit.segment(3 * i, 3) =
+        initPos_ + (double)(i + 1) * (finalPos_ - initPos_) / (double)(nBoxes_);
+    xInit(3 * i + 2) +=
+        maxStepHeight_ * std::sin((double)(i + 1) / (double)(nBoxes_)*pi);
+  }
+  std::cout << "xInit: " << xInit.transpose() << std::endl;
+
+  for (size_t i = 0; i < plans_.size(); i++)
+  {
+    Eigen::Vector3d box0Above(
+        getBoxPositionFromX(plans_[i].box0Above(), xInit));
+    Eigen::Vector3d box1Above(
+        getBoxPositionFromX(plans_[i].box1Above(), xInit));
+    Eigen::Vector3d boxBelow(obstacles_[plans_[i].boxBelow()].center());
+    Eigen::Vector3d n, center;
+    n = (box1Above + box0Above) / 2.0 - boxBelow;
+    center = boxBelow + n / 2.0;
+    n.normalize();
+    double d = center.dot(n);
+    std::cout << "xInit.segment(3*nBoxes_+4*i+1,3): "
+              << xInit.segment(3 * nBoxes_ + 4 * i + 1, 3) << std::endl;
+    xInit.segment(3 * nBoxes_ + 4 * i + 1, 3) << n;
+    xInit(3 * nBoxes_ + 4 * i) = d;
+    std::cout << "xInit: " << xInit.transpose() << std::endl;
+  }
+
+  return xInit;
+}
+
+Eigen::Vector3d BoxesHullTrajProblem::getBoxPositionFromX(
+    size_t i, const Eigen::VectorXd& x) const
+{
+  if (i == -1)
+    return initPos_;
+  else
+    return x.segment(3 * i, 3);
 }
 
 CartesianProduct* BoxesHullTrajProblem::buildManifold(const Index& nBoxes,
@@ -160,7 +201,7 @@ CartesianProduct* BoxesHullTrajProblem::buildManifold(const Index& nBoxes,
       MBoxes->multiply(*MBox);
   }
 
-  Index nPlanes = (nBoxes + 1) * nObstacles;
+  Index nPlanes = nBoxes * nObstacles;
   CartesianProduct* MPlanes;
   if (nPlanes == 0)
     MPlanes = new CartesianProduct(*R0, *R0);
@@ -200,7 +241,7 @@ void BoxesHullTrajProblem::evalObj(double& out) const
   Eigen::Vector3d posNext = phi_x_z()(0)(0)[0];
   Eigen::Vector3d dist = posNext - pos;
   out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
-  for (size_t i = 0; i < nBoxes_ - 1; ++i)
+  for (size_t i = 0; i < nBoxes_; ++i)
   {
     // distance between successive mobile boxes
     pos = phi_x_z()(0)(i)[0];
@@ -209,8 +250,8 @@ void BoxesHullTrajProblem::evalObj(double& out) const
     out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
   }
   // distance between last mobile box and final position
-  pos = phi_x_z()(0)(nBoxes_ - 1)[0];
-  posNext = finalPos_;
+  // pos = phi_x_z()(0)(nBoxes_ - 1)[0];
+  // posNext = finalPos_;
   dist = posNext - pos;
   out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
 }
@@ -226,7 +267,7 @@ void BoxesHullTrajProblem::evalObjDiff(RefMat out) const
   Eigen::Vector3d dist = posNext - pos;
   outRepObjDiff_.block(0, (0) * boxRepDim, 1, boxRepDim) +=
       2 * dist.transpose();
-  for (Index i = 0; i < static_cast<Index>(nBoxes_) - 1; ++i)
+  for (Index i = 0; i < static_cast<Index>(nBoxes_); ++i)
   {
     pos = phi_x_z()(0)(static_cast<size_t>(i))[0];
     posNext = phi_x_z()(0)(static_cast<size_t>(i) + 1)[0];
@@ -236,8 +277,8 @@ void BoxesHullTrajProblem::evalObjDiff(RefMat out) const
     outRepObjDiff_.block(0, (i + 1) * boxRepDim, 1, boxRepDim) +=
         2 * dist.transpose();
   }
-  pos = phi_x_z()(0)(nBoxes_ - 1)[0];
-  posNext = finalPos_;
+  // pos = phi_x_z()(0)(nBoxes_ - 1)[0];
+  // posNext = finalPos_;
   dist = posNext - pos;
   outRepObjDiff_.block(0, (static_cast<Index>(nBoxes_) - 1) * boxRepDim, 1,
                        boxRepDim) += -2 * dist.transpose();
@@ -265,6 +306,11 @@ void BoxesHullTrajProblem::evalNonLinCstr(RefVec out, size_t i) const
     size_t iC = static_cast<size_t>(boxAboveFixedPlanFcts_[i].box().index());
     Eigen::Vector3d trans = phi_x_z()(0)(iC)[0];
     boxAboveFixedPlanFcts_[i].compute(out, trans, nullQuat);
+  }
+  else if (i == nFixedPlanCstr_)
+  {
+    Eigen::Vector3d trans = phi_x_z()(0)(nBoxes_)[0];
+    fixedFinalBox_.compute(out, trans);
   }
   else if (i < numberOfCstr())
   {
@@ -297,13 +343,13 @@ void BoxesHullTrajProblem::evalNonLinCstr(RefVec out, size_t i) const
       box0AbovePlanFct = &initBoxAbovePlanFct_;
       box1AbovePlanFct = &boxAbovePlanFcts_[iBox1AboveSize_t];
     }
-    else if (iBox0Above != -1 && iBox1AboveSize_t == nBoxes_)
-    {
-      trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
-      trans1Above = finalPos_;
-      box0AbovePlanFct = &boxAbovePlanFcts_[iBox0AboveSize_t];
-      box1AbovePlanFct = &finalBoxAbovePlanFct_;
-    }
+    // else if (iBox0Above != -1 && iBox1AboveSize_t == nBoxes_)
+    //{
+    // trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
+    // trans1Above = finalPos_;
+    // box0AbovePlanFct = &boxAbovePlanFcts_[iBox0AboveSize_t];
+    // box1AbovePlanFct = &finalBoxAbovePlanFct_;
+    //}
     else
     {
       std::cerr << "Box0 is initial pos and Box1 is final, there is no "
@@ -336,6 +382,11 @@ void BoxesHullTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
         outRep_.block(8 * static_cast<long>(i), 3 * iC, 8, 3), trans, nullQuat);
     M().applyDiffRetractation(
         out, outRep_.middleRows(8 * static_cast<long>(i), 8), x().value());
+  }
+  else if (i == nFixedPlanCstr_)
+  {
+    Eigen::Vector3d trans = phi_x_z()(0)(nBoxes_)[0];
+    fixedFinalBox_.diff(out);
   }
   else if (i < numberOfCstr())
   {
@@ -380,15 +431,15 @@ void BoxesHullTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
           outRep_.block(rowBeginLong + 8, box1AboveBeginLong, 8, 3),
           trans1Above, nullQuat, d, normal);
     }
-    else if (iBox0Above != -1 && iBox1AboveSize_t == nBoxes_)
-    {
-      trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
-      trans1Above = finalPos_;
-      box1AbovePlanFct = &finalBoxAbovePlanFct_;
-      box0AbovePlanFct->diffTrans(
-          outRep_.block(rowBeginLong, box0AboveBeginLong, 8, 3), trans0Above,
-          nullQuat, d, normal);
-    }
+    // else if (iBox0Above != -1 && iBox1AboveSize_t == nBoxes_)
+    //{
+    // trans0Above = phi_x_z()(0)(iBox0AboveSize_t)[0];
+    // trans1Above = finalPos_;
+    // box1AbovePlanFct = &finalBoxAbovePlanFct_;
+    // box0AbovePlanFct->diffTrans(
+    // outRep_.block(rowBeginLong, box0AboveBeginLong, 8, 3), trans0Above,
+    // nullQuat, d, normal);
+    //}
     else
     {
       std::cerr << "Box0 is initial pos and Box1 is final, there is no "
@@ -432,6 +483,10 @@ void BoxesHullTrajProblem::getNonLinCstrLB(RefVec out, size_t i) const
   {
     boxAboveFixedPlanFcts_[i].LB(out);
   }
+  else if (i == nFixedPlanCstr_)
+  {
+    fixedFinalBox_.LB(out);
+  }
   else if (i < numberOfCstr())
   {
     const size_t iPlan(static_cast<size_t>(i) - nFixedPlanCstr_);
@@ -465,6 +520,10 @@ void BoxesHullTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const
   {
     boxAboveFixedPlanFcts_[i].UB(out);
   }
+  if (i == nFixedPlanCstr_)
+  {
+    fixedFinalBox_.UB(out);
+  }
   else if (i < numberOfCstr())
   {
     const size_t iPlan(static_cast<size_t>(i) - nFixedPlanCstr_);
@@ -482,7 +541,7 @@ void BoxesHullTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const
 
 size_t BoxesHullTrajProblem::numberOfCstr() const
 {
-  size_t nCstr = nFixedPlanCstr_ + nMobilePlanCstr_;
+  size_t nCstr = nFixedPlanCstr_ + 1 + nMobilePlanCstr_;
   return nCstr;
 }
 
@@ -492,6 +551,8 @@ Index BoxesHullTrajProblem::nonLinCstrDim(size_t i) const
 {
   if (i < nFixedPlanCstr_)
     return 8;
+  else if (i == nFixedPlanCstr_)
+    return 3;
   else if (i < numberOfCstr())
     return 24;
   else

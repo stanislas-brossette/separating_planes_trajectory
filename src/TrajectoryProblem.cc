@@ -83,7 +83,7 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
     obstacleAbovePlanFcts_.push_back(BoxAbovePlan(o));
   }
 
-  fixedBoxPositionFcts_.push_back(FixedBoxPosition(boxes_.back(), finalPos_));
+  fixedBoxPositionFcts_.push_back(FixedBoxPosition(finalPos_));
 
   for (int i = -1; i < static_cast<int>(nBoxes_-1); ++i)
   {

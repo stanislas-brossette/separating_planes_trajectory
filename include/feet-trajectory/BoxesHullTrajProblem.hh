@@ -20,6 +20,7 @@
 #include <feet-trajectory/utils/ProblemConfig.hh>
 #include <feet-trajectory/functions/BoxAbovePlan.hh>
 #include <feet-trajectory/functions/BoxAboveFixedPlan.hh>
+#include <feet-trajectory/functions/FixedBoxPosition.hh>
 
 namespace feettrajectory
 {
@@ -71,6 +72,10 @@ class BoxesHullTrajProblem : public pgs::Problem
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
   const std::vector<std::string> cstrNames() const { return cstrNames_; };
   const double& securityDistance() const { return securityDistance_; }
+  const Index& dimVar() const { return M().representationDim(); }
+  const ProblemConfig& config() const { return config_; }
+
+  Eigen::Vector3d getBoxPositionFromX(size_t i, const Eigen::VectorXd& x) const;
 
  private:
   ProblemConfig config_;
@@ -91,11 +96,13 @@ class BoxesHullTrajProblem : public pgs::Problem
   size_t nFixedPlanCstr_;
 
   double securityDistance_;
+  double maxStepHeight_;
 
   //double threshold_; //half of the min dimension of the box
 
-  Box initBox_, finalBox_;
-  BoxAbovePlan initBoxAbovePlanFct_, finalBoxAbovePlanFct_;
+  Box initBox_;
+  BoxAbovePlan initBoxAbovePlanFct_;
+  FixedBoxPosition fixedFinalBox_;
 
   std::vector<Box> boxes_;
   std::vector<PlanForHull> plans_;

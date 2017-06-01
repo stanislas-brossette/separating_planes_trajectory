@@ -17,13 +17,16 @@ using namespace feettrajectory;
 
 int main(int argc, char* argv[])
 {
-  assert(argc > 1 && "Please provide a file to load");
-  std::cout << "Generate Trajectory: Loads a config and generates a trajectory "
-               "between initPos and finalPos that avoids the obstacles and "
-               "some fixed planes" << std::endl;
-
-  std::srand(static_cast<uint>(std::time(0)));
-  std::string ymlPath = std::string(CONFIGS_DATA_DIR) + "/" + argv[1] + ".yml";
+  std::string ymlPath;
+  if (argc > 1)
+  {
+    ymlPath = std::string(CONFIGS_DATA_DIR) + "/" + argv[1] + ".yml";
+  }
+  else
+  {
+    std::cout << "Loading default file \"singleObstacle.yml\"" << std::endl;
+    ymlPath = std::string(CONFIGS_DATA_DIR) + "/singleObstacle.yml";
+  }
   ProblemConfig config(ymlPath);
 
   int nBoxes = config["nBoxes"];
@@ -37,18 +40,31 @@ int main(int argc, char* argv[])
 
   BoxesHullTrajProblem myProb(*M, ymlPath);
 
-  Eigen::VectorXd v0(M->representationDim());
-  v0 = myProb.findInitPoint();
-  myProb.M().forceOnM(v0, v0);
-  Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[",
-                           "]");
+  // Initialization
+  Eigen::VectorXd initVec(myProb.dimVar());
+  if (myProb.config().has("x0"))
+  {
+    initVec << myProb.config()["x0"].asVectorXd();
+    std::cout << "myProb.config()[x0].asVectorXd(): "
+              << myProb.config()["x0"].asVectorXd().transpose() << std::endl;
+  }
+  else
+    initVec = myProb.findInitPoint();
 
-  std::cout << "v0: " << v0.format(HeavyFmt) << std::endl;
+  if (myProb.config().has("initialGuessRandomFactor"))
+  {
+    initVec = initVec +
+              myProb.config()["initialGuessRandomFactor"] *
+                  Eigen::VectorXd::Random(myProb.dimVar());
+  }
+
+  myProb.M().forceOnM(initVec, initVec);
+
+  std::cout << "initVec: " << initVec << std::endl;
 
   // pgs::utils::finiteDiffCheck(myProb);
 
-  myProb.M().forceOnM(v0, v0);
-  mnf::Point x0 = myProb.M().createPoint(v0);
+  mnf::Point x0 = myProb.M().createPoint(initVec);
 
   // Solver mySolver;
   pgs::SolverTrustRegionFilter mySolver;
