@@ -60,9 +60,7 @@ int main(int argc, char* argv[])
 
   myProb.M().forceOnM(initVec, initVec);
 
-  std::cout << "initVec: " << initVec << std::endl;
-
-  // pgs::utils::finiteDiffCheck(myProb);
+  pgs::utils::finiteDiffCheck(myProb);
 
   mnf::Point x0 = myProb.M().createPoint(initVec);
 
@@ -74,8 +72,6 @@ int main(int argc, char* argv[])
   mySolver.init(myProb, x0);
   pgs::Results res = mySolver.solve();
 
-  std::cout << "xSol = \n" << res.x_star << std::endl;
-
   if (config.has("plotResult") && config["plotResult"])
   {
     if (config.has("logLevel") && config["logLevel"].compare("NO_LOG") != 0)
@@ -84,22 +80,17 @@ int main(int argc, char* argv[])
       printAllIterations(config["logName"], myProb, res.x_star,
                          mySolver.logger().folder());
       std::string command = "./animSteps.py logs/";
-      command += argv[1];
+      if (argc > 1)
+      {
+        command += argv[1];
+      }
+      else
+      {
+        command += "singleObstacle";
+      }
       command += ".log";
       system(command.c_str());
-      return 0;
-    }
-    else
-    {
-      print(config["logName"], myProb, res.x_star);
-      // Call the Python script passing a filename argument.
-      std::string command = "./viewSteps.py logs/";
-      command += argv[1];
-      command += ".log";
-      system(command.c_str());
-      return 0;
     }
   }
-
   return 0;
 }

@@ -127,7 +127,7 @@ def plotFixedPlane(triangleMesh, quiver, p, sizePlane, col, alpha):
     return triangleMesh, quiver
 
 def colorIndex(i, N):
-    val = float(i)/float(N)
+    val = (float(i)%float(N))/float(N)
     return (0, val, 1-val)
 
 

@@ -16,7 +16,7 @@ class Box
 
   const std::vector<Eigen::Vector3d>& vertex() const { return vertex_; };
   const Eigen::Matrix<double, 3, 8>& vertexMat() const { return vertexMat_; };
-  const Eigen::Vector3d& vertex(size_t i) const { return vertex_[i]; };
+  const Eigen::Vector3d& vertex(size_t i) const;
   const double& lx() const { return size_[0]; };
   const double& ly() const { return size_[1]; };
   const double& lz() const { return size_[2]; };

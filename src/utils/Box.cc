@@ -38,6 +38,13 @@ Box::Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix)
 {
 }
 
+const Eigen::Vector3d& Box::vertex(size_t i) const
+{
+  if (i >= 0 && i <= 7) return vertex_[i];
+  else
+    throw std::out_of_range("vertex");
+}
+
 std::ostream& Box::print(std::ostream& o) const
 {
   o << "Box " << index() << std::endl;

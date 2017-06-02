@@ -62,8 +62,10 @@ class BoxAbovePlan
                          Eigen::Vector3d normal,
                          bool isBoxBelow = false) const;
 
- private:
+  const std::string& name() const{return name_;}
+ protected:
   Box box_;
+  std::string name_;
 };
 
 //cstr = nx*(tx - vx*(2*qy^2 + 2*qz^2 - 1) - vy*(2*qw*qz - 2*qx*qy) + vz*(2*qw*qy + 2*qx*qz)) - d + ny*(ty - vy*(2*qx^2 + 2*qz^2 - 1) + vx*(2*qw*qz + 2*qx*qy) - vz*(2*qw*qx - 2*qy*qz)) + nz*(tz - vz*(2*qx^2 + 2*qy^2 - 1) - vx*(2*qw*qy - 2*qx*qz) + vy*(2*qw*qx + 2*qy*qz))

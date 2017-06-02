@@ -16,13 +16,25 @@ BoxAboveFixedPlan::BoxAboveFixedPlan(const Box& c,
                                      const double& d)
     : BoxAbovePlan(c), normal_(normal), d_(d)
 {
+  setName();
 }
 BoxAboveFixedPlan::BoxAboveFixedPlan(const Box& c, const FixedPlan& p)
     : BoxAbovePlan(c), normal_(p.normal()), d_(p.d())
 {
+  setName();
 }
 
 BoxAboveFixedPlan::~BoxAboveFixedPlan() {}
+
+void BoxAboveFixedPlan::setName()
+{
+  Eigen::IOFormat CleanFmt(2, 0, ", ", "", "[", "]");
+  std::stringstream ss;
+  ss << "Box " << std::to_string(box_.index())
+     << " above fixed plan: {normal:" << normal_.transpose().format(CleanFmt)
+     << ", d: " << d_ << "}";
+  name_ = ss.str();
+}
 
 void BoxAboveFixedPlan::compute(
     Eigen::Ref<Eigen::Matrix<double, 8, 1>> res,

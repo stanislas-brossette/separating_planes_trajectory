@@ -24,6 +24,8 @@ class MpcCondense
   virtual ~MpcCondense();
   const Eigen::MatrixXd& Ux() const;
   const Eigen::MatrixXd& Uu() const;
+  const unsigned long& dimU() const{return dimU_;}
+  const unsigned long& dimX() const{return dimX_;}
 
  private:
   /// @brief Dimension of the control variable

@@ -3,7 +3,12 @@
 
 namespace feettrajectory
 {
-BoxAbovePlan::BoxAbovePlan(const Box& c) : box_(c) {}
+BoxAbovePlan::BoxAbovePlan(const Box& c) : box_(c)
+{
+  std::stringstream ss;
+  ss << "Box " << std::to_string(box_.index()) << " above plan";
+  name_ = ss.str();
+}
 
 BoxAbovePlan::~BoxAbovePlan() {}
 

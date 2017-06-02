@@ -93,7 +93,7 @@ BoxesHullTrajProblem::BoxesHullTrajProblem(const Manifold& M,
     obstacleAbovePlanFcts_.push_back(BoxAbovePlan(o));
   }
 
-  for (int i = 0; i < static_cast<int>(nBoxes_); ++i)
+  for (int i = -1; i < static_cast<int>(nBoxes_) - 1; ++i)
   {
     for (int j = 0; j < static_cast<int>(nObstacles_); ++j)
     {
@@ -148,7 +148,6 @@ Eigen::VectorXd BoxesHullTrajProblem::findInitPoint()
     xInit(3 * i + 2) +=
         maxStepHeight_ * std::sin((double)(i + 1) / (double)(nBoxes_)*pi);
   }
-  std::cout << "xInit: " << xInit.transpose() << std::endl;
 
   for (size_t i = 0; i < plans_.size(); i++)
   {
@@ -162,11 +161,8 @@ Eigen::VectorXd BoxesHullTrajProblem::findInitPoint()
     center = boxBelow + n / 2.0;
     n.normalize();
     double d = center.dot(n);
-    std::cout << "xInit.segment(3*nBoxes_+4*i+1,3): "
-              << xInit.segment(3 * nBoxes_ + 4 * i + 1, 3) << std::endl;
     xInit.segment(3 * nBoxes_ + 4 * i + 1, 3) << n;
     xInit(3 * nBoxes_ + 4 * i) = d;
-    std::cout << "xInit: " << xInit.transpose() << std::endl;
   }
 
   return xInit;
@@ -241,7 +237,7 @@ void BoxesHullTrajProblem::evalObj(double& out) const
   Eigen::Vector3d posNext = phi_x_z()(0)(0)[0];
   Eigen::Vector3d dist = posNext - pos;
   out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
-  for (size_t i = 0; i < nBoxes_; ++i)
+  for (size_t i = 0; i < nBoxes_ - 1; ++i)
   {
     // distance between successive mobile boxes
     pos = phi_x_z()(0)(i)[0];
@@ -252,8 +248,8 @@ void BoxesHullTrajProblem::evalObj(double& out) const
   // distance between last mobile box and final position
   // pos = phi_x_z()(0)(nBoxes_ - 1)[0];
   // posNext = finalPos_;
-  dist = posNext - pos;
-  out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
+  //dist = posNext - pos;
+  //out += dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2];
 }
 void BoxesHullTrajProblem::evalObjDiff(RefMat out) const
 {
@@ -267,7 +263,7 @@ void BoxesHullTrajProblem::evalObjDiff(RefMat out) const
   Eigen::Vector3d dist = posNext - pos;
   outRepObjDiff_.block(0, (0) * boxRepDim, 1, boxRepDim) +=
       2 * dist.transpose();
-  for (Index i = 0; i < static_cast<Index>(nBoxes_); ++i)
+  for (Index i = 0; i < static_cast<Index>(nBoxes_) - 1; ++i)
   {
     pos = phi_x_z()(0)(static_cast<size_t>(i))[0];
     posNext = phi_x_z()(0)(static_cast<size_t>(i) + 1)[0];
@@ -279,9 +275,9 @@ void BoxesHullTrajProblem::evalObjDiff(RefMat out) const
   }
   // pos = phi_x_z()(0)(nBoxes_ - 1)[0];
   // posNext = finalPos_;
-  dist = posNext - pos;
-  outRepObjDiff_.block(0, (static_cast<Index>(nBoxes_) - 1) * boxRepDim, 1,
-                       boxRepDim) += -2 * dist.transpose();
+  //dist = posNext - pos;
+  //outRepObjDiff_.block(0, (static_cast<Index>(nBoxes_) - 1) * boxRepDim, 1,
+                       //boxRepDim) += -2 * dist.transpose();
   M().applyDiffRetractation(out, outRepObjDiff_, x().value());
 }
 
@@ -309,12 +305,12 @@ void BoxesHullTrajProblem::evalNonLinCstr(RefVec out, size_t i) const
   }
   else if (i == nFixedPlanCstr_)
   {
-    Eigen::Vector3d trans = phi_x_z()(0)(nBoxes_)[0];
+    Eigen::Vector3d trans = phi_x_z()(0)(nBoxes_-1)[0];
     fixedFinalBox_.compute(out, trans);
   }
   else if (i < numberOfCstr())
   {
-    const size_t iPlan(static_cast<size_t>(i) - nFixedPlanCstr_);
+    const size_t iPlan(static_cast<size_t>(i) - nFixedPlanCstr_ - 1);
     const int iBox0Above(plans_[iPlan].box0Above());
     const int iBox1Above(plans_[iPlan].box1Above());
     const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
@@ -385,12 +381,16 @@ void BoxesHullTrajProblem::evalNonLinCstrDiff(RefMat out, size_t i) const
   }
   else if (i == nFixedPlanCstr_)
   {
-    Eigen::Vector3d trans = phi_x_z()(0)(nBoxes_)[0];
-    fixedFinalBox_.diff(out);
+    fixedFinalBox_.diff(
+        outRep_.block(8 * static_cast<long>(i), 3 * (nBoxes_ - 1), 3, 3));
+    M().applyDiffRetractation(
+        out, outRep_.middleRows(8 * static_cast<long>(i), 3), x().value());
   }
   else if (i < numberOfCstr())
   {
-    const size_t iPlan(static_cast<size_t>(i) - nFixedPlanCstr_);
+    const size_t iPlan(static_cast<size_t>(i) - nFixedPlanCstr_ - 1);
+    if(iPlan >= plans_.size())
+      throw std::out_of_range("plan index");
     const int iBox0Above(plans_[iPlan].box0Above());
     const int iBox1Above(plans_[iPlan].box1Above());
     const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
@@ -520,7 +520,7 @@ void BoxesHullTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const
   {
     boxAboveFixedPlanFcts_[i].UB(out);
   }
-  if (i == nFixedPlanCstr_)
+  else if (i == nFixedPlanCstr_)
   {
     fixedFinalBox_.UB(out);
   }
@@ -537,6 +537,8 @@ void BoxesHullTrajProblem::getNonLinCstrUB(RefVec out, size_t i) const
     boxAbovePlanFcts_[iBox1AboveSize_t].UB(out.segment(8, 8));
     boxAbovePlanFcts_[iBoxBelow].UB(out.tail(8));
   }
+  else
+    throw std::out_of_range("constraint index");
 }
 
 size_t BoxesHullTrajProblem::numberOfCstr() const

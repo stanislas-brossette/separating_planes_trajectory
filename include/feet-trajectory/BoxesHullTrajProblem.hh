@@ -72,7 +72,7 @@ class BoxesHullTrajProblem : public pgs::Problem
   const Eigen::Vector3d& boxSize() const { return boxSize_; }
   const std::vector<std::string> cstrNames() const { return cstrNames_; };
   const double& securityDistance() const { return securityDistance_; }
-  const Index& dimVar() const { return M().representationDim(); }
+  Index dimVar() const { return M().representationDim(); }
   const ProblemConfig& config() const { return config_; }
 
   Eigen::Vector3d getBoxPositionFromX(size_t i, const Eigen::VectorXd& x) const;

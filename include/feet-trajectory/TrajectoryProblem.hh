@@ -61,7 +61,10 @@ class TrajectoryProblem
     else if (i > -1)
       return boxes().at(i);
     else
-      std::cerr << "No box with index " << i << std::endl;
+    {
+      throw "No box with index i";
+      //std::cerr << "No box with index " << i << std::endl;
+    }
   }
 
   const std::vector<BoxAboveFixedPlan>& boxAboveFixedPlanFcts() const

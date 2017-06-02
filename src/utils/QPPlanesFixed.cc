@@ -40,9 +40,6 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
     const long iBox0Above(pb_.plans().at(iPlan).box0Above());
     const long iBox1Above(pb_.plans().at(iPlan).box1Above());
     const long iBoxBelow(pb_.plans().at(iPlan).boxBelow());
-    const size_t iBox0AboveSize_t(static_cast<size_t>(iBox0Above));
-    const size_t iBox1AboveSize_t(static_cast<size_t>(iBox1Above));
-    const size_t iBoxBelowSize_t(static_cast<size_t>(iBoxBelow));
     Eigen::Vector3d planN;
     double planD(xPlanes(4 * iPlan));
     planN << xPlanes.segment(4 * iPlan + 1, 3);
