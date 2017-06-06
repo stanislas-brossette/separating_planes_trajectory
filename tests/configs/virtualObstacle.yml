@@ -9,7 +9,7 @@ hessianUpdateMethod: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCH
 hessianUpdateMethodRestoration: "BFGS_SELF_SCALING" #NONE SR1 BFGS BFGS_SELF_SCALING FLETCHER_LQNU
 logLevel: "ONLY_X"
 logDirectory: "logs/PGsolver/"
-maxIter: 100
+maxIter: 20
 regularizationValMin: 1e-8
 resetHessianAfterRestoration: false
 resetHessianBeforeRestoration: false
@@ -31,20 +31,21 @@ FP:
 logName: "logs/virtualObstacle.log"
 
 #Boxes
-nBoxes: 12
+nBoxes: 22
 BoxSize: [0.2, 0.1, 0.05]
 
 #Obstacles
 obstacles:
-  - {size: [0.8, 0.8, 0.8], center: [0.0, -0.44, 0.0], isVirtual: false}
-  - {size: [0.8, 0.8, 0.8], center: [0.0, 0.44, 0.0], isVirtual: true}
-securityDistance: 0.005
+  - {size: [0.8, 0.8, 8.8], center: [0.0, -0.61, 0.0], isVirtual: false}
+  - {size: [0.4, 3.8, 0.4], center: [0.0, 0.0, 0.0], isVirtual: false}
+  - {size: [0.8, 0.8, 8.8], center: [0.0, 0.28, 0.0], isVirtual: true}
+securityDistance: 0.001
 
 maxStepHeight: 0.5
 
 #ground
 fixedPlanes:
-  - { normal: [0,0,1], d: -0.4}
+  - { normal: [0,0,1], d: -0.1}
 
 #initial and final positions
 initPos: [-1.0, 0.0, 0.0]

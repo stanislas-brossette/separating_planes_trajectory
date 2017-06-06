@@ -179,7 +179,7 @@ void ProblemConfig::loadFile(std::string configFile)
             bool hasD= false;
             bool hasCenter = false;
             bool hasSize = false;
-            if (subSubNode.IsMap() && subSubNode.size() == 2)
+            if (subSubNode.IsMap() && subSubNode.size() >= 2)
             {
               for (auto i : subSubNode)
               {

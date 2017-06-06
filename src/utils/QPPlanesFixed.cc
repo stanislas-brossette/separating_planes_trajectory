@@ -32,7 +32,7 @@ void QPPlanesFixed::addRelaxationTerm(size_t cstrIndexBegin, size_t cstrSize,
   // one-to-last variable
   size_t colIndex = dimVar_ - 1;
   if (pb_.hasVirtualObstacles())
-    size_t colIndex = isVirtual ? dimVar_ - 1 : dimVar_ - 2;
+    colIndex = isVirtual ? dimVar_ - 1 : dimVar_ - 2;
   C_.col(colIndex).segment(cstrIndexBegin, cstrSize).setConstant(1);
 }
 
@@ -53,7 +53,7 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
     lVar_.tail(1) << 0;
   }
 
-  A_.bottomRightCorner(1, 1) << 1;
+  //A_.bottomRightCorner(1, 1) << 1;
 
   long cstrIndexBegin = 0;
   for (size_t i = 0; i < pb_.boxAboveFixedPlanFcts().size(); ++i)
@@ -62,7 +62,7 @@ void QPPlanesFixed::formQP(ConstRefVec xPlanes)
     pb_.boxAboveFixedPlanFcts().at(i).fillLinCstr(
         l_(cstrIndexBegin), C_.block(cstrIndexBegin, boxIndexBegin, 1, 3));
 
-    addRelaxationTerm(cstrIndexBegin, 3, false);
+    addRelaxationTerm(cstrIndexBegin, 1, false);
 
     cstrIndexBegin += 1;
   }
