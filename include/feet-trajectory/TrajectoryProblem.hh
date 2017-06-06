@@ -51,7 +51,8 @@ class TrajectoryProblem
   const Index& dimVar() const { return dimVar_; }
   const size_t& maxIter() const { return maxIter_; }
   const double& securityDistance() const { return securityDistance_; }
-  const CostDistance& costFct() const { return costFct_; };
+  const CostDistance& costFct() const { return costFct_; }
+  bool hasVirtualObstacles() const { return hasVirtualObstacles_; }
   Eigen::VectorXd findInitPoint() const;
 
   const Box& getBox(Index i) const
@@ -112,6 +113,7 @@ class TrajectoryProblem
   size_t nBoxes_;
   size_t nPlans_;
   size_t nObstacles_;
+  bool hasVirtualObstacles_ = false;
   size_t nFixedPlanes_;
   size_t nMobilePlanCstr_;
   size_t nFixedPlanCstr_;

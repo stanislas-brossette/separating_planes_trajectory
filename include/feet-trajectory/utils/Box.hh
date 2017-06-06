@@ -10,9 +10,9 @@ class Box
 {
  public:
   Box(int index, double lx, double ly, double lz, double cx = 0.,
-      double cy = 0., double cz = 0., bool fixed = false);
+      double cy = 0., double cz = 0., bool fixed = false, bool isVirtual = false);
   Box(int index, Eigen::Vector3d size);
-  Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix = false);
+  Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix = false, bool isVirtual = false);
 
   const std::vector<Eigen::Vector3d>& vertex() const { return vertex_; };
   const Eigen::Matrix<double, 3, 8>& vertexMat() const { return vertexMat_; };
@@ -25,7 +25,9 @@ class Box
   const double& cz() const { return center_[2]; };
   const int& index() const { return index_; };
   const bool& fixed() const { return fixed_; };
+  const bool& isVirtual() const { return isVirtual_; };
   void setFixed(bool f) { fixed_ = f; };
+  void setVirtual(bool v) { isVirtual_ = v; };
   const Eigen::Vector3d& center() const { return center_; }
   const Eigen::Vector3d& size() const { return size_; }
 
@@ -44,6 +46,8 @@ class Box
   Eigen::Vector3d center_;
   // Is fixed
   bool fixed_;
+  // Is virtual (used only for obstacles
+  bool isVirtual_;
 };
 
 /// \brief Output stream operator for frames.

@@ -3,8 +3,8 @@
 namespace feettrajectory
 {
 Box::Box(int index, double lx, double ly, double lz, double cx, double cy,
-         double cz, bool fixed)
-    : index_(index), fixed_(fixed)
+         double cz, bool fixed, bool isVirtual)
+    : index_(index), fixed_(fixed), isVirtual_(isVirtual)
 {
   size_ << lx, ly, lz;
   center_ << cx, cy, cz;
@@ -32,9 +32,10 @@ Box::Box(int index, Eigen::Vector3d size)
 {
 }
 
-Box::Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix)
+Box::Box(int index, Eigen::Vector3d size, Eigen::Vector3d center, bool fix,
+         bool isVirtual)
     : Box(index, size[0], size[1], size[2], center[0], center[1], center[2],
-          fix)
+          fix, isVirtual)
 {
 }
 
@@ -49,6 +50,7 @@ std::ostream& Box::print(std::ostream& o) const
 {
   o << "Box " << index() << std::endl;
   o << "fixed: " << fixed() << std::endl;
+  o << "isVirtual: " << isVirtual() << std::endl;
   o << "center: " << center().transpose() << std::endl;
   o << "size: " << size().transpose() << std::endl;
   for (size_t i = 0; i < 8; i++)

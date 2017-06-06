@@ -38,6 +38,10 @@ TrajectoryProblem::TrajectoryProblem(const std::string& configPath)
     obstacles_ = config_["obstacles"].asVecBox();
     for (size_t i = 0; i < obstacles_.size(); i++)
     {
+      if (obstacles_[i].isVirtual())
+      {
+        hasVirtualObstacles_ = true;
+      }
       obstacles_[i].setFixed(true);
     }
   }

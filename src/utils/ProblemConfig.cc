@@ -172,6 +172,7 @@ void ProblemConfig::loadFile(std::string configFile)
         {
           bool isBoxMap = false;
           bool isFixedPlanMap = false;
+          bool hasVirtualBool = false;
           for (auto subSubNode : subNode.second)
           {
             bool hasNormal = false;
@@ -194,6 +195,9 @@ void ProblemConfig::loadFile(std::string configFile)
                 else if (std::string("size")
                              .compare(i.first.as<std::string>()) == 0)
                   hasSize = true;
+                else if (std::string("isVirtual")
+                             .compare(i.first.as<std::string>()) == 0)
+                  hasVirtualBool = true;
               }
             }
             if (hasNormal && hasD)
@@ -227,7 +231,12 @@ void ProblemConfig::loadFile(std::string configFile)
                 size[i] = subSubNode["size"][i].as<double>();
                 center[i] = subSubNode["center"][i].as<double>();
               }
-              vecC.push_back(Box(index, size, center));
+              bool isVirtual = false;
+              if (hasVirtualBool)
+              {
+                isVirtual = subSubNode["isVirtual"].as<bool>();
+              }
+              vecC.push_back(Box(index, size, center, false, isVirtual));
               index++;
             }
             prop[entry] = CustomString(vecC, acc);
