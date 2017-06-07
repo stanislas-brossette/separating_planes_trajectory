@@ -149,7 +149,9 @@ void printAllIterations(const std::string& fileName,
     logFile << "- {size: "
             << pb.obstacles()[i].size().transpose().format(logFmt)
             << ", position: "
-            << pb.obstacles()[i].center().transpose().format(logFmt) << "}"
+            << pb.obstacles()[i].center().transpose().format(logFmt)
+            << ", isVirtual: "
+            << pb.obstacles()[i].isVirtual() << "}"
             << std::endl;
   }
   // Fixed Planes
@@ -243,7 +245,9 @@ void printAllIterations(const std::string& fileName,
     logFile << "- {size: "
             << pb.obstacles()[i].size().transpose().format(logFmt)
             << ", position: "
-            << pb.obstacles()[i].center().transpose().format(logFmt) << "}"
+            << pb.obstacles()[i].center().transpose().format(logFmt)
+            << ", isVirtual: "
+            << pb.obstacles()[i].isVirtual() << "}"
             << std::endl;
   }
   // Fixed Planes
