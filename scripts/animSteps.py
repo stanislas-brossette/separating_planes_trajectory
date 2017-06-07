@@ -132,6 +132,7 @@ def colorIndex(i, N):
 
 
 class MyModel(HasTraits):
+    print('Python command: ', str(sys.argv))
     print 'reading file ', str(sys.argv[1])
 
     with open(str(sys.argv[1]), 'r') as stream:
@@ -139,6 +140,13 @@ class MyModel(HasTraits):
             content = yaml.load(stream)
         except yaml.YAMLError as exc:
             print(exc)
+
+    plotMobilePlanes = True;
+
+    if len(sys.argv) > 2:
+        if str(sys.argv[2]) in ['False', 'false', '0']:
+            plotMobilePlanes = False
+
     nIter = content['nIter']
     iter = Range(0,nIter-1,1)
 
@@ -195,8 +203,9 @@ class MyModel(HasTraits):
             for i in range(0,lenWithNone(iterBoxes),1):
                 self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], colorIndex(i, lenWithNone(iterBoxes)), 1)
             # Separating Planes
-            for i in range(0,lenWithNone(iterPlanes),1):
-                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i, lenWithNone(iterBoxes)), 0.4)
+            if self.plotMobilePlanes:
+                for i in range(0,lenWithNone(iterPlanes),1):
+                    self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i, lenWithNone(iterBoxes)), 0.4)
             self.scene.mlab.view(azimuth=90, elevation=90, distance=4, focalpoint=[0,0,-0.4], roll=None, reset_roll=True, figure=None)
 
     @on_trait_change('iter')
@@ -205,8 +214,9 @@ class MyModel(HasTraits):
         iterPlanes = self.planes[self.iter]
         for i in range(0,lenWithNone(iterBoxes),1):
             self.mobileBoxesPlot[i] = plotBox(self.mobileBoxesPlot[i], iterBoxes[i], colorIndex(i, lenWithNone(iterBoxes)), 1)
-        for i in range(0,lenWithNone(iterPlanes),1):
-            self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i, lenWithNone(iterBoxes)), 0.4)
+        if self.plotMobilePlanes:
+            for i in range(0,lenWithNone(iterPlanes),1):
+                self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i] = plotPlane(self.mobilePlanesPlot[i], self.mobilePlanesQuiver[i], iterPlanes[i], self.initBox, iterBoxes, self.finalBox, self.obstacles, 0.2, colorIndex(i, lenWithNone(iterBoxes)), 0.4)
 
 
     # The layout of the dialog created

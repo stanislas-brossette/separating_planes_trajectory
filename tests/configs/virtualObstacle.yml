@@ -52,4 +52,5 @@ initPos: [-1.0, 0.0, 0.0]
 finalPos: [1.0, 0.0, 0.0]
 
 plotResult: true
+plotPlanes: true
 

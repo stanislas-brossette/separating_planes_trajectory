@@ -67,7 +67,9 @@ int main(int argc, char* argv[])
   {
     command += "singleObstacle";
   }
-  command += ".log";
+  command += ".log ";
+  if (myProb.config().has("plotPlanes"))
+    command += myProb.config()["plotPlanes"];
   system(command.c_str());
 
   return 0;
