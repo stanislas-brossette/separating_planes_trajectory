@@ -31,26 +31,26 @@ FP:
 logName: "logs/virtualObstacle.log"
 
 #Boxes
-nBoxes: 22
+nBoxes: 12
 BoxSize: [0.2, 0.1, 0.05]
 
 #Obstacles
 obstacles:
-  - {size: [0.8, 0.8, 8.8], center: [0.0, -0.61, 0.0], isVirtual: false}
-  - {size: [0.4, 3.8, 0.4], center: [0.0, 0.0, 0.0], isVirtual: false}
-  - {size: [0.8, 0.8, 8.8], center: [0.0, 0.28, 0.0], isVirtual: true}
+  - {size: [0.8, 0.8, 2.0], center: [0.0, -0.61, 1.0], isVirtual: true}
+  - {size: [0.4, 2.0, 0.3], center: [0.0, 0.0, 0.15], isVirtual: false}
+  - {size: [0.8, 0.8, 2.0], center: [0.0, 0.28, 1.0], isVirtual: false}
 securityDistance: 0.001
 
 maxStepHeight: 0.5
 
 #ground
 fixedPlanes:
-  - { normal: [0,0,1], d: -0.1}
+  - { normal: [0,0,1], d: 0.0}
 
 #initial and final positions
-initPos: [-1.0, 0.0, 0.0]
-finalPos: [1.0, 0.0, 0.0]
+initPos: [-1.0, 0.0, 0.1]
+finalPos: [1.0, 0.0, 0.1]
 
 plotResult: true
-plotPlanes: true
+plotPlanes: false
 
