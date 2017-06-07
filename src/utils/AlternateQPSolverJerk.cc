@@ -6,7 +6,8 @@ namespace feettrajectory
 AlternateQPSolverJerk::AlternateQPSolverJerk(const TrajectoryProblem& pb,
                                              const size_t& maxIter,
                                              const Jerk3DIntegrator& integ,
-                                             const Eigen::VectorXd& state0)
+                                             const Eigen::VectorXd& state0,
+                                             const double& prec)
     : pb_(pb),
       integ_(integ),
       state0_(state0),
@@ -14,7 +15,8 @@ AlternateQPSolverJerk::AlternateQPSolverJerk(const TrajectoryProblem& pb,
       qpBoxesFixed_(pb_),
       qpBoxesFixedIndividual_(pb_),
       res_(pb_.dimVar()),
-      maxIter_(maxIter)
+      maxIter_(maxIter),
+      precision_(prec)
 {
   resHistory_.resize(maxIter_ + 1);
   for (size_t i = 0; i < resHistory_.size(); i++)
@@ -119,38 +121,33 @@ void AlternateQPSolverJerk::formAndSolveIndividualLPBoxesFixed(RefVec x)
       LPSolverIndiv_.print_inform();
       std::cerr << "LP solver FAILED!!! Damnit" << std::endl;
     }
-    // std::cout << "LPSolverIndiv_.result(): \n"
-    //<< LPSolverIndiv_.result().transpose().format(fmt::custom)
-    //<< std::endl;
     x.segment(pb_.dimBoxes() + 4 * iPlan, 4) << LPSolverIndiv_.result().head(4);
   }
 }
 
 void AlternateQPSolverJerk::solve()
 {
-  Eigen::VectorXd resFixedPlanes(qpPlanesFixed_.dimVar());
-  Eigen::VectorXd resFixedBoxes(qpBoxesFixed_.dimVar());
+  Eigen::VectorXd prevRes(res_.rows());
+  prevRes.setZero();
+  bool converged = false;
 
   int nIter = 1;
-  while (nIter < maxIter_)
+  while (nIter < maxIter_ && !converged)
   {
     formAndSolveIndividualLPBoxesFixed(res_);
-    //{
-    // Eigen::VectorXd copyRes(res_);
-    // formAndSolveLPBoxesFixed(copyRes);
-    //}
-    // std::cout << "res_: \n" << res_.transpose().format(fmt::custom) <<
-    // std::endl;
     pb_.normalizeNormals(res_);
-    // std::cout << "normalized res_: \n" <<
-    // res_.transpose().format(fmt::custom) << std::endl;
     resHistory_[nIter] << res_;
-    nIter++;
 
-    // std::cout << "Solving QP planes fixed" << std::endl;
     formAndSolveQPPlanesFixed(res_);
-    // std::cout << "res_: \n" << res_.transpose() << std::endl;
     resHistory_[nIter] << res_;
+
+    if((prevRes - res_).head(pb_.dimBoxes()).norm() < precision_)
+    {
+      converged = true;
+      std::cout << "Alternate QP Jerk CONVERGED on iteration " << nIter << std::endl;
+    }
+    prevRes = res_;
+
     nIter++;
   }
   totalIter_ = nIter;

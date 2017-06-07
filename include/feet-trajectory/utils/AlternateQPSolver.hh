@@ -19,7 +19,7 @@ namespace feettrajectory
 class AlternateQPSolver
 {
  public:
-  AlternateQPSolver(const TrajectoryProblem& pb, const size_t& maxIter);
+  AlternateQPSolver(const TrajectoryProblem& pb, const size_t& maxIter, const double& precision = 1e-8);
   virtual ~AlternateQPSolver();
   void init(const Eigen::VectorXd& xInit);
   void solve();
@@ -40,6 +40,7 @@ class AlternateQPSolver
   Eigen::VectorXd res_;
   size_t maxIter_, totalIter_;
   std::vector<Eigen::VectorXd> resHistory_;
+  double precision_;
 
   /// @brief QP solver
   Eigen::LSSOL_QP QPSolver_;

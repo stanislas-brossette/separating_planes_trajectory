@@ -22,7 +22,7 @@ class AlternateQPSolverJerk
  public:
   AlternateQPSolverJerk(const TrajectoryProblem& pb, const size_t& maxIter,
                         const Jerk3DIntegrator& integ,
-                        const Eigen::VectorXd& state0);
+                        const Eigen::VectorXd& state0, const double& precision = 1e-8);
   virtual ~AlternateQPSolverJerk();
   void init(const Eigen::VectorXd& xInit);
   void solve();
@@ -45,6 +45,7 @@ class AlternateQPSolverJerk
   Eigen::VectorXd res_;
   size_t maxIter_, totalIter_;
   std::vector<Eigen::VectorXd> resHistory_;
+  double precision_;
 
   /// @brief QP solver
   Eigen::LSSOL_QP QPSolver_;
