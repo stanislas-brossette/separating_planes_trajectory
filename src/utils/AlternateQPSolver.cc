@@ -103,6 +103,7 @@ void AlternateQPSolver::solve()
     formAndSolveIndividualLPBoxesFixed(res_);
     pb_.normalizeNormals(res_);
     resHistory_[nIter] << res_;
+    nIter++;
 
     formAndSolveQPPlanesFixed(res_);
     resHistory_[nIter] << res_;
