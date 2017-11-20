@@ -3,25 +3,25 @@
 #include <fstream>
 #include <string>
 
-#include <manifolds/Point.h>
+//#include <manifolds/Point.h>
 
-#include <feet-trajectory/BoxTrajProblem.hh>
-#include <feet-trajectory/BoxesHullTrajProblem.hh>
-#include <feet-trajectory/TrajectoryProblem.hh>
+//#include <feet-trajectory/BoxTrajProblem.hh>
+//#include <feet-trajectory/BoxesHullTrajProblem.hh>
+//#include <feet-trajectory/TrajectoryProblem.hh>
 #include <feet-trajectory/utils/defs.hh>
 
 namespace feettrajectory
 {
-void print(const std::string& fileName, const BoxTrajProblem& pb,
-           const mnf::Point& xStar);
-void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
-           const mnf::Point& xStar);
+//void print(const std::string& fileName, const BoxTrajProblem& pb,
+//           const mnf::Point& xStar);
+//void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
+//           const mnf::Point& xStar);
 void print(const std::string& fileName, const Eigen::Vector3d& bSize,
            const Eigen::Vector3d& oSize, const Eigen::Vector3d& oPos,
            const Eigen::Vector3d& t, const double& d, const Eigen::Vector3d& n);
-void printAllIterations(const std::string& fileName,
-                        const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
-                        const std::string& folder);
+//void printAllIterations(const std::string& fileName,
+//                        const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
+//                        const std::string& folder);
 void printAllIterations(const std::string& fileName,
                         const TrajectoryProblem& pb,
                         const Eigen::VectorXd& xStar,

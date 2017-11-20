@@ -3,9 +3,9 @@
 #include <iostream>
 #include <fstream>
 
-#include <EigenQP/LSSOL.h>
-#include <EigenQP/LSSOL_QP.h>
-#include <EigenQP/LSSOL_LP.h>
+#include <eigenqp/LSSOL.h>
+#include <eigenqp/LSSOL_QP.h>
+#include <eigenqp/LSSOL_LP.h>
 
 #include <feet-trajectory/TrajectoryProblem.hh>
 #include <feet-trajectory/utils/defs.hh>

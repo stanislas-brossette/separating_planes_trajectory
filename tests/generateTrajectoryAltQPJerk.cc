@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <feet-trajectory/TrajectoryProblem.hh>
-#include <feet-trajectory/utils/Printer.hh>
+//#include <feet-trajectory/utils/Printer.hh>
 #include <feet-trajectory/utils/ProblemConfig.hh>
 #include <feet-trajectory/utils/AlternateQPSolverJerk.hh>
 #include <feet-trajectory/utils/Jerk3DIntegrator.hh>

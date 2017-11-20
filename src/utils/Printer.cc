@@ -4,101 +4,101 @@
 
 namespace feettrajectory
 {
-void print(const std::string& fileName, const BoxTrajProblem& pb,
-           const mnf::Point& xStar)
-{
-  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
-  std::ofstream logFile;
-  logFile.open(fileName);
+//void print(const std::string& fileName, const BoxTrajProblem& pb,
+//           const mnf::Point& xStar)
+//{
+//  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
+//  std::ofstream logFile;
+//  logFile.open(fileName);
+//
+//  // Boxes
+//  auto bSize = pb.boxSize().transpose().format(logFmt);
+//  logFile << "InitialBox: {size: " << bSize
+//          << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
+//  logFile << "MobileBoxes:\n";
+//  for (size_t i = 0; i < pb.nBoxes(); i++)
+//  {
+//    logFile << "- {size: " << bSize
+//            << ", position: " << xStar(0)(i).value().transpose().format(logFmt)
+//            << "}\n";
+//  }
+//  logFile << "FinalBox: {size: " << bSize
+//          << ", position: " << pb.finalPos().transpose().format(logFmt)
+//          << "}\n";
+//
+//  // Obstacles
+//  logFile << "Obstacles:\n";
+//  for (size_t i = 0; i < pb.nObstacles(); i++)
+//  {
+//    logFile << "- {size: "
+//            << pb.obstacles()[i].size().transpose().format(logFmt)
+//            << ", position: "
+//            << pb.obstacles()[i].center().transpose().format(logFmt) << "}"
+//            << std::endl;
+//  }
+//
+//  // Separating planes
+//  logFile << "SeparatingPlanes:\n";
+//  for (size_t i = 0; i < pb.nPlans(); i++)
+//    logFile << "- { d: " << xStar(1)(i)(0).value()
+//            << ", normal: " << xStar(1)(i)(1).value().transpose().format(logFmt)
+//            << ", boxAbove: " << pb.plans()[i].boxAbove()
+//            << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
+//            << std::endl;
+//}
 
-  // Boxes
-  auto bSize = pb.boxSize().transpose().format(logFmt);
-  logFile << "InitialBox: {size: " << bSize
-          << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
-  logFile << "MobileBoxes:\n";
-  for (size_t i = 0; i < pb.nBoxes(); i++)
-  {
-    logFile << "- {size: " << bSize
-            << ", position: " << xStar(0)(i).value().transpose().format(logFmt)
-            << "}\n";
-  }
-  logFile << "FinalBox: {size: " << bSize
-          << ", position: " << pb.finalPos().transpose().format(logFmt)
-          << "}\n";
-
-  // Obstacles
-  logFile << "Obstacles:\n";
-  for (size_t i = 0; i < pb.nObstacles(); i++)
-  {
-    logFile << "- {size: "
-            << pb.obstacles()[i].size().transpose().format(logFmt)
-            << ", position: "
-            << pb.obstacles()[i].center().transpose().format(logFmt) << "}"
-            << std::endl;
-  }
-
-  // Separating planes
-  logFile << "SeparatingPlanes:\n";
-  for (size_t i = 0; i < pb.nPlans(); i++)
-    logFile << "- { d: " << xStar(1)(i)(0).value()
-            << ", normal: " << xStar(1)(i)(1).value().transpose().format(logFmt)
-            << ", boxAbove: " << pb.plans()[i].boxAbove()
-            << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
-            << std::endl;
-}
-
-void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
-           const mnf::Point& xStar)
-{
-  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
-  std::ofstream logFile;
-  logFile.open(fileName);
-
-  // Boxes
-  auto bSize = pb.boxSize().transpose().format(logFmt);
-  logFile << "InitialBox: {size: " << bSize
-          << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
-  logFile << "MobileBoxes:\n";
-  for (size_t i = 0; i < pb.nBoxes(); i++)
-  {
-    logFile << "- {size: " << bSize
-            << ", position: " << xStar(0)(i).value().transpose().format(logFmt)
-            << "}\n";
-  }
-  logFile << "FinalBox: {size: " << bSize
-          << ", position: " << pb.finalPos().transpose().format(logFmt)
-          << "}\n";
-
-  // Obstacles
-  logFile << "Obstacles:\n";
-  for (size_t i = 0; i < pb.nObstacles(); i++)
-  {
-    logFile << "- {size: "
-            << pb.obstacles()[i].size().transpose().format(logFmt)
-            << ", position: "
-            << pb.obstacles()[i].center().transpose().format(logFmt) << "}"
-            << std::endl;
-  }
-
-  // Separating planes
-  logFile << "SeparatingPlanes:\n";
-  for (size_t i = 0; i < pb.nPlans(); i++)
-    logFile << "- { d: " << xStar(1)(i)(0).value()
-            << ", normal: " << xStar(1)(i)(1).value().transpose().format(logFmt)
-            << ", box0Above: " << pb.plans()[i].box0Above()
-            << ", box1Above: " << pb.plans()[i].box1Above()
-            << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
-            << std::endl;
-
-  // Fixed Planes
-  logFile << "FixedPlanes:\n";
-  for (size_t i = 0; i < pb.nFixedPlanes(); i++)
-  {
-    logFile << "- { d: " << pb.fixedPlanes()[i].d() << ", normal: "
-            << pb.fixedPlanes()[i].normal().transpose().format(logFmt) << "}"
-            << std::endl;
-  }
-}
+//void print(const std::string& fileName, const BoxesHullTrajProblem& pb,
+//           const mnf::Point& xStar)
+//{
+//  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
+//  std::ofstream logFile;
+//  logFile.open(fileName);
+//
+//  // Boxes
+//  auto bSize = pb.boxSize().transpose().format(logFmt);
+//  logFile << "InitialBox: {size: " << bSize
+//          << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
+//  logFile << "MobileBoxes:\n";
+//  for (size_t i = 0; i < pb.nBoxes(); i++)
+//  {
+//    logFile << "- {size: " << bSize
+//            << ", position: " << xStar(0)(i).value().transpose().format(logFmt)
+//            << "}\n";
+//  }
+//  logFile << "FinalBox: {size: " << bSize
+//          << ", position: " << pb.finalPos().transpose().format(logFmt)
+//          << "}\n";
+//
+//  // Obstacles
+//  logFile << "Obstacles:\n";
+//  for (size_t i = 0; i < pb.nObstacles(); i++)
+//  {
+//    logFile << "- {size: "
+//            << pb.obstacles()[i].size().transpose().format(logFmt)
+//            << ", position: "
+//            << pb.obstacles()[i].center().transpose().format(logFmt) << "}"
+//            << std::endl;
+//  }
+//
+//  // Separating planes
+//  logFile << "SeparatingPlanes:\n";
+//  for (size_t i = 0; i < pb.nPlans(); i++)
+//    logFile << "- { d: " << xStar(1)(i)(0).value()
+//            << ", normal: " << xStar(1)(i)(1).value().transpose().format(logFmt)
+//            << ", box0Above: " << pb.plans()[i].box0Above()
+//            << ", box1Above: " << pb.plans()[i].box1Above()
+//            << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
+//            << std::endl;
+//
+//  // Fixed Planes
+//  logFile << "FixedPlanes:\n";
+//  for (size_t i = 0; i < pb.nFixedPlanes(); i++)
+//  {
+//    logFile << "- { d: " << pb.fixedPlanes()[i].d() << ", normal: "
+//            << pb.fixedPlanes()[i].normal().transpose().format(logFmt) << "}"
+//            << std::endl;
+//  }
+//}
 
 void print(const std::string& fileName, const Eigen::Vector3d& bSize,
            const Eigen::Vector3d& oSize, const Eigen::Vector3d& oPos,
@@ -126,68 +126,68 @@ void print(const std::string& fileName, const Eigen::Vector3d& bSize,
           << std::endl;
 }
 
-void printAllIterations(const std::string& fileName,
-                        const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
-                        const std::string& folder)
-{
-  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
-  std::ofstream logFile;
-  logFile.open(fileName);
-
-  // Boxes
-  auto bSize = pb.boxSize().transpose().format(logFmt);
-  logFile << "InitialBox: {size: " << bSize
-          << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
-  logFile << "FinalBox: {size: " << bSize
-          << ", position: " << pb.finalPos().transpose().format(logFmt)
-          << "}\n";
-
-  // Obstacles
-  if (pb.nObstacles() > 0) logFile << "Obstacles:\n";
-  for (size_t i = 0; i < pb.nObstacles(); i++)
-  {
-    logFile << "- {size: "
-            << pb.obstacles()[i].size().transpose().format(logFmt)
-            << ", position: "
-            << pb.obstacles()[i].center().transpose().format(logFmt)
-            << ", isVirtual: "
-            << pb.obstacles()[i].isVirtual() << "}"
-            << std::endl;
-  }
-  // Fixed Planes
-  if (pb.nFixedPlanes() > 0) logFile << "FixedPlanes:\n";
-  for (size_t i = 0; i < pb.nFixedPlanes(); i++)
-  {
-    logFile << "- { d: " << pb.fixedPlanes()[i].d() << ", normal: "
-            << pb.fixedPlanes()[i].normal().transpose().format(logFmt) << "}"
-            << std::endl;
-  }
-
-  std::string xFile(folder + "xLog.m");
-  std::vector<Eigen::VectorXd> all_x =
-      parseX(xFile, xStar.getRepresentationDimM());
-  logFile << "nIter: " << all_x.size() << std::endl;
-  for (size_t iter = 0; iter < all_x.size(); iter++)
-  {
-    mnf::Point xIter = xStar.getManifold().createPoint(all_x[iter]);
-    // Separating Planes
-    logFile << "SeparatingPlanes" << iter << ":\n";
-    for (size_t i = 0; i < pb.nPlans(); i++)
-      logFile << "- { d: " << xIter(1)(i)(0).value() << ", normal: "
-              << xIter(1)(i)(1).value().transpose().format(logFmt)
-              << ", box0Above: " << pb.plans()[i].box0Above()
-              << ", box1Above: " << pb.plans()[i].box1Above()
-              << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
-              << std::endl;
-    // Mobile Boxes
-    logFile << "MobileBoxes" << iter << ":\n";
-    for (size_t i = 0; i < pb.nBoxes(); i++)
-    {
-      logFile << "- {size: " << bSize << ", position: "
-              << xIter(0)(i).value().transpose().format(logFmt) << "}\n";
-    }
-  }
-}
+//void printAllIterations(const std::string& fileName,
+//                        const BoxesHullTrajProblem& pb, const mnf::Point& xStar,
+//                        const std::string& folder)
+//{
+//  Eigen::IOFormat logFmt(3, 0, ", ", "\n", "[", "]");
+//  std::ofstream logFile;
+//  logFile.open(fileName);
+//
+//  // Boxes
+//  auto bSize = pb.boxSize().transpose().format(logFmt);
+//  logFile << "InitialBox: {size: " << bSize
+//          << ", position: " << pb.initPos().transpose().format(logFmt) << "}\n";
+//  logFile << "FinalBox: {size: " << bSize
+//          << ", position: " << pb.finalPos().transpose().format(logFmt)
+//          << "}\n";
+//
+//  // Obstacles
+//  if (pb.nObstacles() > 0) logFile << "Obstacles:\n";
+//  for (size_t i = 0; i < pb.nObstacles(); i++)
+//  {
+//    logFile << "- {size: "
+//            << pb.obstacles()[i].size().transpose().format(logFmt)
+//            << ", position: "
+//            << pb.obstacles()[i].center().transpose().format(logFmt)
+//            << ", isVirtual: "
+//            << pb.obstacles()[i].isVirtual() << "}"
+//            << std::endl;
+//  }
+//  // Fixed Planes
+//  if (pb.nFixedPlanes() > 0) logFile << "FixedPlanes:\n";
+//  for (size_t i = 0; i < pb.nFixedPlanes(); i++)
+//  {
+//    logFile << "- { d: " << pb.fixedPlanes()[i].d() << ", normal: "
+//            << pb.fixedPlanes()[i].normal().transpose().format(logFmt) << "}"
+//            << std::endl;
+//  }
+//
+//  std::string xFile(folder + "xLog.m");
+//  std::vector<Eigen::VectorXd> all_x =
+//      parseX(xFile, xStar.getRepresentationDimM());
+//  logFile << "nIter: " << all_x.size() << std::endl;
+//  for (size_t iter = 0; iter < all_x.size(); iter++)
+//  {
+//    mnf::Point xIter = xStar.getManifold().createPoint(all_x[iter]);
+//    // Separating Planes
+//    logFile << "SeparatingPlanes" << iter << ":\n";
+//    for (size_t i = 0; i < pb.nPlans(); i++)
+//      logFile << "- { d: " << xIter(1)(i)(0).value() << ", normal: "
+//              << xIter(1)(i)(1).value().transpose().format(logFmt)
+//              << ", box0Above: " << pb.plans()[i].box0Above()
+//              << ", box1Above: " << pb.plans()[i].box1Above()
+//              << ", obstacleBelow: " << pb.plans()[i].boxBelow() << "}"
+//              << std::endl;
+//    // Mobile Boxes
+//    logFile << "MobileBoxes" << iter << ":\n";
+//    for (size_t i = 0; i < pb.nBoxes(); i++)
+//    {
+//      logFile << "- {size: " << bSize << ", position: "
+//              << xIter(0)(i).value().transpose().format(logFmt) << "}\n";
+//    }
+//  }
+//}
 
 std::vector<Eigen::VectorXd> parseX(const std::string& fileName,
                                     const Index& vectorDimension)
